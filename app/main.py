@@ -1,14 +1,45 @@
+from collections import defaultdict
 from datetime import datetime, timedelta
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
+from io import StringIO
+import csv
+
 from fastapi import Depends, FastAPI, Form, HTTPException, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from sqlalchemy import inspect, text
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
+
 from .database import Base, engine, get_db
-from .models import Quote, RFQ, RFQStatus, Trade, TradeHistory, TradeStatus
+from .models import AmountType, Quote, RFQ, RFQStatus, Trade, TradeHistory, TradeStatus
 
 Base.metadata.create_all(bind=engine)
+
+
+def migrate_sqlite_schema() -> None:
+    """Минимальная миграция старой демонстрационной SQLite-базы без Alembic."""
+    inspector = inspect(engine)
+    if "rfqs" in inspector.get_table_names():
+        columns = {c["name"] for c in inspector.get_columns("rfqs")}
+        with engine.begin() as connection:
+            if "fiat_amount" not in columns:
+                connection.execute(text("ALTER TABLE rfqs ADD COLUMN fiat_amount NUMERIC(30, 8)"))
+            if "amount_type" not in columns:
+                connection.execute(text("ALTER TABLE rfqs ADD COLUMN amount_type VARCHAR(16) DEFAULT 'CRYPTO'"))
+                connection.execute(text("UPDATE rfqs SET amount_type = 'CRYPTO' WHERE amount_type IS NULL"))
+    if "trades" in inspector.get_table_names():
+        columns = {c["name"] for c in inspector.get_columns("trades")}
+        with engine.begin() as connection:
+            if "bank_fee" not in columns:
+                connection.execute(text("ALTER TABLE trades ADD COLUMN bank_fee NUMERIC(30, 8) DEFAULT 0"))
+            if "network_fee" not in columns:
+                connection.execute(text("ALTER TABLE trades ADD COLUMN network_fee NUMERIC(30, 8) DEFAULT 0"))
+
+
+migrate_sqlite_schema()
+
 app = FastAPI(title="Simple OTC Desk")
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
@@ -24,58 +55,189 @@ ALLOWED_TRANSITIONS = {
     TradeStatus.CANCELLED: set(),
 }
 
+
+def money(value: Decimal | float | None) -> Decimal:
+    return Decimal(str(value or 0))
+
+
+def calculate_amounts(rfq: RFQ, price: Decimal) -> tuple[Decimal, Decimal]:
+    if price <= 0:
+        raise HTTPException(400, "Цена должна быть больше нуля")
+    if rfq.amount_type == AmountType.FIAT:
+        fiat_amount = money(rfq.fiat_amount)
+        if fiat_amount <= 0:
+            raise HTTPException(400, "Сумма фиата должна быть больше нуля")
+        crypto_amount = fiat_amount / price
+    else:
+        crypto_amount = money(rfq.amount)
+        if crypto_amount <= 0:
+            raise HTTPException(400, "Количество криптовалюты должно быть больше нуля")
+        fiat_amount = crypto_amount * price
+    return crypto_amount, fiat_amount
+
+
+def trade_values(trade: Trade) -> dict[str, Decimal]:
+    crypto_amount = money(trade.quote.rfq.amount)
+    fiat_amount = money(trade.quote.rfq.fiat_amount)
+    bank_fee = money(trade.bank_fee)
+    network_fee = money(trade.network_fee)
+    return {
+        "crypto_amount": crypto_amount,
+        "fiat_amount": fiat_amount,
+        "bank_fee": bank_fee,
+        "network_fee": network_fee,
+        "total_cost": fiat_amount + bank_fee + network_fee,
+    }
+
+
 @app.get("/", response_class=HTMLResponse)
 def dashboard(request: Request, db: Session = Depends(get_db)):
     rfqs = db.query(RFQ).options(joinedload(RFQ.quote)).order_by(RFQ.id.desc()).all()
-    trades = db.query(Trade).options(joinedload(Trade.quote).joinedload(Quote.rfq)).order_by(Trade.id.desc()).all()
-    return templates.TemplateResponse(request=request,name="index.html",context={"rfqs": rfqs,"trades": trades, },
-)
+    trades = (
+        db.query(Trade)
+        .options(joinedload(Trade.quote).joinedload(Quote.rfq))
+        .order_by(Trade.id.desc())
+        .all()
+    )
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={"rfqs": rfqs, "trades": trades},
+    )
+
 
 @app.post("/rfqs")
 def create_rfq(
-    client_name: str = Form(...), side: str = Form(...), base_asset: str = Form(...),
-    quote_asset: str = Form(...), amount: Decimal = Form(...), comment: str = Form(""),
+    client_name: str = Form(...),
+    side: str = Form(...),
+    base_asset: str = Form(...),
+    quote_asset: str = Form(...),
+    amount_type: AmountType = Form(...),
+    crypto_amount: str = Form(""),
+    fiat_amount: str = Form(""),
+    comment: str = Form(""),
     db: Session = Depends(get_db),
 ):
-    if amount <= 0:
-        raise HTTPException(400, "Количество должно быть больше нуля")
-    rfq = RFQ(client_name=client_name.strip(), side=side, base_asset=base_asset.upper(),
-              quote_asset=quote_asset.upper(), amount=amount, comment=comment.strip())
-    db.add(rfq); db.commit()
-    return RedirectResponse("/", status_code=303)
+    try:
+        crypto = Decimal(crypto_amount) if crypto_amount.strip() else None
+        fiat = Decimal(fiat_amount) if fiat_amount.strip() else None
+    except InvalidOperation as exc:
+        raise HTTPException(400, "Количество должно быть числом") from exc
 
-@app.post("/rfqs/{rfq_id}/quote")
-def create_quote(rfq_id: int, price: Decimal = Form(...), fee_rate: Decimal = Form(0),
-                 valid_minutes: int = Form(5), dealer_name: str = Form(...), db: Session = Depends(get_db)):
-    rfq = db.get(RFQ, rfq_id)
-    if not rfq or rfq.status != RFQStatus.SUBMITTED:
-        raise HTTPException(400, "RFQ недоступен для котирования")
-    if price <= 0 or fee_rate < 0 or valid_minutes < 1:
-        raise HTTPException(400, "Некорректные параметры котировки")
-    quote = Quote(rfq=rfq, price=price, fee_rate=fee_rate,
-                  expires_at=datetime.utcnow() + timedelta(minutes=valid_minutes), dealer_name=dealer_name.strip())
-    rfq.status = RFQStatus.QUOTED
-    db.add(quote); db.commit()
-    return RedirectResponse("/", status_code=303)
+    if amount_type == AmountType.CRYPTO and (crypto is None or crypto <= 0):
+        raise HTTPException(400, "Укажите количество криптовалюты")
+    if amount_type == AmountType.FIAT and (fiat is None or fiat <= 0):
+        raise HTTPException(400, "Укажите сумму фиата")
 
-@app.post("/quotes/{quote_id}/accept")
-def accept_quote(quote_id: int, db: Session = Depends(get_db)):
-    quote = db.query(Quote).options(joinedload(Quote.rfq), joinedload(Quote.trade)).filter(Quote.id == quote_id).first()
-    if not quote or quote.trade:
-        raise HTTPException(400, "Котировка уже обработана")
-    if quote.expires_at < datetime.utcnow():
-        raise HTTPException(400, "Срок котировки истек")
-    quote.rfq.status = RFQStatus.ACCEPTED
-    trade = Trade(quote=quote, status=TradeStatus.ACCEPTED)
-    db.add(trade); db.flush()
-    db.add(TradeHistory(trade_id=trade.id, old_status=None, new_status=TradeStatus.ACCEPTED.value,
-                        changed_by=quote.rfq.client_name, note="Котировка принята клиентом"))
+    rfq = RFQ(
+        client_name=client_name.strip(),
+        side=side,
+        base_asset=base_asset.upper().strip(),
+        quote_asset=quote_asset.upper().strip(),
+        amount_type=amount_type,
+        amount=crypto if amount_type == AmountType.CRYPTO else None,
+        fiat_amount=fiat if amount_type == AmountType.FIAT else None,
+        comment=comment.strip(),
+    )
+    db.add(rfq)
     db.commit()
     return RedirectResponse("/", status_code=303)
 
+
+@app.post("/rfqs/{rfq_id}/quote")
+def create_quote(
+    rfq_id: int,
+    price: Decimal = Form(...),
+    valid_minutes: int = Form(5),
+    dealer_name: str = Form(...),
+    db: Session = Depends(get_db),
+):
+    rfq = db.get(RFQ, rfq_id)
+    if not rfq or rfq.status != RFQStatus.SUBMITTED:
+        raise HTTPException(400, "RFQ недоступен для котирования")
+    if price <= 0 or valid_minutes < 1:
+        raise HTTPException(400, "Некорректные параметры котировки")
+
+    crypto_amount, fiat_amount = calculate_amounts(rfq, price)
+    rfq.amount = crypto_amount
+    rfq.fiat_amount = fiat_amount
+    quote = Quote(
+        rfq=rfq,
+        price=price,
+        expires_at=datetime.utcnow() + timedelta(minutes=valid_minutes),
+        dealer_name=dealer_name.strip(),
+    )
+    rfq.status = RFQStatus.QUOTED
+    db.add(quote)
+    db.commit()
+    return RedirectResponse("/", status_code=303)
+
+
+@app.post("/quotes/{quote_id}/accept")
+def accept_quote(quote_id: int, db: Session = Depends(get_db)):
+    quote = (
+        db.query(Quote)
+        .options(joinedload(Quote.rfq), joinedload(Quote.trade))
+        .filter(Quote.id == quote_id)
+        .with_for_update()
+        .first()
+    )
+    if not quote:
+        raise HTTPException(404, "Котировка не найдена")
+    if quote.trade or quote.rfq.status == RFQStatus.ACCEPTED:
+        raise HTTPException(409, "Котировка уже принята")
+    if quote.rfq.status != RFQStatus.QUOTED:
+        raise HTTPException(400, "Котировка недоступна для принятия")
+    if quote.expires_at < datetime.utcnow():
+        raise HTTPException(400, "Срок котировки истек")
+
+    quote.rfq.status = RFQStatus.ACCEPTED
+    trade = Trade(quote=quote, status=TradeStatus.ACCEPTED, bank_fee=0, network_fee=0)
+    db.add(trade)
+    try:
+        db.flush()
+        db.add(
+            TradeHistory(
+                trade_id=trade.id,
+                old_status=None,
+                new_status=TradeStatus.ACCEPTED.value,
+                changed_by=quote.rfq.client_name,
+                note="Котировка принята клиентом",
+            )
+        )
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(409, "Котировка уже принята другой операцией") from exc
+    return RedirectResponse(f"/trades/{trade.id}", status_code=303)
+
+
+@app.post("/trades/{trade_id}/fees")
+def update_fees(
+    trade_id: int,
+    bank_fee: Decimal = Form(0),
+    network_fee: Decimal = Form(0),
+    db: Session = Depends(get_db),
+):
+    trade = db.get(Trade, trade_id)
+    if not trade:
+        raise HTTPException(404, "Сделка не найдена")
+    if bank_fee < 0 or network_fee < 0:
+        raise HTTPException(400, "Комиссии не могут быть отрицательными")
+    trade.bank_fee = bank_fee
+    trade.network_fee = network_fee
+    db.commit()
+    return RedirectResponse(f"/trades/{trade_id}", status_code=303)
+
+
 @app.post("/trades/{trade_id}/status")
-def change_status(trade_id: int, new_status: TradeStatus = Form(...), changed_by: str = Form(...),
-                  note: str = Form(""), db: Session = Depends(get_db)):
+def change_status(
+    trade_id: int,
+    new_status: TradeStatus = Form(...),
+    changed_by: str = Form(...),
+    note: str = Form(""),
+    db: Session = Depends(get_db),
+):
     trade = db.get(Trade, trade_id)
     if not trade:
         raise HTTPException(404, "Сделка не найдена")
@@ -83,26 +245,120 @@ def change_status(trade_id: int, new_status: TradeStatus = Form(...), changed_by
         raise HTTPException(400, f"Переход {trade.status.value} → {new_status.value} запрещен")
     old = trade.status
     trade.status = new_status
-    db.add(TradeHistory(trade_id=trade.id, old_status=old.value, new_status=new_status.value,
-                        changed_by=changed_by.strip(), note=note.strip()))
+    db.add(
+        TradeHistory(
+            trade_id=trade.id,
+            old_status=old.value,
+            new_status=new_status.value,
+            changed_by=changed_by.strip(),
+            note=note.strip(),
+        )
+    )
     db.commit()
     return RedirectResponse(f"/trades/{trade_id}", status_code=303)
 
+
 @app.get("/trades/{trade_id}", response_class=HTMLResponse)
 def trade_page(trade_id: int, request: Request, db: Session = Depends(get_db)):
-    trade = db.query(Trade).options(joinedload(Trade.quote).joinedload(Quote.rfq), joinedload(Trade.history)).filter(Trade.id == trade_id).first()
+    trade = (
+        db.query(Trade)
+        .options(joinedload(Trade.quote).joinedload(Quote.rfq), joinedload(Trade.history))
+        .filter(Trade.id == trade_id)
+        .first()
+    )
     if not trade:
         raise HTTPException(404, "Сделка не найдена")
     allowed = sorted(ALLOWED_TRANSITIONS[trade.status], key=lambda x: x.value)
-    gross = Decimal(str(trade.quote.price)) * Decimal(str(trade.quote.rfq.amount))
-    fee = gross * Decimal(str(trade.quote.fee_rate)) / Decimal("100")
-    return templates.TemplateResponse(request=request,name="trade.html",context={"trade": trade,"allowed": allowed,
-"gross": gross,"fee": fee,"total": gross + fee, },
-)
+    return templates.TemplateResponse(
+        request=request,
+        name="trade.html",
+        context={"trade": trade, "allowed": allowed, **trade_values(trade)},
+    )
+
+
+@app.get("/reports/trades", response_class=HTMLResponse)
+def trades_report(request: Request, db: Session = Depends(get_db)):
+    trades = (
+        db.query(Trade)
+        .options(joinedload(Trade.quote).joinedload(Quote.rfq))
+        .order_by(Trade.id.desc())
+        .all()
+    )
+    rows = [{"trade": trade, **trade_values(trade)} for trade in trades]
+    totals = defaultdict(
+        lambda: {"fiat": Decimal("0"), "bank": Decimal("0"), "network": Decimal("0"), "total": Decimal("0"), "count": 0}
+    )
+    for row in rows:
+        currency = row["trade"].quote.rfq.quote_asset
+        totals[currency]["fiat"] += row["fiat_amount"]
+        totals[currency]["bank"] += row["bank_fee"]
+        totals[currency]["network"] += row["network_fee"]
+        totals[currency]["total"] += row["total_cost"]
+        totals[currency]["count"] += 1
+    return templates.TemplateResponse(
+        request=request,
+        name="report.html",
+        context={"rows": rows, "totals": dict(totals)},
+    )
+
+
+@app.get("/reports/trades.csv")
+def trades_report_csv(db: Session = Depends(get_db)):
+    trades = (
+        db.query(Trade)
+        .options(joinedload(Trade.quote).joinedload(Quote.rfq))
+        .order_by(Trade.id.desc())
+        .all()
+    )
+    buffer = StringIO()
+    writer = csv.writer(buffer, delimiter=";")
+    writer.writerow(["ID", "Дата", "Клиент", "Операция", "Пара", "Криптовалюта", "Цена", "Сумма сделки", "Валюта", "Комиссия банка", "Комиссия сети", "Итого", "Статус"])
+    for trade in trades:
+        values = trade_values(trade)
+        rfq = trade.quote.rfq
+        writer.writerow(
+            [
+                trade.id,
+                trade.created_at.isoformat(),
+                rfq.client_name,
+                rfq.side,
+                f"{rfq.base_asset}/{rfq.quote_asset}",
+                values["crypto_amount"],
+                trade.quote.price,
+                values["fiat_amount"],
+                rfq.quote_asset,
+                values["bank_fee"],
+                values["network_fee"],
+                values["total_cost"],
+                trade.status.value,
+            ]
+        )
+    data = "\ufeff" + buffer.getvalue()
+    return StreamingResponse(
+        iter([data]),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": "attachment; filename=otc_trades_report.csv"},
+    )
+
 
 @app.get("/api/trades")
 def api_trades(db: Session = Depends(get_db)):
     trades = db.query(Trade).options(joinedload(Trade.quote).joinedload(Quote.rfq)).all()
-    return [{"id": t.id, "status": t.status.value, "client": t.quote.rfq.client_name,
-             "pair": f"{t.quote.rfq.base_asset}/{t.quote.rfq.quote_asset}",
-             "amount": float(t.quote.rfq.amount), "price": float(t.quote.price)} for t in trades]
+    result = []
+    for trade in trades:
+        values = trade_values(trade)
+        rfq = trade.quote.rfq
+        result.append({
+            "id": trade.id,
+            "status": trade.status.value,
+            "client": rfq.client_name,
+            "side": rfq.side,
+            "pair": f"{rfq.base_asset}/{rfq.quote_asset}",
+            "crypto_amount": float(values["crypto_amount"]),
+            "price": float(trade.quote.price),
+            "fiat_amount": float(values["fiat_amount"]),
+            "bank_fee": float(values["bank_fee"]),
+            "network_fee": float(values["network_fee"]),
+            "total_cost": float(values["total_cost"]),
+        })
+    return result

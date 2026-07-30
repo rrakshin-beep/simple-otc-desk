@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import inspect, text
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from .database import Base, engine, get_db
 from .models import AmountType, Quote, RFQ, RFQStatus, Trade, TradeHistory, TradeStatus
@@ -53,6 +53,32 @@ ALLOWED_TRANSITIONS = {
     TradeStatus.COMPLETED: set(),
     TradeStatus.CANCELLED: set(),
 }
+
+REPORT_STATUS_COLUMNS = [
+    TradeStatus.ACCEPTED,
+    TradeStatus.FUNDED,
+    TradeStatus.AML_REVIEW,
+    TradeStatus.APPROVED,
+    TradeStatus.EXECUTED,
+    TradeStatus.SETTLED,
+    TradeStatus.COMPLETED,
+    TradeStatus.CANCELLED,
+]
+
+
+def format_datetime(value: datetime | None) -> str:
+    return value.strftime("%d.%m.%Y %H:%M:%S") if value else "—"
+
+
+def status_timestamps(trade: Trade) -> dict[str, str]:
+    timestamps: dict[str, datetime] = {}
+    for item in sorted(trade.history, key=lambda record: (record.created_at, record.id)):
+        timestamps.setdefault(item.new_status, item.created_at)
+    timestamps.setdefault(TradeStatus.ACCEPTED.value, trade.created_at)
+    return {status.value: format_datetime(timestamps.get(status.value)) for status in REPORT_STATUS_COLUMNS}
+
+
+templates.env.globals["format_datetime"] = format_datetime
 
 
 def money(value: Decimal | float | None) -> Decimal:
@@ -278,15 +304,15 @@ def trade_page(trade_id: int, request: Request, db: Session = Depends(get_db)):
 def trades_report(request: Request, db: Session = Depends(get_db)):
     trades = (
         db.query(Trade)
-        .options(joinedload(Trade.quote).joinedload(Quote.rfq))
+        .options(joinedload(Trade.quote).joinedload(Quote.rfq), selectinload(Trade.history))
         .order_by(Trade.id.desc())
         .all()
     )
-    rows = [{"trade": trade, **trade_values(trade)} for trade in trades]
+    rows = [{"trade": trade, "status_times": status_timestamps(trade), **trade_values(trade)} for trade in trades]
     return templates.TemplateResponse(
         request=request,
         name="report.html",
-        context={"rows": rows},
+        context={"rows": rows, "status_columns": REPORT_STATUS_COLUMNS},
     )
 
 
@@ -294,17 +320,18 @@ def trades_report(request: Request, db: Session = Depends(get_db)):
 def trades_report_csv(db: Session = Depends(get_db)):
     trades = (
         db.query(Trade)
-        .options(joinedload(Trade.quote).joinedload(Quote.rfq))
+        .options(joinedload(Trade.quote).joinedload(Quote.rfq), selectinload(Trade.history))
         .order_by(Trade.id.desc())
         .all()
     )
     buffer = StringIO()
     writer = csv.writer(buffer, delimiter=";")
-    writer.writerow(["ID", "Дата", "Клиент", "Операция", "Пара", "Криптовалюта", "Цена", "Сумма сделки", "Фиатная валюта", "Комиссия банка", "Валюта комиссии банка", "Комиссия сети", "Валюта комиссии сети", "Статус"])
+    writer.writerow(["ID", "Дата создания", "Клиент", "Операция", "Пара", "Криптовалюта", "Цена", "Сумма сделки", "Фиатная валюта", "Комиссия банка", "Валюта комиссии банка", "Комиссия сети", "Валюта комиссии сети", "Текущий статус"] + [f"Дата и время: {status.value}" for status in REPORT_STATUS_COLUMNS])
     for trade in trades:
         values = trade_values(trade)
         rfq = trade.quote.rfq
-        writer.writerow([trade.id, trade.created_at.isoformat(), rfq.client_name, rfq.side, f"{rfq.base_asset}/{rfq.quote_asset}", values["crypto_amount"], trade.quote.price, values["fiat_amount"], rfq.quote_asset, values["bank_fee"], rfq.quote_asset, values["network_fee"], rfq.base_asset, trade.status.value])
+        times = status_timestamps(trade)
+        writer.writerow([trade.id, format_datetime(trade.created_at), rfq.client_name, rfq.side, f"{rfq.base_asset}/{rfq.quote_asset}", values["crypto_amount"], trade.quote.price, values["fiat_amount"], rfq.quote_asset, values["bank_fee"], rfq.quote_asset, values["network_fee"], rfq.base_asset, trade.status.value] + [times[status.value] for status in REPORT_STATUS_COLUMNS])
     data = "\ufeff" + buffer.getvalue()
     return StreamingResponse(iter([data]), media_type="text/csv; charset=utf-8", headers={"Content-Disposition": "attachment; filename=otc_trades_report.csv"})
 

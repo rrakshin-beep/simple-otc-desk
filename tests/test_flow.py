@@ -68,7 +68,10 @@ def test_fiat_based_calculation_and_report():
     assert report.status_code == 200
     assert "Комиссия банка" in report.text
     assert "Комиссия сети" in report.text
+    assert "ACCEPTED — дата и время" in report.text
+    assert "FUNDED — дата и время" in report.text
 
     csv_report = client.get("/reports/trades.csv")
     assert csv_report.status_code == 200
     assert "otc_trades_report.csv" in csv_report.headers["content-disposition"]
+    assert "Дата и время: ACCEPTED" in csv_report.text

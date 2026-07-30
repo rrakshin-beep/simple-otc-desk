@@ -28,7 +28,8 @@ ALLOWED_TRANSITIONS = {
 def dashboard(request: Request, db: Session = Depends(get_db)):
     rfqs = db.query(RFQ).options(joinedload(RFQ.quote)).order_by(RFQ.id.desc()).all()
     trades = db.query(Trade).options(joinedload(Trade.quote).joinedload(Quote.rfq)).order_by(Trade.id.desc()).all()
-    return templates.TemplateResponse("index.html", {"request": request, "rfqs": rfqs, "trades": trades})
+    return templates.TemplateResponse(request=request,name="index.html",context={"rfqs": rfqs,"trades": trades, },
+)
 
 @app.post("/rfqs")
 def create_rfq(
@@ -95,8 +96,9 @@ def trade_page(trade_id: int, request: Request, db: Session = Depends(get_db)):
     allowed = sorted(ALLOWED_TRANSITIONS[trade.status], key=lambda x: x.value)
     gross = Decimal(str(trade.quote.price)) * Decimal(str(trade.quote.rfq.amount))
     fee = gross * Decimal(str(trade.quote.fee_rate)) / Decimal("100")
-    return templates.TemplateResponse("trade.html", {"request": request, "trade": trade, "allowed": allowed,
-        "gross": gross, "fee": fee, "total": gross + fee})
+    return templates.TemplateResponse(request=request,name="trade.html",context={"trade": trade,"allowed": allowed,
+"gross": gross,"fee": fee,"total": gross + fee, },
+)
 
 @app.get("/api/trades")
 def api_trades(db: Session = Depends(get_db)):

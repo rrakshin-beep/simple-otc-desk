@@ -3,7 +3,7 @@
 <body><header><div><h1>Простой OTC Desk</h1><p>Учет RFQ, котировок и сделок</p></div><a class="header-link" href="/reports/trades">Сводный отчет</a></header><main>
 <section class="card"><h2>Новый запрос котировки</h2><form method="post" action="/rfqs" class="grid" id="rfq-form">
 <input name="client_name" placeholder="Клиент" required><select name="side"><option value="BUY">Купить</option><option value="SELL">Продать</option></select>
-<input name="base_asset" value="BTC" required><input name="quote_asset" value="USDT" required>
+<input name="base_asset" value="BTC" placeholder="Криптовалюта (BTC)" required><input name="quote_asset" placeholder="Фиатная валюта (USD, EUR, KGS, RUB)" required>
 <select name="amount_type" id="amount-type"><option value="CRYPTO">Задать количество криптовалюты</option><option value="FIAT">Задать сумму фиата</option></select>
 <input name="crypto_amount" id="crypto-amount" type="number" step="0.00000001" min="0" placeholder="Количество криптовалюты" required>
 <input name="fiat_amount" id="fiat-amount" type="number" step="0.01" min="0" placeholder="Сумма фиата" disabled>

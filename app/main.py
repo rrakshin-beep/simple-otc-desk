@@ -1,4 +1,3 @@
-from collections import defaultdict
 from datetime import datetime, timedelta
 from decimal import Decimal, InvalidOperation
 from io import StringIO
@@ -86,7 +85,6 @@ def trade_values(trade: Trade) -> dict[str, Decimal]:
         "fiat_amount": fiat_amount,
         "bank_fee": bank_fee,
         "network_fee": network_fee,
-        "total_cost": fiat_amount + bank_fee + network_fee,
     }
 
 
@@ -285,20 +283,10 @@ def trades_report(request: Request, db: Session = Depends(get_db)):
         .all()
     )
     rows = [{"trade": trade, **trade_values(trade)} for trade in trades]
-    totals = defaultdict(
-        lambda: {"fiat": Decimal("0"), "bank": Decimal("0"), "network": Decimal("0"), "total": Decimal("0"), "count": 0}
-    )
-    for row in rows:
-        currency = row["trade"].quote.rfq.quote_asset
-        totals[currency]["fiat"] += row["fiat_amount"]
-        totals[currency]["bank"] += row["bank_fee"]
-        totals[currency]["network"] += row["network_fee"]
-        totals[currency]["total"] += row["total_cost"]
-        totals[currency]["count"] += 1
     return templates.TemplateResponse(
         request=request,
         name="report.html",
-        context={"rows": rows, "totals": dict(totals)},
+        context={"rows": rows},
     )
 
 
@@ -312,33 +300,13 @@ def trades_report_csv(db: Session = Depends(get_db)):
     )
     buffer = StringIO()
     writer = csv.writer(buffer, delimiter=";")
-    writer.writerow(["ID", "Дата", "Клиент", "Операция", "Пара", "Криптовалюта", "Цена", "Сумма сделки", "Валюта", "Комиссия банка", "Комиссия сети", "Итого", "Статус"])
+    writer.writerow(["ID", "Дата", "Клиент", "Операция", "Пара", "Криптовалюта", "Цена", "Сумма сделки", "Фиатная валюта", "Комиссия банка", "Валюта комиссии банка", "Комиссия сети", "Валюта комиссии сети", "Статус"])
     for trade in trades:
         values = trade_values(trade)
         rfq = trade.quote.rfq
-        writer.writerow(
-            [
-                trade.id,
-                trade.created_at.isoformat(),
-                rfq.client_name,
-                rfq.side,
-                f"{rfq.base_asset}/{rfq.quote_asset}",
-                values["crypto_amount"],
-                trade.quote.price,
-                values["fiat_amount"],
-                rfq.quote_asset,
-                values["bank_fee"],
-                values["network_fee"],
-                values["total_cost"],
-                trade.status.value,
-            ]
-        )
+        writer.writerow([trade.id, trade.created_at.isoformat(), rfq.client_name, rfq.side, f"{rfq.base_asset}/{rfq.quote_asset}", values["crypto_amount"], trade.quote.price, values["fiat_amount"], rfq.quote_asset, values["bank_fee"], rfq.quote_asset, values["network_fee"], rfq.base_asset, trade.status.value])
     data = "\ufeff" + buffer.getvalue()
-    return StreamingResponse(
-        iter([data]),
-        media_type="text/csv; charset=utf-8",
-        headers={"Content-Disposition": "attachment; filename=otc_trades_report.csv"},
-    )
+    return StreamingResponse(iter([data]), media_type="text/csv; charset=utf-8", headers={"Content-Disposition": "attachment; filename=otc_trades_report.csv"})
 
 
 @app.get("/api/trades")
@@ -358,7 +326,8 @@ def api_trades(db: Session = Depends(get_db)):
             "price": float(trade.quote.price),
             "fiat_amount": float(values["fiat_amount"]),
             "bank_fee": float(values["bank_fee"]),
+            "bank_fee_currency": rfq.quote_asset,
             "network_fee": float(values["network_fee"]),
-            "total_cost": float(values["total_cost"]),
+            "network_fee_currency": rfq.base_asset,
         })
     return result

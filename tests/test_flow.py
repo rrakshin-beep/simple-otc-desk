@@ -61,7 +61,8 @@ def test_fiat_based_calculation_and_report():
     assert trade["fiat_amount"] == 6000.0
     assert trade["bank_fee"] == 25.0
     assert trade["network_fee"] == 5.0
-    assert trade["total_cost"] == 6030.0
+    assert trade["bank_fee_currency"] == "USD"
+    assert trade["network_fee_currency"] == "ETH"
 
     report = client.get("/reports/trades")
     assert report.status_code == 200

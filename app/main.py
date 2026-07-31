@@ -14,7 +14,27 @@ from sqlalchemy.orm import Session, joinedload, selectinload
 from .database import Base, engine, get_db
 from .models import AmountType, Quote, RFQ, RFQStatus, Trade, TradeHistory, TradeStatus
 
-Base.metadata.create_all(bind=engine)
+
+def reset_demo_database() -> None:
+    inspector = inspect(engine)
+    existing_tables = set(inspector.get_table_names())
+    if not existing_tables:
+        Base.metadata.create_all(bind=engine)
+        return
+
+    with engine.begin() as connection:
+        connection.execute(text("PRAGMA foreign_keys = OFF"))
+        for table_name in ("trade_history", "trades", "quotes", "rfqs"):
+            if table_name in existing_tables:
+                connection.execute(text(f"DELETE FROM {table_name}"))
+        if "sqlite_sequence" in existing_tables:
+            connection.execute(text("DELETE FROM sqlite_sequence WHERE name IN ('rfqs', 'quotes', 'trades', 'trade_history')"))
+        connection.execute(text("PRAGMA foreign_keys = ON"))
+
+    Base.metadata.create_all(bind=engine)
+
+
+reset_demo_database()
 
 
 def migrate_sqlite_schema() -> None:
@@ -39,32 +59,38 @@ def migrate_sqlite_schema() -> None:
 
 migrate_sqlite_schema()
 
+def migrate_legacy_trade_statuses() -> None:
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                "UPDATE trades SET status = 'APPROVED' "
+                "WHERE status IN ('EXECUTED', 'SETTLED', 'COMPLETED')"
+            )
+        )
+
+migrate_legacy_trade_statuses()
+
 app = FastAPI(title="Simple OTC Desk")
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
+
+CRYPTO_ASSETS = {"USDT", "BTC", "USDC", "TRX", "ETH", "TON"}
+FIAT_ASSETS = {"USD", "EUR", "KGS", "RUB"}
 
 ALLOWED_TRANSITIONS = {
     TradeStatus.ACCEPTED: {TradeStatus.FUNDED, TradeStatus.CANCELLED},
     TradeStatus.FUNDED: {TradeStatus.AML_REVIEW, TradeStatus.APPROVED, TradeStatus.CANCELLED},
     TradeStatus.AML_REVIEW: {TradeStatus.APPROVED, TradeStatus.CANCELLED},
-    TradeStatus.APPROVED: {TradeStatus.EXECUTED, TradeStatus.CANCELLED},
-    TradeStatus.EXECUTED: {TradeStatus.SETTLED},
-    TradeStatus.SETTLED: {TradeStatus.COMPLETED},
-    TradeStatus.COMPLETED: set(),
+    TradeStatus.APPROVED: {TradeStatus.CANCELLED},
     TradeStatus.CANCELLED: set(),
 }
-
 REPORT_STATUS_COLUMNS = [
     TradeStatus.ACCEPTED,
     TradeStatus.FUNDED,
     TradeStatus.AML_REVIEW,
     TradeStatus.APPROVED,
-    TradeStatus.EXECUTED,
-    TradeStatus.SETTLED,
-    TradeStatus.COMPLETED,
     TradeStatus.CANCELLED,
 ]
-
 
 def format_datetime(value: datetime | None) -> str:
     return value.strftime("%d.%m.%Y %H:%M:%S") if value else "—"
@@ -142,6 +168,10 @@ def create_rfq(
     comment: str = Form(""),
     db: Session = Depends(get_db),
 ):
+    base_asset = base_asset.upper().strip()
+    quote_asset = quote_asset.upper().strip()
+    if not base_asset or not quote_asset:
+        raise HTTPException(400, "Укажите тикеры активов")
     try:
         crypto = Decimal(crypto_amount) if crypto_amount.strip() else None
         fiat = Decimal(fiat_amount) if fiat_amount.strip() else None
@@ -156,8 +186,8 @@ def create_rfq(
     rfq = RFQ(
         client_name=client_name.strip(),
         side=side,
-        base_asset=base_asset.upper().strip(),
-        quote_asset=quote_asset.upper().strip(),
+        base_asset=base_asset,
+        quote_asset=quote_asset,
         amount_type=amount_type,
         amount=crypto if amount_type == AmountType.CRYPTO else None,
         fiat_amount=fiat if amount_type == AmountType.FIAT else None,
@@ -280,6 +310,22 @@ def change_status(
     )
     db.commit()
     return RedirectResponse(f"/trades/{trade_id}", status_code=303)
+
+
+@app.post("/trades/{trade_id}/delete")
+def delete_trade(trade_id: int, db: Session = Depends(get_db)):
+    trade = (
+        db.query(Trade)
+        .options(joinedload(Trade.quote).joinedload(Quote.rfq))
+        .filter(Trade.id == trade_id)
+        .first()
+    )
+    if not trade:
+        raise HTTPException(404, "Сделка не найдена")
+    trade.quote.rfq.status = RFQStatus.QUOTED
+    db.delete(trade)
+    db.commit()
+    return RedirectResponse("/", status_code=303)
 
 
 @app.get("/trades/{trade_id}", response_class=HTMLResponse)

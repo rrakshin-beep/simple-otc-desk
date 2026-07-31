@@ -3,5 +3,56 @@
 <section class="card"><h2>Расходы по сделке</h2><form method="post" action="/trades/{{trade.id}}/fees" class="grid"><label>Комиссия банка, {{trade.quote.rfq.quote_asset}}<input name="bank_fee" type="number" step="0.00000001" min="0" value="{{bank_fee}}" placeholder="Комиссия банка"></label><label>Комиссия сети, {{trade.quote.rfq.base_asset}}<input name="network_fee" type="number" step="0.00000001" min="0" value="{{network_fee}}" placeholder="Комиссия сети"></label><button>Сохранить расходы</button></form></section>
 <section class="card"><h2>Изменить статус</h2>{% if allowed %}<form method="post" action="/trades/{{trade.id}}/status" class="grid"><select name="new_status">{% for s in allowed %}<option value="{{s.value}}">{{s.value}}</option>{% endfor %}</select><input name="changed_by" value="OTC Operator" required><input name="note" placeholder="Комментарий"><button>Применить</button></form>{% else %}<p>Сделка находится в финальном статусе.</p>{% endif %}</section>
 <section class="card"><h2>Удаление сделки</h2><form method="post" action="/trades/{{trade.id}}/delete" onsubmit="return confirm('Удалить сделку #{{trade.id}}? Это действие нельзя отменить.');"><button type="submit">Удалить сделку</button></form></section>
+
+<section class="card">
+<h2>Редактирование сделки</h2>
+<form method="post" action="/trades/{{trade.id}}/edit" class="grid" id="trade-edit-form">
+<label>Клиент<input name="client_name" value="{{trade.quote.rfq.client_name}}" required></label>
+<label>Операция<select name="side"><option value="BUY" {% if trade.quote.rfq.side == 'BUY' %}selected{% endif %}>Купить</option><option value="SELL" {% if trade.quote.rfq.side == 'SELL' %}selected{% endif %}>Продать</option></select></label>
+<label>Криптовалюта<select name="base_asset">
+<option value="USDT" {% if trade.quote.rfq.base_asset == 'USDT' %}selected{% endif %}>USDT</option>
+<option value="BTC" {% if trade.quote.rfq.base_asset == 'BTC' %}selected{% endif %}>Bitcoin (BTC)</option>
+<option value="USDC" {% if trade.quote.rfq.base_asset == 'USDC' %}selected{% endif %}>USDC</option>
+<option value="TRX" {% if trade.quote.rfq.base_asset == 'TRX' %}selected{% endif %}>Tron (TRX)</option>
+<option value="ETH" {% if trade.quote.rfq.base_asset == 'ETH' %}selected{% endif %}>Эфир (ETH)</option>
+<option value="TON" {% if trade.quote.rfq.base_asset == 'TON' %}selected{% endif %}>TON</option>
+</select></label>
+<label>Фиатная валюта<select name="quote_asset">
+<option value="USD" {% if trade.quote.rfq.quote_asset == 'USD' %}selected{% endif %}>USD</option>
+<option value="EUR" {% if trade.quote.rfq.quote_asset == 'EUR' %}selected{% endif %}>EUR</option>
+<option value="KGS" {% if trade.quote.rfq.quote_asset == 'KGS' %}selected{% endif %}>KGS</option>
+<option value="RUB" {% if trade.quote.rfq.quote_asset == 'RUB' %}selected{% endif %}>RUB</option>
+</select></label>
+<label>Количество криптовалюты<input name="crypto_amount" id="edit-crypto-amount" type="number" step="0.00000001" min="0.00000001" value="{{crypto_amount}}" required></label>
+<label>Цена<input name="price" id="edit-price" type="number" step="0.00000001" min="0.00000001" value="{{trade.quote.price}}" required></label>
+<label>Расчетная сумма сделки<input id="edit-fiat-amount" type="number" step="0.00000001" value="{{fiat_amount}}" readonly></label>
+<label>Комиссия банка<input name="bank_fee" type="number" step="0.00000001" min="0" value="{{bank_fee}}"></label>
+<label>Комиссия сети<input name="network_fee" type="number" step="0.00000001" min="0" value="{{network_fee}}"></label>
+<label>Комментарий<input name="comment" value="{{trade.quote.rfq.comment or ''}}"></label>
+<label>Кто изменил<input name="changed_by" value="OTC Operator" required></label>
+<button type="submit">Сохранить изменения</button>
+</form>
+</section>
+<section class="card">
+<h2>Удаление сделки</h2>
+<p>Удаление доступно при любом статусе. Связанная котировка вернется в статус QUOTED.</p>
+<form method="post" action="/trades/{{trade.id}}/delete" onsubmit="return confirm('Удалить сделку #{{trade.id}}? Действие нельзя отменить.');">
+<button type="submit">Удалить сделку</button>
+</form>
+</section>
 <section class="card"><h2>История</h2><div class="table"><table><tr><th>Дата</th><th>Переход</th><th>Кто</th><th>Комментарий</th></tr>{% for h in trade.history|sort(attribute='id', reverse=true) %}<tr><td>{{format_datetime(h.created_at)}}</td><td>{{h.old_status or '—'}} → {{h.new_status}}</td><td>{{h.changed_by}}</td><td>{{h.note or ''}}</td></tr>{% endfor %}</table></div></section>
-</main></body></html>
+</main>
+<script>
+const editCrypto = document.getElementById('edit-crypto-amount');
+const editPrice = document.getElementById('edit-price');
+const editFiat = document.getElementById('edit-fiat-amount');
+function recalculateTrade() {
+  const crypto = Number(editCrypto.value || 0);
+  const price = Number(editPrice.value || 0);
+  editFiat.value = (crypto * price).toFixed(8);
+}
+editCrypto.addEventListener('input', recalculateTrade);
+editPrice.addEventListener('input', recalculateTrade);
+recalculateTrade();
+</script>
+</body></html>

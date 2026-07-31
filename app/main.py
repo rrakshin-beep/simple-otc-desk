@@ -312,8 +312,22 @@ def change_status(
     return RedirectResponse(f"/trades/{trade_id}", status_code=303)
 
 
-@app.post("/trades/{trade_id}/delete")
-def delete_trade(trade_id: int, db: Session = Depends(get_db)):
+
+@app.post("/trades/{trade_id}/edit")
+def edit_trade(
+    trade_id: int,
+    client_name: str = Form(...),
+    side: str = Form(...),
+    base_asset: str = Form(...),
+    quote_asset: str = Form(...),
+    crypto_amount: Decimal = Form(...),
+    price: Decimal = Form(...),
+    bank_fee: Decimal = Form(0),
+    network_fee: Decimal = Form(0),
+    comment: str = Form(""),
+    changed_by: str = Form("OTC Operator"),
+    db: Session = Depends(get_db),
+):
     trade = (
         db.query(Trade)
         .options(joinedload(Trade.quote).joinedload(Quote.rfq))
@@ -322,7 +336,69 @@ def delete_trade(trade_id: int, db: Session = Depends(get_db)):
     )
     if not trade:
         raise HTTPException(404, "Сделка не найдена")
-    trade.quote.rfq.status = RFQStatus.QUOTED
+
+    base_asset = base_asset.upper().strip()
+    quote_asset = quote_asset.upper().strip()
+    if base_asset not in {"USDT", "BTC", "USDC", "TRX", "ETH", "TON"}:
+        raise HTTPException(400, "Недопустимая криптовалюта")
+    if quote_asset not in {"USD", "EUR", "KGS", "RUB"}:
+        raise HTTPException(400, "Недопустимая фиатная валюта")
+    if side not in {"BUY", "SELL"}:
+        raise HTTPException(400, "Недопустимый тип операции")
+    if crypto_amount <= 0 or price <= 0:
+        raise HTTPException(400, "Количество и цена должны быть больше нуля")
+    if bank_fee < 0 or network_fee < 0:
+        raise HTTPException(400, "Комиссии не могут быть отрицательными")
+
+    rfq = trade.quote.rfq
+    old_values = (
+        f"Клиент: {rfq.client_name}; операция: {rfq.side}; "
+        f"пара: {rfq.base_asset}/{rfq.quote_asset}; "
+        f"количество: {rfq.amount}; цена: {trade.quote.price}; "
+        f"комиссия банка: {trade.bank_fee}; комиссия сети: {trade.network_fee}"
+    )
+
+    rfq.client_name = client_name.strip()
+    rfq.side = side
+    rfq.base_asset = base_asset
+    rfq.quote_asset = quote_asset
+    rfq.amount_type = AmountType.CRYPTO
+    rfq.amount = crypto_amount
+    rfq.fiat_amount = crypto_amount * price
+    rfq.comment = comment.strip()
+    trade.quote.price = price
+    trade.bank_fee = bank_fee
+    trade.network_fee = network_fee
+
+    db.add(
+        TradeHistory(
+            trade_id=trade.id,
+            old_status=trade.status.value,
+            new_status=trade.status.value,
+            changed_by=changed_by.strip() or "OTC Operator",
+            note=f"Параметры сделки изменены. Было: {old_values}",
+        )
+    )
+    db.commit()
+    return RedirectResponse(f"/trades/{trade_id}", status_code=303)
+
+
+@app.post("/trades/{trade_id}/delete")
+def delete_trade(
+    trade_id: int,
+    db: Session = Depends(get_db),
+):
+    trade = (
+        db.query(Trade)
+        .options(joinedload(Trade.quote).joinedload(Quote.rfq))
+        .filter(Trade.id == trade_id)
+        .first()
+    )
+    if not trade:
+        raise HTTPException(404, "Сделка не найдена")
+
+    rfq = trade.quote.rfq
+    rfq.status = RFQStatus.QUOTED
     db.delete(trade)
     db.commit()
     return RedirectResponse("/", status_code=303)

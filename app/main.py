@@ -12,7 +12,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from .database import Base, engine, get_db
-from .models import AmountType, Quote, RFQ, RFQStatus, Trade, TradeHistory, TradeStatus
+from .models import AmountType, Quote, RFQ, RFQHistory, RFQStatus, Trade, TradeHistory, TradeStatus
 
 
 def reset_demo_database() -> None:
@@ -24,11 +24,11 @@ def reset_demo_database() -> None:
 
     with engine.begin() as connection:
         connection.execute(text("PRAGMA foreign_keys = OFF"))
-        for table_name in ("trade_history", "trades", "quotes", "rfqs"):
+        for table_name in ("trade_history", "rfq_history", "trades", "quotes", "rfqs"):
             if table_name in existing_tables:
                 connection.execute(text(f"DELETE FROM {table_name}"))
         if "sqlite_sequence" in existing_tables:
-            connection.execute(text("DELETE FROM sqlite_sequence WHERE name IN ('rfqs', 'quotes', 'trades', 'trade_history')"))
+            connection.execute(text("DELETE FROM sqlite_sequence WHERE name IN ('rfqs', 'quotes', 'trades', 'trade_history', 'rfq_history')"))
         connection.execute(text("PRAGMA foreign_keys = ON"))
 
     Base.metadata.create_all(bind=engine)
@@ -142,7 +142,7 @@ def trade_values(trade: Trade) -> dict[str, Decimal]:
 
 @app.get("/", response_class=HTMLResponse)
 def dashboard(request: Request, db: Session = Depends(get_db)):
-    rfqs = db.query(RFQ).options(joinedload(RFQ.quote)).order_by(RFQ.id.desc()).all()
+    rfqs = db.query(RFQ).options(joinedload(RFQ.quote), selectinload(RFQ.rfq_history)).order_by(RFQ.id.desc()).all()
     trades = (
         db.query(Trade)
         .options(joinedload(Trade.quote).joinedload(Quote.rfq))
@@ -204,6 +204,7 @@ def create_quote(
     price: Decimal = Form(...),
     valid_minutes: int = Form(5),
     dealer_name: str = Form(...),
+    quote_created_at: str = Form(""),
     db: Session = Depends(get_db),
 ):
     rfq = db.get(RFQ, rfq_id)
@@ -215,14 +216,65 @@ def create_quote(
     crypto_amount, fiat_amount = calculate_amounts(rfq, price)
     rfq.amount = crypto_amount
     rfq.fiat_amount = fiat_amount
+    try:
+        created_at = datetime.fromisoformat(quote_created_at) if quote_created_at.strip() else datetime.utcnow()
+    except ValueError as exc:
+        raise HTTPException(400, "Некорректная дата и время создания котировки") from exc
     quote = Quote(
         rfq=rfq,
         price=price,
-        expires_at=datetime.utcnow() + timedelta(minutes=valid_minutes),
+        expires_at=created_at + timedelta(minutes=valid_minutes),
         dealer_name=dealer_name.strip(),
+        created_at=created_at,
     )
     rfq.status = RFQStatus.QUOTED
     db.add(quote)
+    db.flush()
+    db.add(
+        RFQHistory(
+            rfq_id=rfq.id,
+            old_status=RFQStatus.SUBMITTED.value,
+            new_status=RFQStatus.QUOTED.value,
+            changed_by=dealer_name.strip(),
+            note="Котировка создана",
+            created_at=created_at,
+        )
+    )
+    db.commit()
+    return RedirectResponse("/", status_code=303)
+
+
+@app.post("/quotes/{quote_id}/reject")
+def reject_quote(
+    quote_id: int,
+    rejected_by: str = Form(...),
+    reason: str = Form(""),
+    db: Session = Depends(get_db),
+):
+    quote = (
+        db.query(Quote)
+        .options(joinedload(Quote.rfq), joinedload(Quote.trade))
+        .filter(Quote.id == quote_id)
+        .first()
+    )
+    if not quote:
+        raise HTTPException(404, "Котировка не найдена")
+    if quote.trade:
+        raise HTTPException(400, "Принятую котировку отклонить нельзя")
+    if quote.rfq.status != RFQStatus.QUOTED:
+        raise HTTPException(400, "Котировка недоступна для отклонения")
+
+    old_status = quote.rfq.status
+    quote.rfq.status = RFQStatus.REJECTED
+    db.add(
+        RFQHistory(
+            rfq_id=quote.rfq.id,
+            old_status=old_status.value,
+            new_status=RFQStatus.REJECTED.value,
+            changed_by=rejected_by.strip() or "OTC Operator",
+            note=reason.strip() or "Котировка отклонена",
+        )
+    )
     db.commit()
     return RedirectResponse("/", status_code=303)
 
@@ -408,7 +460,7 @@ def delete_trade(
 def trade_page(trade_id: int, request: Request, db: Session = Depends(get_db)):
     trade = (
         db.query(Trade)
-        .options(joinedload(Trade.quote).joinedload(Quote.rfq), joinedload(Trade.history))
+        .options(joinedload(Trade.quote).joinedload(Quote.rfq).selectinload(RFQ.rfq_history), joinedload(Trade.history))
         .filter(Trade.id == trade_id)
         .first()
     )

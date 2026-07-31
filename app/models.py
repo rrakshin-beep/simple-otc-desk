@@ -47,6 +47,19 @@ class RFQ(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     quote = relationship("Quote", back_populates="rfq", uselist=False, cascade="all, delete-orphan")
+    rfq_history = relationship("RFQHistory", back_populates="rfq", cascade="all, delete-orphan")
+
+
+class RFQHistory(Base):
+    __tablename__ = "rfq_history"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    rfq_id: Mapped[int] = mapped_column(ForeignKey("rfqs.id"))
+    old_status: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    new_status: Mapped[str] = mapped_column(String(32))
+    changed_by: Mapped[str] = mapped_column(String(120))
+    note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    rfq = relationship("RFQ", back_populates="rfq_history")
 
 
 class Quote(Base):

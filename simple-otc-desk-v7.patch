@@ -1,0 +1,1009 @@
+diff -ruN otc-original-v5/simple-otc-desk-v5/.pytest_cache/.gitignore otc-full-patch/simple-otc-desk-v5/.pytest_cache/.gitignore
+--- otc-original-v5/simple-otc-desk-v5/.pytest_cache/.gitignore	1970-01-01 00:00:00.000000000 +0000
++++ otc-full-patch/simple-otc-desk-v5/.pytest_cache/.gitignore	2026-08-03 09:15:23.231773051 +0000
+@@ -0,0 +1,2 @@
++# Created by pytest automatically.
++*
+diff -ruN otc-original-v5/simple-otc-desk-v5/.pytest_cache/CACHEDIR.TAG otc-full-patch/simple-otc-desk-v5/.pytest_cache/CACHEDIR.TAG
+--- otc-original-v5/simple-otc-desk-v5/.pytest_cache/CACHEDIR.TAG	1970-01-01 00:00:00.000000000 +0000
++++ otc-full-patch/simple-otc-desk-v5/.pytest_cache/CACHEDIR.TAG	2026-08-03 09:15:23.231773051 +0000
+@@ -0,0 +1,4 @@
++Signature: 8a477f597d28d172789f06886806bc55
++# This file is a cache directory tag created by pytest.
++# For information about cache directory tags, see:
++#	https://bford.info/cachedir/spec.html
+diff -ruN otc-original-v5/simple-otc-desk-v5/.pytest_cache/README.md otc-full-patch/simple-otc-desk-v5/.pytest_cache/README.md
+--- otc-original-v5/simple-otc-desk-v5/.pytest_cache/README.md	1970-01-01 00:00:00.000000000 +0000
++++ otc-full-patch/simple-otc-desk-v5/.pytest_cache/README.md	2026-08-03 09:15:23.231773051 +0000
+@@ -0,0 +1,8 @@
++# pytest cache directory #
++
++This directory contains data from the pytest's cache plugin,
++which provides the `--lf` and `--ff` options, as well as the `cache` fixture.
++
++**Do not** commit this to version control.
++
++See [the docs](https://docs.pytest.org/en/stable/how-to/cache.html) for more information.
+diff -ruN otc-original-v5/simple-otc-desk-v5/.pytest_cache/v/cache/nodeids otc-full-patch/simple-otc-desk-v5/.pytest_cache/v/cache/nodeids
+--- otc-original-v5/simple-otc-desk-v5/.pytest_cache/v/cache/nodeids	1970-01-01 00:00:00.000000000 +0000
++++ otc-full-patch/simple-otc-desk-v5/.pytest_cache/v/cache/nodeids	2026-08-03 09:15:23.231773051 +0000
+@@ -0,0 +1,4 @@
++[
++  "tests/test_flow.py::test_full_flow_and_idempotency",
++  "tests/test_flow.py::test_reject_report_and_archive"
++]
+\ No newline at end of file
+diff -ruN otc-original-v5/simple-otc-desk-v5/README.md otc-full-patch/simple-otc-desk-v5/README.md
+--- otc-original-v5/simple-otc-desk-v5/README.md	2026-07-30 08:01:56.000000000 +0000
++++ otc-full-patch/simple-otc-desk-v5/README.md	2026-08-03 09:15:33.675772933 +0000
+@@ -1,16 +1,27 @@
+-# Simple OTC Desk v2
++# Simple OTC Desk v6 — комплексный патч
+ 
+ Демонстрационный OTC-деск на FastAPI и SQLite.
+ 
+-## Добавлено
++## Что добавлено
+ 
+-- RFQ можно создать от количества криптовалюты или от суммы фиата;
+-- после ввода цены автоматически рассчитывается вторая сторона сделки;
+-- комиссия OTC удалена;
+-- добавлены комиссия банка и комиссия сети;
+-- безопасное принятие котировки с защитой от повторного принятия;
+-- сводный HTML-отчет и экспорт CSV;
+-- автоматическое добавление новых колонок в старую SQLite-базу.
++- отдельные интерфейсы клиента, дилера и комплаенса (`/client`, `/dealer`, `/compliance`);
++- русские названия операций и статусов;
++- выпадающие списки криптовалют, фиатных валют и сетей;
++- отклонение котировки с обязательной причиной;
++- автоматическое истечение котировки и обратный таймер;
++- подтверждение условий перед принятием и ключ идемпотентности;
++- неизменяемые существенные условия принятой сделки;
++- комиссии банка и сети, плательщик каждой комиссии и признак включения в котировку;
++- сеть, банковский референс, TX hash и AML-риск;
++- обязательная причина отмены сделки;
++- архивирование вместо физического удаления;
++- журнал аудита;
++- отображение времени в часовом поясе Asia/Bishkek (UTC+6);
++- визуальный таймлайн статусов;
++- фильтры сводного отчета;
++- RFQ ID, Quote ID, Trade ID и дополнительные поля отчета;
++- экспорт CSV и XLSX;
++- скрытие архивированных сделок из рабочих списков.
+ 
+ ## Запуск
+ 
+@@ -21,21 +32,14 @@
+ uvicorn app.main:app --reload
+ ```
+ 
+-Открыть: http://127.0.0.1:8000
++Открыть: `http://127.0.0.1:8000/client`
+ 
+-## Важно
+-
+-Это демонстрационный MVP, не production-система.
+-
+-
+-## Изменения v3
++## Проверка
+ 
+-- Поле фиатной валюты больше не предзаполняется значением USDT.
+-- Валюта банковской комиссии берется из quote asset пары RFQ.
+-- В сводном отчете удалены агрегированные итоги по валютам; показывается только перечень сделок.
++```bash
++pytest -q
++```
+ 
+-## Изменения v5
++## Важно
+ 
+-- В карточке сделки история статусов показывает дату и время в формате `ДД.ММ.ГГГГ ЧЧ:ММ:СС`.
+-- В сводном HTML- и CSV-отчете добавлены отдельные столбцы даты и времени для каждого статуса сделки.
+-- Комиссия банка и комиссия сети отображаются отдельными столбцами с валютами из торговой пары.
++Это демонстрационный MVP. Разделение интерфейсов не является полноценной авторизацией. Перед промышленным использованием необходимы PostgreSQL, RBAC, 2FA, защищенное хранение секретов, Alembic, резервное копирование и интеграции KYC/AML/Wallet.
+Binary files otc-original-v5/simple-otc-desk-v5/app/__pycache__/__init__.cpython-313.pyc and otc-full-patch/simple-otc-desk-v5/app/__pycache__/__init__.cpython-313.pyc differ
+Binary files otc-original-v5/simple-otc-desk-v5/app/__pycache__/database.cpython-313.pyc and otc-full-patch/simple-otc-desk-v5/app/__pycache__/database.cpython-313.pyc differ
+Binary files otc-original-v5/simple-otc-desk-v5/app/__pycache__/main.cpython-313.pyc and otc-full-patch/simple-otc-desk-v5/app/__pycache__/main.cpython-313.pyc differ
+Binary files otc-original-v5/simple-otc-desk-v5/app/__pycache__/models.cpython-313.pyc and otc-full-patch/simple-otc-desk-v5/app/__pycache__/models.cpython-313.pyc differ
+diff -ruN otc-original-v5/simple-otc-desk-v5/app/main.py otc-full-patch/simple-otc-desk-v5/app/main.py
+--- otc-original-v5/simple-otc-desk-v5/app/main.py	2026-07-30 08:01:13.000000000 +0000
++++ otc-full-patch/simple-otc-desk-v5/app/main.py	2026-08-03 09:14:34.707773597 +0000
+@@ -1,90 +1,114 @@
+-from datetime import datetime, timedelta
++from datetime import datetime, timedelta, timezone
+ from decimal import Decimal, InvalidOperation
+-from io import StringIO
++from io import BytesIO, StringIO
++from uuid import uuid4
++from zoneinfo import ZoneInfo
+ import csv
+ 
+-from fastapi import Depends, FastAPI, Form, HTTPException, Request
++from fastapi import Depends, FastAPI, Form, HTTPException, Query, Request
+ from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
+ from fastapi.staticfiles import StaticFiles
+ from fastapi.templating import Jinja2Templates
++from openpyxl import Workbook
+ from sqlalchemy import inspect, text
+ from sqlalchemy.exc import IntegrityError
+ from sqlalchemy.orm import Session, joinedload, selectinload
+ 
+ from .database import Base, engine, get_db
+-from .models import AmountType, Quote, RFQ, RFQStatus, Trade, TradeHistory, TradeStatus
++from .models import AuditLog, AmountType, Quote, QuoteAcceptance, RFQ, RFQStatus, Trade, TradeHistory, TradeStatus
+ 
+ Base.metadata.create_all(bind=engine)
+ 
+ 
+ def migrate_sqlite_schema() -> None:
+-    """Минимальная миграция старой демонстрационной SQLite-базы без Alembic."""
++    additions = {
++        "rfqs": {
++            "fiat_amount": "NUMERIC(30, 8)", "amount_type": "VARCHAR(16) DEFAULT 'CRYPTO'",
++            "network": "VARCHAR(40)", "rejected_at": "DATETIME", "rejected_by": "VARCHAR(120)",
++            "rejection_reason": "TEXT",
++        },
++        "trades": {
++            "bank_fee": "NUMERIC(30, 8) DEFAULT 0", "network_fee": "NUMERIC(30, 8) DEFAULT 0",
++            "bank_fee_payer": "VARCHAR(20) DEFAULT 'CLIENT'", "network_fee_payer": "VARCHAR(20) DEFAULT 'CLIENT'",
++            "fees_included_in_quote": "BOOLEAN DEFAULT 0", "bank_reference": "VARCHAR(120)",
++            "tx_hash": "VARCHAR(180)", "aml_risk": "VARCHAR(20)", "cancellation_reason": "TEXT",
++            "archived": "BOOLEAN DEFAULT 0", "archived_at": "DATETIME", "archived_by": "VARCHAR(120)",
++            "archive_reason": "TEXT",
++        },
++    }
+     inspector = inspect(engine)
+-    if "rfqs" in inspector.get_table_names():
+-        columns = {c["name"] for c in inspector.get_columns("rfqs")}
+-        with engine.begin() as connection:
+-            if "fiat_amount" not in columns:
+-                connection.execute(text("ALTER TABLE rfqs ADD COLUMN fiat_amount NUMERIC(30, 8)"))
+-            if "amount_type" not in columns:
+-                connection.execute(text("ALTER TABLE rfqs ADD COLUMN amount_type VARCHAR(16) DEFAULT 'CRYPTO'"))
+-                connection.execute(text("UPDATE rfqs SET amount_type = 'CRYPTO' WHERE amount_type IS NULL"))
+-    if "trades" in inspector.get_table_names():
+-        columns = {c["name"] for c in inspector.get_columns("trades")}
++    for table_name, fields in additions.items():
++        if table_name not in inspector.get_table_names():
++            continue
++        columns = {c["name"] for c in inspector.get_columns(table_name)}
+         with engine.begin() as connection:
+-            if "bank_fee" not in columns:
+-                connection.execute(text("ALTER TABLE trades ADD COLUMN bank_fee NUMERIC(30, 8) DEFAULT 0"))
+-            if "network_fee" not in columns:
+-                connection.execute(text("ALTER TABLE trades ADD COLUMN network_fee NUMERIC(30, 8) DEFAULT 0"))
++            for name, ddl in fields.items():
++                if name not in columns:
++                    connection.execute(text(f"ALTER TABLE {table_name} ADD COLUMN {name} {ddl}"))
+ 
+ 
+ migrate_sqlite_schema()
+-
+ app = FastAPI(title="Simple OTC Desk")
+ app.mount("/static", StaticFiles(directory="app/static"), name="static")
+ templates = Jinja2Templates(directory="app/templates")
+-
++BISHKEK = ZoneInfo("Asia/Bishkek")
++CRYPTO_ASSETS = ["USDT", "BTC", "USDC", "TRX", "ETH", "TON"]
++FIAT_ASSETS = ["KGS", "USD", "EUR", "RUB"]
++NETWORKS = ["TRC-20", "ERC-20", "TON", "BEP-20", "Bitcoin", "Ethereum", "Tron"]
++SIDE_LABELS = {"BUY": "Покупка", "SELL": "Продажа"}
++STATUS_LABELS = {
++    "SUBMITTED": "Запрос создан", "QUOTED": "Котировка выставлена", "ACCEPTED": "Принято",
++    "REJECTED": "Отклонено", "EXPIRED": "Срок истек", "CANCELLED": "Отменено",
++    "FUNDED": "Средства получены", "AML_REVIEW": "AML-проверка", "APPROVED": "Одобрено",
++    "EXECUTED": "Исполнено", "SETTLED": "Расчеты завершены", "COMPLETED": "Завершено",
++}
+ ALLOWED_TRANSITIONS = {
+     TradeStatus.ACCEPTED: {TradeStatus.FUNDED, TradeStatus.CANCELLED},
+     TradeStatus.FUNDED: {TradeStatus.AML_REVIEW, TradeStatus.APPROVED, TradeStatus.CANCELLED},
+     TradeStatus.AML_REVIEW: {TradeStatus.APPROVED, TradeStatus.CANCELLED},
+     TradeStatus.APPROVED: {TradeStatus.EXECUTED, TradeStatus.CANCELLED},
+-    TradeStatus.EXECUTED: {TradeStatus.SETTLED},
+-    TradeStatus.SETTLED: {TradeStatus.COMPLETED},
+-    TradeStatus.COMPLETED: set(),
+-    TradeStatus.CANCELLED: set(),
++    TradeStatus.EXECUTED: {TradeStatus.SETTLED}, TradeStatus.SETTLED: {TradeStatus.COMPLETED},
++    TradeStatus.COMPLETED: set(), TradeStatus.CANCELLED: set(),
+ }
++REPORT_STATUS_COLUMNS = list(TradeStatus)
++
+ 
+-REPORT_STATUS_COLUMNS = [
+-    TradeStatus.ACCEPTED,
+-    TradeStatus.FUNDED,
+-    TradeStatus.AML_REVIEW,
+-    TradeStatus.APPROVED,
+-    TradeStatus.EXECUTED,
+-    TradeStatus.SETTLED,
+-    TradeStatus.COMPLETED,
+-    TradeStatus.CANCELLED,
+-]
++def utcnow() -> datetime:
++    return datetime.utcnow()
+ 
+ 
+ def format_datetime(value: datetime | None) -> str:
+-    return value.strftime("%d.%m.%Y %H:%M:%S") if value else "—"
++    if not value:
++        return "—"
++    aware = value.replace(tzinfo=timezone.utc) if value.tzinfo is None else value.astimezone(timezone.utc)
++    return aware.astimezone(BISHKEK).strftime("%d.%m.%Y %H:%M:%S UTC+6")
+ 
+ 
+-def status_timestamps(trade: Trade) -> dict[str, str]:
+-    timestamps: dict[str, datetime] = {}
+-    for item in sorted(trade.history, key=lambda record: (record.created_at, record.id)):
+-        timestamps.setdefault(item.new_status, item.created_at)
+-    timestamps.setdefault(TradeStatus.ACCEPTED.value, trade.created_at)
+-    return {status.value: format_datetime(timestamps.get(status.value)) for status in REPORT_STATUS_COLUMNS}
++def label(value) -> str:
++    raw = value.value if hasattr(value, "value") else str(value)
++    return STATUS_LABELS.get(raw, SIDE_LABELS.get(raw, raw))
+ 
+ 
+-templates.env.globals["format_datetime"] = format_datetime
++templates.env.globals.update(format_datetime=format_datetime, label=label)
+ 
+ 
+-def money(value: Decimal | float | None) -> Decimal:
++def money(value) -> Decimal:
+     return Decimal(str(value or 0))
+ 
+ 
++def audit(db: Session, entity_type: str, entity_id: int, action: str, actor: str, details: str = "") -> None:
++    db.add(AuditLog(entity_type=entity_type, entity_id=entity_id, action=action, actor=actor or "system", details=details))
++
++
++def expire_quotes(db: Session) -> None:
++    expired = db.query(RFQ).join(Quote).filter(RFQ.status == RFQStatus.QUOTED, Quote.expires_at < utcnow()).all()
++    for rfq in expired:
++        rfq.status = RFQStatus.EXPIRED
++        audit(db, "RFQ", rfq.id, "QUOTE_EXPIRED", "system")
++    if expired:
++        db.commit()
++
++
+ def calculate_amounts(rfq: RFQ, price: Decimal) -> tuple[Decimal, Decimal]:
+     if price <= 0:
+         raise HTTPException(400, "Цена должна быть больше нуля")
+@@ -92,269 +116,220 @@
+         fiat_amount = money(rfq.fiat_amount)
+         if fiat_amount <= 0:
+             raise HTTPException(400, "Сумма фиата должна быть больше нуля")
+-        crypto_amount = fiat_amount / price
+-    else:
+-        crypto_amount = money(rfq.amount)
+-        if crypto_amount <= 0:
+-            raise HTTPException(400, "Количество криптовалюты должно быть больше нуля")
+-        fiat_amount = crypto_amount * price
+-    return crypto_amount, fiat_amount
++        return fiat_amount / price, fiat_amount
++    crypto_amount = money(rfq.amount)
++    if crypto_amount <= 0:
++        raise HTTPException(400, "Количество криптовалюты должно быть больше нуля")
++    return crypto_amount, crypto_amount * price
++
++
++def status_timestamps(trade: Trade) -> dict[str, str]:
++    timestamps = {}
++    for item in sorted(trade.history, key=lambda x: (x.created_at, x.id)):
++        timestamps.setdefault(item.new_status, item.created_at)
++    timestamps.setdefault(TradeStatus.ACCEPTED.value, trade.created_at)
++    return {s.value: format_datetime(timestamps.get(s.value)) for s in REPORT_STATUS_COLUMNS}
++
++
++def current_status_time(trade: Trade) -> str:
++    matching = [h for h in trade.history if h.new_status == trade.status.value]
++    return format_datetime(max((h.created_at for h in matching), default=trade.created_at))
+ 
+ 
+-def trade_values(trade: Trade) -> dict[str, Decimal]:
+-    crypto_amount = money(trade.quote.rfq.amount)
+-    fiat_amount = money(trade.quote.rfq.fiat_amount)
+-    bank_fee = money(trade.bank_fee)
+-    network_fee = money(trade.network_fee)
++def trade_values(trade: Trade) -> dict:
++    rfq = trade.quote.rfq
+     return {
+-        "crypto_amount": crypto_amount,
+-        "fiat_amount": fiat_amount,
+-        "bank_fee": bank_fee,
+-        "network_fee": network_fee,
++        "crypto_amount": money(rfq.amount), "fiat_amount": money(rfq.fiat_amount),
++        "bank_fee": money(trade.bank_fee), "network_fee": money(trade.network_fee),
++        "status_times": status_timestamps(trade), "current_status_time": current_status_time(trade),
+     }
+ 
+ 
+-@app.get("/", response_class=HTMLResponse)
+-def dashboard(request: Request, db: Session = Depends(get_db)):
++def dashboard_context(db: Session, role: str):
++    expire_quotes(db)
+     rfqs = db.query(RFQ).options(joinedload(RFQ.quote)).order_by(RFQ.id.desc()).all()
+-    trades = (
+-        db.query(Trade)
+-        .options(joinedload(Trade.quote).joinedload(Quote.rfq))
+-        .order_by(Trade.id.desc())
+-        .all()
+-    )
+-    return templates.TemplateResponse(
+-        request=request,
+-        name="index.html",
+-        context={"rfqs": rfqs, "trades": trades},
+-    )
++    trades = db.query(Trade).options(joinedload(Trade.quote).joinedload(Quote.rfq)).filter(Trade.archived.is_(False)).order_by(Trade.id.desc()).all()
++    return {"rfqs": rfqs, "trades": trades, "role": role, "crypto_assets": CRYPTO_ASSETS,
++            "fiat_assets": FIAT_ASSETS, "networks": NETWORKS, "accept_key": str(uuid4())}
++
++
++@app.get("/", response_class=HTMLResponse)
++def home(request: Request, db: Session = Depends(get_db)):
++    return templates.TemplateResponse(request=request, name="index.html", context=dashboard_context(db, "dealer"))
++
++
++@app.get("/{role}", response_class=HTMLResponse)
++def role_dashboard(role: str, request: Request, db: Session = Depends(get_db)):
++    if role not in {"client", "dealer", "compliance"}:
++        raise HTTPException(404)
++    return templates.TemplateResponse(request=request, name="index.html", context=dashboard_context(db, role))
+ 
+ 
+ @app.post("/rfqs")
+-def create_rfq(
+-    client_name: str = Form(...),
+-    side: str = Form(...),
+-    base_asset: str = Form(...),
+-    quote_asset: str = Form(...),
+-    amount_type: AmountType = Form(...),
+-    crypto_amount: str = Form(""),
+-    fiat_amount: str = Form(""),
+-    comment: str = Form(""),
+-    db: Session = Depends(get_db),
+-):
++def create_rfq(client_name: str = Form(...), side: str = Form(...), base_asset: str = Form(...),
++               quote_asset: str = Form(...), network: str = Form(""), amount_type: AmountType = Form(...),
++               crypto_amount: str = Form(""), fiat_amount: str = Form(""), comment: str = Form(""),
++               db: Session = Depends(get_db)):
++    if base_asset not in CRYPTO_ASSETS or quote_asset not in FIAT_ASSETS:
++        raise HTTPException(400, "Выберите валюту из перечня")
+     try:
+         crypto = Decimal(crypto_amount) if crypto_amount.strip() else None
+         fiat = Decimal(fiat_amount) if fiat_amount.strip() else None
+     except InvalidOperation as exc:
+         raise HTTPException(400, "Количество должно быть числом") from exc
+-
+     if amount_type == AmountType.CRYPTO and (crypto is None or crypto <= 0):
+         raise HTTPException(400, "Укажите количество криптовалюты")
+     if amount_type == AmountType.FIAT and (fiat is None or fiat <= 0):
+         raise HTTPException(400, "Укажите сумму фиата")
+-
+-    rfq = RFQ(
+-        client_name=client_name.strip(),
+-        side=side,
+-        base_asset=base_asset.upper().strip(),
+-        quote_asset=quote_asset.upper().strip(),
+-        amount_type=amount_type,
+-        amount=crypto if amount_type == AmountType.CRYPTO else None,
+-        fiat_amount=fiat if amount_type == AmountType.FIAT else None,
+-        comment=comment.strip(),
+-    )
+-    db.add(rfq)
+-    db.commit()
+-    return RedirectResponse("/", status_code=303)
++    rfq = RFQ(client_name=client_name.strip(), side=side, base_asset=base_asset, quote_asset=quote_asset,
++              network=network or None, amount_type=amount_type, amount=crypto if amount_type == AmountType.CRYPTO else None,
++              fiat_amount=fiat if amount_type == AmountType.FIAT else None, comment=comment.strip())
++    db.add(rfq); db.flush(); audit(db, "RFQ", rfq.id, "CREATED", client_name, comment); db.commit()
++    return RedirectResponse("/client", 303)
+ 
+ 
+ @app.post("/rfqs/{rfq_id}/quote")
+-def create_quote(
+-    rfq_id: int,
+-    price: Decimal = Form(...),
+-    valid_minutes: int = Form(5),
+-    dealer_name: str = Form(...),
+-    db: Session = Depends(get_db),
+-):
++def create_quote(rfq_id: int, price: Decimal = Form(...), valid_minutes: int = Form(5),
++                 dealer_name: str = Form(...), db: Session = Depends(get_db)):
+     rfq = db.get(RFQ, rfq_id)
+     if not rfq or rfq.status != RFQStatus.SUBMITTED:
+         raise HTTPException(400, "RFQ недоступен для котирования")
+-    if price <= 0 or valid_minutes < 1:
+-        raise HTTPException(400, "Некорректные параметры котировки")
+-
+-    crypto_amount, fiat_amount = calculate_amounts(rfq, price)
+-    rfq.amount = crypto_amount
+-    rfq.fiat_amount = fiat_amount
+-    quote = Quote(
+-        rfq=rfq,
+-        price=price,
+-        expires_at=datetime.utcnow() + timedelta(minutes=valid_minutes),
+-        dealer_name=dealer_name.strip(),
+-    )
+-    rfq.status = RFQStatus.QUOTED
+-    db.add(quote)
+-    db.commit()
+-    return RedirectResponse("/", status_code=303)
++    crypto, fiat = calculate_amounts(rfq, price)
++    rfq.amount, rfq.fiat_amount, rfq.status = crypto, fiat, RFQStatus.QUOTED
++    quote = Quote(rfq=rfq, price=price, expires_at=utcnow() + timedelta(minutes=max(valid_minutes, 1)), dealer_name=dealer_name.strip())
++    db.add(quote); db.flush(); audit(db, "RFQ", rfq.id, "QUOTED", dealer_name, f"Цена {price}"); db.commit()
++    return RedirectResponse("/dealer", 303)
++
++
++@app.post("/quotes/{quote_id}/reject")
++def reject_quote(quote_id: int, rejected_by: str = Form(...), reason: str = Form(...), db: Session = Depends(get_db)):
++    quote = db.get(Quote, quote_id)
++    if not quote or quote.rfq.status != RFQStatus.QUOTED:
++        raise HTTPException(400, "Котировка недоступна для отклонения")
++    quote.rfq.status, quote.rfq.rejected_at = RFQStatus.REJECTED, utcnow()
++    quote.rfq.rejected_by, quote.rfq.rejection_reason = rejected_by.strip(), reason.strip()
++    audit(db, "RFQ", quote.rfq.id, "QUOTE_REJECTED", rejected_by, reason); db.commit()
++    return RedirectResponse("/client", 303)
+ 
+ 
+ @app.post("/quotes/{quote_id}/accept")
+-def accept_quote(quote_id: int, db: Session = Depends(get_db)):
+-    quote = (
+-        db.query(Quote)
+-        .options(joinedload(Quote.rfq), joinedload(Quote.trade))
+-        .filter(Quote.id == quote_id)
+-        .with_for_update()
+-        .first()
+-    )
+-    if not quote:
+-        raise HTTPException(404, "Котировка не найдена")
+-    if quote.trade or quote.rfq.status == RFQStatus.ACCEPTED:
+-        raise HTTPException(409, "Котировка уже принята")
+-    if quote.rfq.status != RFQStatus.QUOTED:
+-        raise HTTPException(400, "Котировка недоступна для принятия")
+-    if quote.expires_at < datetime.utcnow():
+-        raise HTTPException(400, "Срок котировки истек")
+-
++def accept_quote(quote_id: int, idempotency_key: str = Form(...), confirm: str = Form(...), db: Session = Depends(get_db)):
++    if confirm != "yes":
++        raise HTTPException(400, "Необходимо подтвердить условия")
++    existing = db.query(QuoteAcceptance).filter(QuoteAcceptance.idempotency_key == idempotency_key).first()
++    if existing:
++        trade = db.query(Trade).filter(Trade.quote_id == existing.quote_id).first()
++        return RedirectResponse(f"/trades/{trade.id}", 303) if trade else RedirectResponse("/client", 303)
++    quote = db.query(Quote).options(joinedload(Quote.rfq), joinedload(Quote.trade)).filter(Quote.id == quote_id).with_for_update().first()
++    if not quote: raise HTTPException(404, "Котировка не найдена")
++    if quote.trade or quote.rfq.status == RFQStatus.ACCEPTED: raise HTTPException(409, "Котировка уже принята")
++    if quote.rfq.status != RFQStatus.QUOTED: raise HTTPException(400, "Котировка недоступна")
++    if quote.expires_at < utcnow():
++        quote.rfq.status = RFQStatus.EXPIRED; db.commit(); raise HTTPException(400, "Срок котировки истек")
+     quote.rfq.status = RFQStatus.ACCEPTED
+-    trade = Trade(quote=quote, status=TradeStatus.ACCEPTED, bank_fee=0, network_fee=0)
+-    db.add(trade)
++    trade = Trade(quote=quote, status=TradeStatus.ACCEPTED)
++    db.add_all([trade, QuoteAcceptance(quote_id=quote.id, idempotency_key=idempotency_key)])
+     try:
+-        db.flush()
+-        db.add(
+-            TradeHistory(
+-                trade_id=trade.id,
+-                old_status=None,
+-                new_status=TradeStatus.ACCEPTED.value,
+-                changed_by=quote.rfq.client_name,
+-                note="Котировка принята клиентом",
+-            )
+-        )
+-        db.commit()
++        db.flush(); db.add(TradeHistory(trade_id=trade.id, old_status=None, new_status="ACCEPTED", changed_by=quote.rfq.client_name, note="Котировка принята клиентом")); audit(db, "TRADE", trade.id, "CREATED", quote.rfq.client_name); db.commit()
+     except IntegrityError as exc:
+-        db.rollback()
+-        raise HTTPException(409, "Котировка уже принята другой операцией") from exc
+-    return RedirectResponse(f"/trades/{trade.id}", status_code=303)
++        db.rollback(); raise HTTPException(409, "Котировка уже принята") from exc
++    return RedirectResponse(f"/trades/{trade.id}", 303)
+ 
+ 
+-@app.post("/trades/{trade_id}/fees")
+-def update_fees(
+-    trade_id: int,
+-    bank_fee: Decimal = Form(0),
+-    network_fee: Decimal = Form(0),
+-    db: Session = Depends(get_db),
+-):
++@app.post("/trades/{trade_id}/details")
++def update_trade_details(trade_id: int, bank_fee: Decimal = Form(0), network_fee: Decimal = Form(0),
++                         bank_fee_payer: str = Form("CLIENT"), network_fee_payer: str = Form("CLIENT"),
++                         fees_included_in_quote: bool = Form(False), bank_reference: str = Form(""),
++                         tx_hash: str = Form(""), aml_risk: str = Form(""), actor: str = Form("OTC Operator"),
++                         db: Session = Depends(get_db)):
+     trade = db.get(Trade, trade_id)
+-    if not trade:
+-        raise HTTPException(404, "Сделка не найдена")
+-    if bank_fee < 0 or network_fee < 0:
+-        raise HTTPException(400, "Комиссии не могут быть отрицательными")
+-    trade.bank_fee = bank_fee
+-    trade.network_fee = network_fee
+-    db.commit()
+-    return RedirectResponse(f"/trades/{trade_id}", status_code=303)
++    if not trade or trade.archived: raise HTTPException(404, "Сделка не найдена")
++    if bank_fee < 0 or network_fee < 0: raise HTTPException(400, "Комиссии не могут быть отрицательными")
++    trade.bank_fee, trade.network_fee = bank_fee, network_fee
++    trade.bank_fee_payer, trade.network_fee_payer = bank_fee_payer, network_fee_payer
++    trade.fees_included_in_quote, trade.bank_reference, trade.tx_hash, trade.aml_risk = fees_included_in_quote, bank_reference.strip(), tx_hash.strip(), aml_risk.strip()
++    audit(db, "TRADE", trade.id, "DETAILS_UPDATED", actor); db.commit()
++    return RedirectResponse(f"/trades/{trade_id}", 303)
+ 
+ 
+ @app.post("/trades/{trade_id}/status")
+-def change_status(
+-    trade_id: int,
+-    new_status: TradeStatus = Form(...),
+-    changed_by: str = Form(...),
+-    note: str = Form(""),
+-    db: Session = Depends(get_db),
+-):
++def change_status(trade_id: int, new_status: TradeStatus = Form(...), changed_by: str = Form(...),
++                  note: str = Form(""), db: Session = Depends(get_db)):
+     trade = db.get(Trade, trade_id)
+-    if not trade:
+-        raise HTTPException(404, "Сделка не найдена")
+-    if new_status not in ALLOWED_TRANSITIONS[trade.status]:
+-        raise HTTPException(400, f"Переход {trade.status.value} → {new_status.value} запрещен")
+-    old = trade.status
+-    trade.status = new_status
+-    db.add(
+-        TradeHistory(
+-            trade_id=trade.id,
+-            old_status=old.value,
+-            new_status=new_status.value,
+-            changed_by=changed_by.strip(),
+-            note=note.strip(),
+-        )
+-    )
+-    db.commit()
+-    return RedirectResponse(f"/trades/{trade_id}", status_code=303)
++    if not trade or trade.archived: raise HTTPException(404, "Сделка не найдена")
++    if new_status not in ALLOWED_TRANSITIONS[trade.status]: raise HTTPException(400, "Запрещенный переход статуса")
++    if new_status == TradeStatus.CANCELLED and not note.strip(): raise HTTPException(400, "Укажите причину отмены")
++    old = trade.status; trade.status = new_status
++    if new_status == TradeStatus.CANCELLED: trade.cancellation_reason = note.strip()
++    db.add(TradeHistory(trade_id=trade.id, old_status=old.value, new_status=new_status.value, changed_by=changed_by.strip(), note=note.strip()))
++    audit(db, "TRADE", trade.id, "STATUS_CHANGED", changed_by, f"{old.value}->{new_status.value}: {note}"); db.commit()
++    return RedirectResponse(f"/trades/{trade_id}", 303)
++
++
++@app.post("/trades/{trade_id}/archive")
++def archive_trade(trade_id: int, archived_by: str = Form(...), reason: str = Form(...), db: Session = Depends(get_db)):
++    trade = db.get(Trade, trade_id)
++    if not trade: raise HTTPException(404, "Сделка не найдена")
++    if not reason.strip(): raise HTTPException(400, "Укажите причину архивирования")
++    trade.archived, trade.archived_at, trade.archived_by, trade.archive_reason = True, utcnow(), archived_by.strip(), reason.strip()
++    audit(db, "TRADE", trade.id, "ARCHIVED", archived_by, reason); db.commit()
++    return RedirectResponse("/dealer", 303)
+ 
+ 
+ @app.get("/trades/{trade_id}", response_class=HTMLResponse)
+ def trade_page(trade_id: int, request: Request, db: Session = Depends(get_db)):
+-    trade = (
+-        db.query(Trade)
+-        .options(joinedload(Trade.quote).joinedload(Quote.rfq), joinedload(Trade.history))
+-        .filter(Trade.id == trade_id)
+-        .first()
+-    )
+-    if not trade:
+-        raise HTTPException(404, "Сделка не найдена")
+-    allowed = sorted(ALLOWED_TRANSITIONS[trade.status], key=lambda x: x.value)
+-    return templates.TemplateResponse(
+-        request=request,
+-        name="trade.html",
+-        context={"trade": trade, "allowed": allowed, **trade_values(trade)},
+-    )
++    trade = db.query(Trade).options(joinedload(Trade.quote).joinedload(Quote.rfq), joinedload(Trade.history)).filter(Trade.id == trade_id).first()
++    if not trade: raise HTTPException(404, "Сделка не найдена")
++    return templates.TemplateResponse(request=request, name="trade.html", context={"trade": trade, "allowed": sorted(ALLOWED_TRANSITIONS[trade.status], key=lambda x: x.value), **trade_values(trade)})
++
++
++def filtered_trades(db: Session, client: str = "", status: str = "", side: str = "", base_asset: str = "", quote_asset: str = "", include_archived: bool = False):
++    q = db.query(Trade).options(joinedload(Trade.quote).joinedload(Quote.rfq), selectinload(Trade.history))
++    if not include_archived: q = q.filter(Trade.archived.is_(False))
++    if client: q = q.join(Quote).join(RFQ).filter(RFQ.client_name.contains(client))
++    if status: q = q.filter(Trade.status == TradeStatus(status))
++    if side: q = q.join(Quote, Trade.quote_id == Quote.id).join(RFQ, Quote.rfq_id == RFQ.id).filter(RFQ.side == side)
++    if base_asset: q = q.join(Quote, Trade.quote_id == Quote.id).join(RFQ, Quote.rfq_id == RFQ.id).filter(RFQ.base_asset == base_asset)
++    if quote_asset: q = q.join(Quote, Trade.quote_id == Quote.id).join(RFQ, Quote.rfq_id == RFQ.id).filter(RFQ.quote_asset == quote_asset)
++    return q.order_by(Trade.id.desc()).all()
+ 
+ 
+ @app.get("/reports/trades", response_class=HTMLResponse)
+-def trades_report(request: Request, db: Session = Depends(get_db)):
+-    trades = (
+-        db.query(Trade)
+-        .options(joinedload(Trade.quote).joinedload(Quote.rfq), selectinload(Trade.history))
+-        .order_by(Trade.id.desc())
+-        .all()
+-    )
+-    rows = [{"trade": trade, "status_times": status_timestamps(trade), **trade_values(trade)} for trade in trades]
+-    return templates.TemplateResponse(
+-        request=request,
+-        name="report.html",
+-        context={"rows": rows, "status_columns": REPORT_STATUS_COLUMNS},
+-    )
++def trades_report(request: Request, client: str = Query(""), status: str = Query(""), side: str = Query(""), base_asset: str = Query(""), quote_asset: str = Query(""), db: Session = Depends(get_db)):
++    trades = filtered_trades(db, client, status, side, base_asset, quote_asset)
++    rows = [{"trade": t, **trade_values(t)} for t in trades]
++    return templates.TemplateResponse(request=request, name="report.html", context={"rows": rows, "status_columns": REPORT_STATUS_COLUMNS, "filters": locals(), "crypto_assets": CRYPTO_ASSETS, "fiat_assets": FIAT_ASSETS})
++
++
++def report_matrix(trades):
++    headers = ["Trade ID", "RFQ ID", "Quote ID", "Создано", "Клиент", "Операция", "Пара", "Сеть", "Количество криптовалюты", "Цена", "Сумма сделки", "Комиссия банка", "Валюта комиссии банка", "Плательщик комиссии банка", "Комиссия сети", "Валюта комиссии сети", "Плательщик комиссии сети", "Комиссии включены", "Текущий статус", "Дата текущего статуса", "Дилер", "AML-риск", "Банковский референс", "TX hash", "Причина отмены", "Последнее изменение"] + [f"Статус {label(s)}" for s in REPORT_STATUS_COLUMNS]
++    rows = []
++    for t in trades:
++        r, v = t.quote.rfq, trade_values(t)
++        rows.append([t.id, r.id, t.quote.id, format_datetime(t.created_at), r.client_name, label(r.side), f"{r.base_asset}/{r.quote_asset}", r.network or "—", v["crypto_amount"], t.quote.price, v["fiat_amount"], v["bank_fee"], r.quote_asset, t.bank_fee_payer, v["network_fee"], r.base_asset, t.network_fee_payer, "Да" if t.fees_included_in_quote else "Нет", label(t.status), v["current_status_time"], t.quote.dealer_name, t.aml_risk or "—", t.bank_reference or "—", t.tx_hash or "—", t.cancellation_reason or "—", format_datetime(t.updated_at)] + [v["status_times"][s.value] for s in REPORT_STATUS_COLUMNS])
++    return headers, rows
+ 
+ 
+ @app.get("/reports/trades.csv")
+ def trades_report_csv(db: Session = Depends(get_db)):
+-    trades = (
+-        db.query(Trade)
+-        .options(joinedload(Trade.quote).joinedload(Quote.rfq), selectinload(Trade.history))
+-        .order_by(Trade.id.desc())
+-        .all()
+-    )
+-    buffer = StringIO()
+-    writer = csv.writer(buffer, delimiter=";")
+-    writer.writerow(["ID", "Дата создания", "Клиент", "Операция", "Пара", "Криптовалюта", "Цена", "Сумма сделки", "Фиатная валюта", "Комиссия банка", "Валюта комиссии банка", "Комиссия сети", "Валюта комиссии сети", "Текущий статус"] + [f"Дата и время: {status.value}" for status in REPORT_STATUS_COLUMNS])
+-    for trade in trades:
+-        values = trade_values(trade)
+-        rfq = trade.quote.rfq
+-        times = status_timestamps(trade)
+-        writer.writerow([trade.id, format_datetime(trade.created_at), rfq.client_name, rfq.side, f"{rfq.base_asset}/{rfq.quote_asset}", values["crypto_amount"], trade.quote.price, values["fiat_amount"], rfq.quote_asset, values["bank_fee"], rfq.quote_asset, values["network_fee"], rfq.base_asset, trade.status.value] + [times[status.value] for status in REPORT_STATUS_COLUMNS])
+-    data = "\ufeff" + buffer.getvalue()
+-    return StreamingResponse(iter([data]), media_type="text/csv; charset=utf-8", headers={"Content-Disposition": "attachment; filename=otc_trades_report.csv"})
++    headers, rows = report_matrix(filtered_trades(db)); buffer = StringIO(); writer = csv.writer(buffer, delimiter=";"); writer.writerow(headers); writer.writerows(rows)
++    return StreamingResponse(iter(["\ufeff" + buffer.getvalue()]), media_type="text/csv; charset=utf-8", headers={"Content-Disposition": "attachment; filename=otc_trades_report.csv"})
++
++
++@app.get("/reports/trades.xlsx")
++def trades_report_xlsx(db: Session = Depends(get_db)):
++    headers, rows = report_matrix(filtered_trades(db)); wb = Workbook(); ws = wb.active; ws.title = "OTC сделки"; ws.append(headers)
++    for row in rows: ws.append(row)
++    ws.freeze_panes = "A2"; ws.auto_filter.ref = ws.dimensions
++    for col in ws.columns: ws.column_dimensions[col[0].column_letter].width = min(max(len(str(c.value or "")) for c in col) + 2, 45)
++    output = BytesIO(); wb.save(output); output.seek(0)
++    return StreamingResponse(output, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers={"Content-Disposition": "attachment; filename=otc_trades_report.xlsx"})
+ 
+ 
+ @app.get("/api/trades")
+ def api_trades(db: Session = Depends(get_db)):
+-    trades = db.query(Trade).options(joinedload(Trade.quote).joinedload(Quote.rfq)).all()
+     result = []
+-    for trade in trades:
+-        values = trade_values(trade)
+-        rfq = trade.quote.rfq
+-        result.append({
+-            "id": trade.id,
+-            "status": trade.status.value,
+-            "client": rfq.client_name,
+-            "side": rfq.side,
+-            "pair": f"{rfq.base_asset}/{rfq.quote_asset}",
+-            "crypto_amount": float(values["crypto_amount"]),
+-            "price": float(trade.quote.price),
+-            "fiat_amount": float(values["fiat_amount"]),
+-            "bank_fee": float(values["bank_fee"]),
+-            "bank_fee_currency": rfq.quote_asset,
+-            "network_fee": float(values["network_fee"]),
+-            "network_fee_currency": rfq.base_asset,
+-        })
++    for t in filtered_trades(db):
++        r, v = t.quote.rfq, trade_values(t)
++        result.append({"id": t.id, "status": t.status.value, "status_label": label(t.status), "client": r.client_name, "side": r.side, "pair": f"{r.base_asset}/{r.quote_asset}", "network": r.network, "crypto_amount": float(v["crypto_amount"]), "price": float(t.quote.price), "fiat_amount": float(v["fiat_amount"]), "bank_fee": float(v["bank_fee"]), "bank_fee_currency": r.quote_asset, "network_fee": float(v["network_fee"]), "network_fee_currency": r.base_asset})
+     return result
+diff -ruN otc-original-v5/simple-otc-desk-v5/app/models.py otc-full-patch/simple-otc-desk-v5/app/models.py
+--- otc-original-v5/simple-otc-desk-v5/app/models.py	2026-07-30 07:32:37.000000000 +0000
++++ otc-full-patch/simple-otc-desk-v5/app/models.py	2026-08-03 09:14:34.707773597 +0000
+@@ -1,7 +1,7 @@
+ import enum
+ from datetime import datetime
+ 
+-from sqlalchemy import DateTime, Enum, ForeignKey, Integer, Numeric, String, Text
++from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, Numeric, String, Text, UniqueConstraint
+ from sqlalchemy.orm import Mapped, mapped_column, relationship
+ 
+ from .database import Base
+@@ -12,6 +12,7 @@
+     QUOTED = "QUOTED"
+     ACCEPTED = "ACCEPTED"
+     REJECTED = "REJECTED"
++    EXPIRED = "EXPIRED"
+     CANCELLED = "CANCELLED"
+ 
+ 
+@@ -33,54 +34,62 @@
+ 
+ class RFQ(Base):
+     __tablename__ = "rfqs"
+-
+     id: Mapped[int] = mapped_column(Integer, primary_key=True)
+     client_name: Mapped[str] = mapped_column(String(120))
+     side: Mapped[str] = mapped_column(String(10))
+     base_asset: Mapped[str] = mapped_column(String(16))
+     quote_asset: Mapped[str] = mapped_column(String(16))
++    network: Mapped[str | None] = mapped_column(String(40), nullable=True)
+     amount: Mapped[float | None] = mapped_column(Numeric(30, 8), nullable=True)
+     fiat_amount: Mapped[float | None] = mapped_column(Numeric(30, 8), nullable=True)
+     amount_type: Mapped[AmountType] = mapped_column(Enum(AmountType), default=AmountType.CRYPTO)
+     comment: Mapped[str | None] = mapped_column(Text, nullable=True)
+     status: Mapped[RFQStatus] = mapped_column(Enum(RFQStatus), default=RFQStatus.SUBMITTED)
++    rejected_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
++    rejected_by: Mapped[str | None] = mapped_column(String(120), nullable=True)
++    rejection_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+-
+     quote = relationship("Quote", back_populates="rfq", uselist=False, cascade="all, delete-orphan")
+ 
+ 
+ class Quote(Base):
+     __tablename__ = "quotes"
+-
+     id: Mapped[int] = mapped_column(Integer, primary_key=True)
+     rfq_id: Mapped[int] = mapped_column(ForeignKey("rfqs.id"), unique=True)
+     price: Mapped[float] = mapped_column(Numeric(30, 8))
+     expires_at: Mapped[datetime] = mapped_column(DateTime)
+     dealer_name: Mapped[str] = mapped_column(String(120))
+     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+-
+     rfq = relationship("RFQ", back_populates="quote")
+     trade = relationship("Trade", back_populates="quote", uselist=False)
+ 
+ 
+ class Trade(Base):
+     __tablename__ = "trades"
+-
+     id: Mapped[int] = mapped_column(Integer, primary_key=True)
+     quote_id: Mapped[int] = mapped_column(ForeignKey("quotes.id"), unique=True)
+     status: Mapped[TradeStatus] = mapped_column(Enum(TradeStatus), default=TradeStatus.ACCEPTED)
+     bank_fee: Mapped[float] = mapped_column(Numeric(30, 8), default=0)
++    bank_fee_payer: Mapped[str] = mapped_column(String(20), default="CLIENT")
+     network_fee: Mapped[float] = mapped_column(Numeric(30, 8), default=0)
++    network_fee_payer: Mapped[str] = mapped_column(String(20), default="CLIENT")
++    fees_included_in_quote: Mapped[bool] = mapped_column(Boolean, default=False)
++    bank_reference: Mapped[str | None] = mapped_column(String(120), nullable=True)
++    tx_hash: Mapped[str | None] = mapped_column(String(180), nullable=True)
++    aml_risk: Mapped[str | None] = mapped_column(String(20), nullable=True)
++    cancellation_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
++    archived: Mapped[bool] = mapped_column(Boolean, default=False)
++    archived_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
++    archived_by: Mapped[str | None] = mapped_column(String(120), nullable=True)
++    archive_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+-
+     quote = relationship("Quote", back_populates="trade")
+     history = relationship("TradeHistory", back_populates="trade", cascade="all, delete-orphan")
+ 
+ 
+ class TradeHistory(Base):
+     __tablename__ = "trade_history"
+-
+     id: Mapped[int] = mapped_column(Integer, primary_key=True)
+     trade_id: Mapped[int] = mapped_column(ForeignKey("trades.id"))
+     old_status: Mapped[str | None] = mapped_column(String(32), nullable=True)
+@@ -88,5 +97,24 @@
+     changed_by: Mapped[str] = mapped_column(String(120))
+     note: Mapped[str | None] = mapped_column(Text, nullable=True)
+     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+-
+     trade = relationship("Trade", back_populates="history")
++
++
++class QuoteAcceptance(Base):
++    __tablename__ = "quote_acceptances"
++    __table_args__ = (UniqueConstraint("idempotency_key"),)
++    id: Mapped[int] = mapped_column(Integer, primary_key=True)
++    quote_id: Mapped[int] = mapped_column(ForeignKey("quotes.id"), unique=True)
++    idempotency_key: Mapped[str] = mapped_column(String(80))
++    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
++
++
++class AuditLog(Base):
++    __tablename__ = "audit_log"
++    id: Mapped[int] = mapped_column(Integer, primary_key=True)
++    entity_type: Mapped[str] = mapped_column(String(40))
++    entity_id: Mapped[int] = mapped_column(Integer)
++    action: Mapped[str] = mapped_column(String(80))
++    actor: Mapped[str] = mapped_column(String(120))
++    details: Mapped[str | None] = mapped_column(Text, nullable=True)
++    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+diff -ruN otc-original-v5/simple-otc-desk-v5/app/static/style.css otc-full-patch/simple-otc-desk-v5/app/static/style.css
+--- otc-original-v5/simple-otc-desk-v5/app/static/style.css	2026-07-30 07:32:37.000000000 +0000
++++ otc-full-patch/simple-otc-desk-v5/app/static/style.css	2026-08-03 09:15:08.423773218 +0000
+@@ -1 +1,2 @@
+ :root{font-family:Inter,system-ui,sans-serif;background:#f4f6f8;color:#17202a}body{margin:0}header{padding:24px 5%;background:#101828;color:white;display:flex;justify-content:space-between;align-items:center;gap:20px}header h1{margin:0 0 6px}header p{margin:0;color:#cbd5e1}header a{color:white}.header-link{background:#155eef;padding:10px 14px;border-radius:8px;text-decoration:none}main{max-width:1400px;margin:24px auto;padding:0 16px}.card{background:white;border-radius:14px;padding:20px;margin-bottom:20px;box-shadow:0 3px 16px #00000012}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.inline{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.quote{margin:8px 0;line-height:1.5}input,select,button{padding:10px;border:1px solid #ccd2da;border-radius:8px}button{background:#155eef;color:white;border:0;cursor:pointer}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:10px;border-bottom:1px solid #e5e7eb;white-space:nowrap}.table{overflow:auto}.status{font-size:12px;font-weight:700;background:#eef4ff;padding:5px 8px;border-radius:999px}.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.facts div{background:#f8fafc;padding:12px;border-radius:10px}.facts b{display:block;margin-top:4px}.section-title{display:flex;justify-content:space-between;align-items:center}.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.summary{background:#f8fafc;padding:16px;border-radius:10px}.summary h3{margin-top:0}
++nav{display:flex;gap:10px;align-items:center;flex-wrap:wrap}nav a{color:white;text-decoration:none}.danger{background:#b42318}.danger-zone{border:1px solid #fda29b}.alert{background:#fff1f0;border:1px solid #fda29b;padding:14px;border-radius:10px;margin-bottom:16px}.confirm-box{padding:12px;background:#f8fafc;border-radius:10px;margin-top:8px}.confirm-box form{margin-top:10px}.timeline{display:grid;gap:0}.timeline-item{display:grid;grid-template-columns:28px 1fr;gap:10px;padding:10px 0;border-bottom:1px solid #e5e7eb}.timeline-item span{width:24px;height:24px;border-radius:50%;background:#dcfae6;display:grid;place-items:center}.timeline-item small{display:block;color:#667085;margin-top:3px}.timeline-item p{margin:4px 0 0}label{display:grid;gap:5px;font-size:13px}small{color:#667085}
+diff -ruN otc-original-v5/simple-otc-desk-v5/app/templates/index.html otc-full-patch/simple-otc-desk-v5/app/templates/index.html
+--- otc-original-v5/simple-otc-desk-v5/app/templates/index.html	2026-07-30 07:49:19.000000000 +0000
++++ otc-full-patch/simple-otc-desk-v5/app/templates/index.html	2026-08-03 09:15:08.419773218 +0000
+@@ -1,16 +1,10 @@
+-<!doctype html>
+-<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OTC Desk</title><link rel="stylesheet" href="/static/style.css"></head>
+-<body><header><div><h1>Простой OTC Desk</h1><p>Учет RFQ, котировок и сделок</p></div><a class="header-link" href="/reports/trades">Сводный отчет</a></header><main>
+-<section class="card"><h2>Новый запрос котировки</h2><form method="post" action="/rfqs" class="grid" id="rfq-form">
+-<input name="client_name" placeholder="Клиент" required><select name="side"><option value="BUY">Купить</option><option value="SELL">Продать</option></select>
+-<input name="base_asset" value="BTC" placeholder="Криптовалюта (BTC)" required><input name="quote_asset" placeholder="Фиатная валюта (USD, EUR, KGS, RUB)" required>
+-<select name="amount_type" id="amount-type"><option value="CRYPTO">Задать количество криптовалюты</option><option value="FIAT">Задать сумму фиата</option></select>
+-<input name="crypto_amount" id="crypto-amount" type="number" step="0.00000001" min="0" placeholder="Количество криптовалюты" required>
+-<input name="fiat_amount" id="fiat-amount" type="number" step="0.01" min="0" placeholder="Сумма фиата" disabled>
+-<input name="comment" placeholder="Комментарий"><button>Создать RFQ</button></form></section>
+-<section class="card"><h2>Запросы котировок</h2><div class="table"><table><tr><th>ID</th><th>Клиент</th><th>Операция</th><th>Пара</th><th>Вводная</th><th>Расчет</th><th>Статус / действие</th></tr>
+-{% for r in rfqs %}<tr><td>{{r.id}}</td><td>{{r.client_name}}</td><td>{{r.side}}</td><td>{{r.base_asset}}/{{r.quote_asset}}</td><td>{% if r.amount_type.value == 'FIAT' %}{{r.fiat_amount}} {{r.quote_asset}}{% else %}{{r.amount}} {{r.base_asset}}{% endif %}</td><td>{% if r.quote %}{{r.amount}} {{r.base_asset}} = {{r.fiat_amount}} {{r.quote_asset}}{% else %}—{% endif %}</td><td><span class="status">{{r.status.value}}</span>
+-{% if r.status.value == 'SUBMITTED' %}<form class="inline" method="post" action="/rfqs/{{r.id}}/quote"><input name="price" type="number" step="0.00000001" placeholder="Цена" required><input name="valid_minutes" type="number" value="5" min="1" title="Минут"><input name="dealer_name" value="OTC Dealer" required><button>Котировать</button></form>{% endif %}
+-{% if r.status.value == 'QUOTED' %}<div class="quote">Цена: {{r.quote.price}} {{r.quote_asset}}<br>{{r.amount}} {{r.base_asset}} = {{r.fiat_amount}} {{r.quote_asset}}</div><form method="post" action="/quotes/{{r.quote.id}}/accept"><button>Принять котировку</button></form>{% endif %}</td></tr>{% endfor %}</table></div></section>
+-<section class="card"><div class="section-title"><h2>Сделки</h2><a href="/reports/trades">Открыть отчет →</a></div><div class="table"><table><tr><th>ID</th><th>Клиент</th><th>Пара</th><th>Криптовалюта</th><th>Сумма сделки</th><th>Цена</th><th>Статус</th></tr>{% for t in trades %}<tr><td><a href="/trades/{{t.id}}">#{{t.id}}</a></td><td>{{t.quote.rfq.client_name}}</td><td>{{t.quote.rfq.base_asset}}/{{t.quote.rfq.quote_asset}}</td><td>{{t.quote.rfq.amount}}</td><td>{{t.quote.rfq.fiat_amount}} {{t.quote.rfq.quote_asset}}</td><td>{{t.quote.price}}</td><td><span class="status">{{t.status.value}}</span></td></tr>{% endfor %}</table></div></section>
+-</main><script>const type=document.getElementById('amount-type'),crypto=document.getElementById('crypto-amount'),fiat=document.getElementById('fiat-amount');function toggle(){const isFiat=type.value==='FIAT';crypto.disabled=isFiat;crypto.required=!isFiat;fiat.disabled=!isFiat;fiat.required=isFiat;}type.addEventListener('change',toggle);toggle();</script></body></html>
++<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OTC Desk</title><link rel="stylesheet" href="/static/style.css"></head><body>
++<header><div><h1>OTC Desk</h1><p>Кабинет: {{ {'client':'клиент','dealer':'OTC-дилер','compliance':'комплаенс'}[role] }}</p></div><nav><a href="/client">Клиент</a><a href="/dealer">Дилер</a><a href="/compliance">Комплаенс</a><a class="header-link" href="/reports/trades">Отчет</a></nav></header><main>
++{% if role == 'client' %}<section class="card"><h2>Новый запрос котировки</h2><form method="post" action="/rfqs" class="grid" id="rfq-form"><input name="client_name" placeholder="Клиент" required><select name="side"><option value="BUY">Купить</option><option value="SELL">Продать</option></select><select name="base_asset" required>{% for a in crypto_assets %}<option>{{a}}</option>{% endfor %}</select><select name="quote_asset" required>{% for a in fiat_assets %}<option>{{a}}</option>{% endfor %}</select><select name="network">{% for n in networks %}<option>{{n}}</option>{% endfor %}</select><select name="amount_type" id="amount-type"><option value="CRYPTO">Количество криптовалюты</option><option value="FIAT">Сумма фиата</option></select><input name="crypto_amount" id="crypto-amount" type="number" step="0.00000001" min="0" placeholder="Количество криптовалюты" required><input name="fiat_amount" id="fiat-amount" type="number" step="0.01" min="0" placeholder="Сумма фиата" disabled><input name="comment" placeholder="Комментарий"><button>Создать RFQ</button></form></section>{% endif %}
++<section class="card"><h2>Запросы котировок</h2><div class="table"><table><tr><th>ID</th><th>Клиент</th><th>Операция</th><th>Пара</th><th>Сеть</th><th>Вводная</th><th>Статус / действие</th></tr>{% for r in rfqs %}<tr><td>{{r.id}}</td><td>{{r.client_name}}</td><td>{{label(r.side)}}</td><td>{{r.base_asset}}/{{r.quote_asset}}</td><td>{{r.network or '—'}}</td><td>{% if r.amount_type.value == 'FIAT' %}{{r.fiat_amount}} {{r.quote_asset}}{% else %}{{r.amount}} {{r.base_asset}}{% endif %}</td><td><span class="status">{{label(r.status)}}</span>
++{% if role == 'dealer' and r.status.value == 'SUBMITTED' %}<form class="inline" method="post" action="/rfqs/{{r.id}}/quote"><input name="price" type="number" step="0.00000001" placeholder="Цена {{r.quote_asset}} за 1 {{r.base_asset}}" required><input name="valid_minutes" type="number" value="5" min="1"><input name="dealer_name" value="OTC Dealer" required><button>Выставить котировку</button></form>{% endif %}
++{% if r.quote %}<div class="quote">{{r.quote.price}} {{r.quote_asset}} за 1 {{r.base_asset}}<br>{{r.amount}} {{r.base_asset}} = {{r.fiat_amount}} {{r.quote_asset}}<br>Действует до {{format_datetime(r.quote.expires_at)}} <span class="timer" data-expiry="{{r.quote.expires_at.isoformat()}}Z"></span></div>{% endif %}
++{% if role == 'client' and r.status.value == 'QUOTED' %}<details><summary>Принять или отклонить</summary><div class="confirm-box"><b>Вы {{'покупаете' if r.side == 'BUY' else 'продаете'}} {{r.amount}} {{r.base_asset}}</b><br>Сумма: {{r.fiat_amount}} {{r.quote_asset}}<br>Цена: {{r.quote.price}} {{r.quote_asset}} за 1 {{r.base_asset}}<form method="post" action="/quotes/{{r.quote.id}}/accept"><input type="hidden" name="idempotency_key" value="{{accept_key}}"><label><input type="checkbox" name="confirm" value="yes" required> Подтверждаю условия</label><button>Принять котировку</button></form><form method="post" action="/quotes/{{r.quote.id}}/reject" class="inline"><input name="rejected_by" value="{{r.client_name}}" required><input name="reason" placeholder="Причина отклонения" required><button class="danger">Отклонить</button></form></div></details>{% endif %}
++{% if r.status.value == 'REJECTED' %}<small>{{r.rejection_reason}}</small>{% endif %}</td></tr>{% endfor %}</table></div></section>
++<section class="card"><div class="section-title"><h2>Сделки</h2><a href="/reports/trades">Открыть отчет →</a></div><div class="table"><table><tr><th>ID</th><th>Клиент</th><th>Пара</th><th>Количество</th><th>Сумма</th><th>Цена</th><th>Статус</th></tr>{% for t in trades %}<tr><td><a href="/trades/{{t.id}}">#{{t.id}}</a></td><td>{{t.quote.rfq.client_name}}</td><td>{{t.quote.rfq.base_asset}}/{{t.quote.rfq.quote_asset}}</td><td>{{t.quote.rfq.amount}} {{t.quote.rfq.base_asset}}</td><td>{{t.quote.rfq.fiat_amount}} {{t.quote.rfq.quote_asset}}</td><td>{{t.quote.price}} {{t.quote.rfq.quote_asset}} за 1 {{t.quote.rfq.base_asset}}</td><td><span class="status">{{label(t.status)}}</span></td></tr>{% endfor %}</table></div></section></main>
++<script>const type=document.getElementById('amount-type'),crypto=document.getElementById('crypto-amount'),fiat=document.getElementById('fiat-amount');if(type){function toggle(){const f=type.value==='FIAT';crypto.disabled=f;crypto.required=!f;fiat.disabled=!f;fiat.required=f}type.addEventListener('change',toggle);toggle()}document.querySelectorAll('.timer').forEach(el=>{const tick=()=>{const d=new Date(el.dataset.expiry)-new Date();el.textContent=d<=0?'(истекла)':`(осталось ${String(Math.floor(d/60000)).padStart(2,'0')}:${String(Math.floor(d/1000)%60).padStart(2,'0')})`};tick();setInterval(tick,1000)});</script></body></html>
+diff -ruN otc-original-v5/simple-otc-desk-v5/app/templates/report.html otc-full-patch/simple-otc-desk-v5/app/templates/report.html
+--- otc-original-v5/simple-otc-desk-v5/app/templates/report.html	2026-07-30 08:01:36.000000000 +0000
++++ otc-full-patch/simple-otc-desk-v5/app/templates/report.html	2026-08-03 09:15:08.423773218 +0000
+@@ -1,3 +1,3 @@
+-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Сводный отчет по сделкам</title><link rel="stylesheet" href="/static/style.css"></head><body><header><div><h1>Сводный отчет по сделкам</h1><a href="/">← На главную</a></div><a class="header-link" href="/reports/trades.csv">Скачать CSV</a></header><main>
+-<section class="card"><h2>Все сделки</h2><div class="table"><table><tr><th>ID</th><th>Дата создания</th><th>Клиент</th><th>Операция</th><th>Пара</th><th>Криптовалюта</th><th>Цена</th><th>Сумма сделки</th><th>Комиссия банка</th><th>Комиссия сети</th><th>Текущий статус</th>{% for status in status_columns %}<th>{{status.value}} — дата и время</th>{% endfor %}</tr>{% for row in rows %}<tr><td><a href="/trades/{{row.trade.id}}">#{{row.trade.id}}</a></td><td>{{format_datetime(row.trade.created_at)}}</td><td>{{row.trade.quote.rfq.client_name}}</td><td>{{row.trade.quote.rfq.side}}</td><td>{{row.trade.quote.rfq.base_asset}}/{{row.trade.quote.rfq.quote_asset}}</td><td>{{row.crypto_amount}} {{row.trade.quote.rfq.base_asset}}</td><td>{{row.trade.quote.price}} {{row.trade.quote.rfq.quote_asset}}</td><td>{{row.fiat_amount}} {{row.trade.quote.rfq.quote_asset}}</td><td>{{row.bank_fee}} {{row.trade.quote.rfq.quote_asset}}</td><td>{{row.network_fee}} {{row.trade.quote.rfq.base_asset}}</td><td><span class="status">{{row.trade.status.value}}</span></td>{% for status in status_columns %}<td>{{row.status_times[status.value]}}</td>{% endfor %}</tr>{% endfor %}</table></div></section>
+-</main></body></html>
++<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Сводный отчет</title><link rel="stylesheet" href="/static/style.css"></head><body><header><div><h1>Сводный отчет по сделкам</h1><a href="/dealer">← На главную</a></div><nav><a class="header-link" href="/reports/trades.csv">CSV</a><a class="header-link" href="/reports/trades.xlsx">XLSX</a></nav></header><main>
++<section class="card"><h2>Фильтры</h2><form class="grid" method="get"><input name="client" placeholder="Клиент" value="{{filters.client}}"><select name="status"><option value="">Все статусы</option>{% for s in status_columns %}<option value="{{s.value}}" {% if filters.status==s.value %}selected{% endif %}>{{label(s)}}</option>{% endfor %}</select><select name="side"><option value="">Все операции</option><option value="BUY" {% if filters.side=='BUY' %}selected{% endif %}>Покупка</option><option value="SELL" {% if filters.side=='SELL' %}selected{% endif %}>Продажа</option></select><select name="base_asset"><option value="">Все криптовалюты</option>{% for a in crypto_assets %}<option {% if filters.base_asset==a %}selected{% endif %}>{{a}}</option>{% endfor %}</select><select name="quote_asset"><option value="">Все фиатные валюты</option>{% for a in fiat_assets %}<option {% if filters.quote_asset==a %}selected{% endif %}>{{a}}</option>{% endfor %}</select><button>Применить</button></form></section>
++<section class="card"><h2>Сделки</h2><div class="table"><table><tr><th>Trade/RFQ/Quote</th><th>Создано</th><th>Клиент</th><th>Операция</th><th>Пара/сеть</th><th>Количество</th><th>Цена</th><th>Сумма сделки</th><th>Комиссия банка</th><th>Комиссия сети</th><th>Текущий статус</th><th>Дата статуса</th><th>Дилер</th><th>AML</th><th>Банк. референс</th><th>TX hash</th><th>Причина отмены</th>{% for status in status_columns %}<th>{{label(status)}} — дата и время</th>{% endfor %}</tr>{% for row in rows %}<tr><td><a href="/trades/{{row.trade.id}}">T#{{row.trade.id}}</a> / R#{{row.trade.quote.rfq.id}} / Q#{{row.trade.quote.id}}</td><td>{{format_datetime(row.trade.created_at)}}</td><td>{{row.trade.quote.rfq.client_name}}</td><td>{{label(row.trade.quote.rfq.side)}}</td><td>{{row.trade.quote.rfq.base_asset}}/{{row.trade.quote.rfq.quote_asset}}<br><small>{{row.trade.quote.rfq.network or '—'}}</small></td><td>{{row.crypto_amount}} {{row.trade.quote.rfq.base_asset}}</td><td>{{row.trade.quote.price}} {{row.trade.quote.rfq.quote_asset}} за 1 {{row.trade.quote.rfq.base_asset}}</td><td>{{row.fiat_amount}} {{row.trade.quote.rfq.quote_asset}}</td><td>{{row.bank_fee}} {{row.trade.quote.rfq.quote_asset}}<br><small>{{row.trade.bank_fee_payer}}</small></td><td>{{row.network_fee}} {{row.trade.quote.rfq.base_asset}}<br><small>{{row.trade.network_fee_payer}}</small></td><td><span class="status">{{label(row.trade.status)}}</span></td><td>{{row.current_status_time}}</td><td>{{row.trade.quote.dealer_name}}</td><td>{{row.trade.aml_risk or '—'}}</td><td>{{row.trade.bank_reference or '—'}}</td><td>{{row.trade.tx_hash or '—'}}</td><td>{{row.trade.cancellation_reason or '—'}}</td>{% for status in status_columns %}<td>{{row.status_times[status.value]}}</td>{% endfor %}</tr>{% endfor %}</table></div></section></main></body></html>
+diff -ruN otc-original-v5/simple-otc-desk-v5/app/templates/trade.html otc-full-patch/simple-otc-desk-v5/app/templates/trade.html
+--- otc-original-v5/simple-otc-desk-v5/app/templates/trade.html	2026-07-30 08:01:37.000000000 +0000
++++ otc-full-patch/simple-otc-desk-v5/app/templates/trade.html	2026-08-03 09:15:08.423773218 +0000
+@@ -1,6 +1,7 @@
+-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Сделка #{{trade.id}}</title><link rel="stylesheet" href="/static/style.css"></head><body><header><div><h1>Сделка #{{trade.id}}</h1><a href="/">← На главную</a></div><a class="header-link" href="/reports/trades">Сводный отчет</a></header><main>
+-<section class="card"><h2>Параметры</h2><div class="facts"><div>Клиент<b>{{trade.quote.rfq.client_name}}</b></div><div>Операция<b>{{trade.quote.rfq.side}}</b></div><div>Пара<b>{{trade.quote.rfq.base_asset}}/{{trade.quote.rfq.quote_asset}}</b></div><div>Количество криптовалюты<b>{{crypto_amount}} {{trade.quote.rfq.base_asset}}</b></div><div>Цена<b>{{trade.quote.price}} {{trade.quote.rfq.quote_asset}}</b></div><div>Сумма сделки<b>{{fiat_amount}} {{trade.quote.rfq.quote_asset}}</b></div><div>Комиссия банка<b>{{bank_fee}} {{trade.quote.rfq.quote_asset}}</b></div><div>Комиссия сети<b>{{network_fee}} {{trade.quote.rfq.base_asset}}</b></div><div>Статус<b>{{trade.status.value}}</b></div></div></section>
+-<section class="card"><h2>Расходы по сделке</h2><form method="post" action="/trades/{{trade.id}}/fees" class="grid"><label>Комиссия банка, {{trade.quote.rfq.quote_asset}}<input name="bank_fee" type="number" step="0.00000001" min="0" value="{{bank_fee}}" placeholder="Комиссия банка"></label><label>Комиссия сети, {{trade.quote.rfq.base_asset}}<input name="network_fee" type="number" step="0.00000001" min="0" value="{{network_fee}}" placeholder="Комиссия сети"></label><button>Сохранить расходы</button></form></section>
+-<section class="card"><h2>Изменить статус</h2>{% if allowed %}<form method="post" action="/trades/{{trade.id}}/status" class="grid"><select name="new_status">{% for s in allowed %}<option value="{{s.value}}">{{s.value}}</option>{% endfor %}</select><input name="changed_by" value="OTC Operator" required><input name="note" placeholder="Комментарий"><button>Применить</button></form>{% else %}<p>Сделка находится в финальном статусе.</p>{% endif %}</section>
+-<section class="card"><h2>История</h2><div class="table"><table><tr><th>Дата</th><th>Переход</th><th>Кто</th><th>Комментарий</th></tr>{% for h in trade.history|sort(attribute='id', reverse=true) %}<tr><td>{{format_datetime(h.created_at)}}</td><td>{{h.old_status or '—'}} → {{h.new_status}}</td><td>{{h.changed_by}}</td><td>{{h.note or ''}}</td></tr>{% endfor %}</table></div></section>
+-</main></body></html>
++<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Сделка #{{trade.id}}</title><link rel="stylesheet" href="/static/style.css"></head><body><header><div><h1>Сделка #{{trade.id}}</h1><a href="/dealer">← К сделкам</a></div><a class="header-link" href="/reports/trades">Отчет</a></header><main>
++{% if trade.archived %}<div class="alert">Сделка архивирована: {{trade.archive_reason}} ({{trade.archived_by}}, {{format_datetime(trade.archived_at)}})</div>{% endif %}
++<section class="card"><h2>Неизменяемые условия сделки</h2><div class="facts"><div>Клиент<b>{{trade.quote.rfq.client_name}}</b></div><div>Операция<b>{{label(trade.quote.rfq.side)}}</b></div><div>Пара<b>{{trade.quote.rfq.base_asset}}/{{trade.quote.rfq.quote_asset}}</b></div><div>Сеть<b>{{trade.quote.rfq.network or '—'}}</b></div><div>Количество<b>{{crypto_amount}} {{trade.quote.rfq.base_asset}}</b></div><div>Цена<b>{{trade.quote.price}} {{trade.quote.rfq.quote_asset}} за 1 {{trade.quote.rfq.base_asset}}</b></div><div>Сумма сделки<b>{{fiat_amount}} {{trade.quote.rfq.quote_asset}}</b></div><div>Дилер<b>{{trade.quote.dealer_name}}</b></div><div>Статус<b>{{label(trade.status)}}</b></div><div>Дата статуса<b>{{current_status_time}}</b></div></div></section>
++{% if not trade.archived %}<section class="card"><h2>Расходы и расчетные реквизиты</h2><form method="post" action="/trades/{{trade.id}}/details" class="grid"><label>Комиссия банка, {{trade.quote.rfq.quote_asset}}<input name="bank_fee" type="number" step="0.00000001" min="0" value="{{bank_fee}}"></label><label>Плательщик<select name="bank_fee_payer"><option value="CLIENT" {% if trade.bank_fee_payer=='CLIENT' %}selected{% endif %}>Клиент</option><option value="EXCHANGE" {% if trade.bank_fee_payer=='EXCHANGE' %}selected{% endif %}>Биржа</option></select></label><label>Комиссия сети, {{trade.quote.rfq.base_asset}}<input name="network_fee" type="number" step="0.00000001" min="0" value="{{network_fee}}"></label><label>Плательщик<select name="network_fee_payer"><option value="CLIENT" {% if trade.network_fee_payer=='CLIENT' %}selected{% endif %}>Клиент</option><option value="EXCHANGE" {% if trade.network_fee_payer=='EXCHANGE' %}selected{% endif %}>Биржа</option></select></label><label>Банковский референс<input name="bank_reference" value="{{trade.bank_reference or ''}}"></label><label>TX hash<input name="tx_hash" value="{{trade.tx_hash or ''}}"></label><label>AML-риск<select name="aml_risk"><option value="">Не указан</option>{% for x in ['LOW','MEDIUM','HIGH'] %}<option {% if trade.aml_risk==x %}selected{% endif %}>{{x}}</option>{% endfor %}</select></label><label><input type="checkbox" name="fees_included_in_quote" value="true" {% if trade.fees_included_in_quote %}checked{% endif %}> Комиссии включены в котировку</label><input name="actor" value="OTC Operator" required><button>Сохранить</button></form></section>
++<section class="card"><h2>Изменить статус</h2>{% if allowed %}<form method="post" action="/trades/{{trade.id}}/status" class="grid"><select name="new_status">{% for s in allowed %}<option value="{{s.value}}">{{label(s)}}</option>{% endfor %}</select><input name="changed_by" value="OTC Operator" required><input name="note" placeholder="Комментарий; для отмены обязателен"><button>Применить</button></form>{% else %}<p>Финальный статус.</p>{% endif %}</section>
++<section class="card danger-zone"><h2>Архивирование сделки</h2><p>Запись не удаляется физически и остается в журнале аудита.</p><form method="post" action="/trades/{{trade.id}}/archive" class="grid"><input name="archived_by" value="Administrator" required><input name="reason" placeholder="Причина архивирования" required><button class="danger">Архивировать</button></form></section>{% endif %}
++<section class="card"><h2>Таймлайн статусов</h2><div class="timeline">{% for h in trade.history|sort(attribute='id') %}<div class="timeline-item"><span>✓</span><div><b>{{label(h.new_status)}}</b><small>{{format_datetime(h.created_at)}} · {{h.changed_by}}</small><p>{{h.note or ''}}</p></div></div>{% endfor %}</div></section></main></body></html>
+Binary files otc-original-v5/simple-otc-desk-v5/otc.db and otc-full-patch/simple-otc-desk-v5/otc.db differ
+diff -ruN otc-original-v5/simple-otc-desk-v5/requirements.txt otc-full-patch/simple-otc-desk-v5/requirements.txt
+--- otc-original-v5/simple-otc-desk-v5/requirements.txt	2026-07-30 07:32:37.000000000 +0000
++++ otc-full-patch/simple-otc-desk-v5/requirements.txt	2026-08-03 09:15:09.331773207 +0000
+@@ -6,3 +6,5 @@
+ pydantic>=2.11,<3
+ httpx>=0.28,<1
+ pytest>=8,<9
++
++openpyxl>=3.1,<4
+Binary files otc-original-v5/simple-otc-desk-v5/tests/__pycache__/test_flow.cpython-313-pytest-9.0.2.pyc and otc-full-patch/simple-otc-desk-v5/tests/__pycache__/test_flow.cpython-313-pytest-9.0.2.pyc differ
+diff -ruN otc-original-v5/simple-otc-desk-v5/tests/test_flow.py otc-full-patch/simple-otc-desk-v5/tests/test_flow.py
+--- otc-original-v5/simple-otc-desk-v5/tests/test_flow.py	2026-07-30 08:01:37.000000000 +0000
++++ otc-full-patch/simple-otc-desk-v5/tests/test_flow.py	2026-08-03 09:15:18.635773103 +0000
+@@ -1,5 +1,6 @@
+ import os
+ from pathlib import Path
++from uuid import uuid4
+ 
+ os.chdir(Path(__file__).resolve().parents[1])
+ 
+@@ -9,69 +10,43 @@
+ client = TestClient(app)
+ 
+ 
+-def test_crypto_based_quote_and_acceptance():
+-    response = client.post("/rfqs", data={
+-        "client_name": "Test Crypto",
+-        "side": "BUY",
+-        "base_asset": "BTC",
+-        "quote_asset": "USDT",
+-        "amount_type": "CRYPTO",
+-        "crypto_amount": "2",
+-        "fiat_amount": "",
+-        "comment": "",
++def test_full_flow_and_idempotency():
++    r = client.post('/rfqs', data={
++        'client_name':'Client A','side':'BUY','base_asset':'BTC','quote_asset':'RUB','network':'Bitcoin',
++        'amount_type':'CRYPTO','crypto_amount':'2','fiat_amount':'','comment':'test'
+     }, follow_redirects=False)
+-    assert response.status_code == 303
+-    home = client.get("/")
+-    assert home.status_code == 200
+-
+-    response = client.post("/rfqs/1/quote", data={"price": "50000", "valid_minutes": "5", "dealer_name": "Dealer"}, follow_redirects=False)
+-    assert response.status_code == 303
+-
+-    response = client.post("/quotes/1/accept", follow_redirects=False)
+-    assert response.status_code == 303
+-    assert response.headers["location"] == "/trades/1"
+-
+-    duplicate = client.post("/quotes/1/accept", follow_redirects=False)
+-    assert duplicate.status_code == 409
+-
+-    api = client.get("/api/trades").json()
+-    assert api[0]["crypto_amount"] == 2.0
+-    assert api[0]["fiat_amount"] == 100000.0
+-
+-
+-def test_fiat_based_calculation_and_report():
+-    client.post("/rfqs", data={
+-        "client_name": "Test Fiat",
+-        "side": "SELL",
+-        "base_asset": "ETH",
+-        "quote_asset": "USD",
+-        "amount_type": "FIAT",
+-        "crypto_amount": "",
+-        "fiat_amount": "6000",
+-        "comment": "",
+-    })
+-    response = client.post("/rfqs/2/quote", data={"price": "3000", "valid_minutes": "5", "dealer_name": "Dealer"}, follow_redirects=False)
+-    assert response.status_code == 303
+-    client.post("/quotes/2/accept")
+-    client.post("/trades/2/fees", data={"bank_fee": "25", "network_fee": "5"})
+-
+-    api = client.get("/api/trades").json()
+-    trade = next(item for item in api if item["id"] == 2)
+-    assert trade["crypto_amount"] == 2.0
+-    assert trade["fiat_amount"] == 6000.0
+-    assert trade["bank_fee"] == 25.0
+-    assert trade["network_fee"] == 5.0
+-    assert trade["bank_fee_currency"] == "USD"
+-    assert trade["network_fee_currency"] == "ETH"
++    assert r.status_code == 303
++    r = client.post('/rfqs/1/quote', data={'price':'5000000','valid_minutes':'5','dealer_name':'Dealer'}, follow_redirects=False)
++    assert r.status_code == 303
++    key = str(uuid4())
++    r = client.post('/quotes/1/accept', data={'idempotency_key':key,'confirm':'yes'}, follow_redirects=False)
++    assert r.status_code == 303 and r.headers['location'] == '/trades/1'
++    duplicate = client.post('/quotes/1/accept', data={'idempotency_key':key,'confirm':'yes'}, follow_redirects=False)
++    assert duplicate.status_code == 303
++    details = client.post('/trades/1/details', data={
++        'bank_fee':'1000','network_fee':'0.0001','bank_fee_payer':'CLIENT','network_fee_payer':'EXCHANGE',
++        'bank_reference':'BANK-1','tx_hash':'abc','aml_risk':'LOW','actor':'Operator'
++    }, follow_redirects=False)
++    assert details.status_code == 303
++    api = client.get('/api/trades').json()[0]
++    assert api['fiat_amount'] == 10000000.0
++    assert api['bank_fee_currency'] == 'RUB'
++    assert api['network_fee_currency'] == 'BTC'
+ 
+-    report = client.get("/reports/trades")
++
++def test_reject_report_and_archive():
++    client.post('/rfqs', data={
++        'client_name':'Client B','side':'SELL','base_asset':'USDT','quote_asset':'USD','network':'TRC-20',
++        'amount_type':'FIAT','crypto_amount':'','fiat_amount':'6000','comment':''
++    })
++    client.post('/rfqs/2/quote', data={'price':'1','valid_minutes':'5','dealer_name':'Dealer'})
++    reject = client.post('/quotes/2/reject', data={'rejected_by':'Client B','reason':'Не устраивает цена'}, follow_redirects=False)
++    assert reject.status_code == 303
++    report = client.get('/reports/trades')
+     assert report.status_code == 200
+-    assert "Комиссия банка" in report.text
+-    assert "Комиссия сети" in report.text
+-    assert "ACCEPTED — дата и время" in report.text
+-    assert "FUNDED — дата и время" in report.text
+-
+-    csv_report = client.get("/reports/trades.csv")
+-    assert csv_report.status_code == 200
+-    assert "otc_trades_report.csv" in csv_report.headers["content-disposition"]
+-    assert "Дата и время: ACCEPTED" in csv_report.text
++    assert 'Комиссия банка' in report.text and 'Комиссия сети' in report.text
++    assert client.get('/reports/trades.csv').status_code == 200
++    assert client.get('/reports/trades.xlsx').status_code == 200
++    archived = client.post('/trades/1/archive', data={'archived_by':'Admin','reason':'Тест архива'}, follow_redirects=False)
++    assert archived.status_code == 303
++    assert client.get('/api/trades').json() == []

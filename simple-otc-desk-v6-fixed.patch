@@ -16,7 +16,7 @@ diff --git a/app/main.py b/app/main.py
 index 0000000..1111111 100644
 --- a/app/main.py
 +++ b/app/main.py
-@@ -33,6 +33,12 @@ def migrate_sqlite_schema() -> None:
+@@ -33,4 +33,11 @@ def migrate_sqlite_schema() -> None:
              if "network_fee" not in columns:
                  connection.execute(text("ALTER TABLE trades ADD COLUMN network_fee NUMERIC(30, 8) DEFAULT 0"))
 +            # Старые финальные статусы больше не используются.
@@ -28,7 +28,7 @@ index 0000000..1111111 100644
 +            )
  
  migrate_sqlite_schema()
-@@ -43,9 +49,7 @@ ALLOWED_TRANSITIONS = {
+@@ -43,9 +49,6 @@ ALLOWED_TRANSITIONS = {
      TradeStatus.FUNDED: {TradeStatus.AML_REVIEW, TradeStatus.APPROVED, TradeStatus.CANCELLED},
      TradeStatus.AML_REVIEW: {TradeStatus.APPROVED, TradeStatus.CANCELLED},
 -    TradeStatus.APPROVED: {TradeStatus.EXECUTED, TradeStatus.CANCELLED},
@@ -39,7 +39,7 @@ index 0000000..1111111 100644
      TradeStatus.CANCELLED: set(),
  }
  REPORT_STATUS_COLUMNS = [
-@@ -53,9 +57,6 @@ REPORT_STATUS_COLUMNS = [
+@@ -53,8 +57,8 @@ REPORT_STATUS_COLUMNS = [
      TradeStatus.FUNDED,
      TradeStatus.AML_REVIEW,
      TradeStatus.APPROVED,
@@ -51,7 +51,7 @@ index 0000000..1111111 100644
 +
 +CRYPTO_ASSETS = {"USDT", "BTC", "USDC", "TRX", "ETH", "TON"}
 +FIAT_ASSETS = {"USD", "EUR", "KGS", "RUB"}
-@@ -138,6 +139,10 @@ def create_rfq(
+@@ -138,3 +139,7 @@ def create_rfq(
      if amount_type == AmountType.FIAT and (fiat is None or fiat <= 0):
          raise HTTPException(400, "Укажите сумму фиата")
 +    if base_asset.upper().strip() not in CRYPTO_ASSETS:
@@ -59,7 +59,7 @@ index 0000000..1111111 100644
 +    if quote_asset.upper().strip() not in FIAT_ASSETS:
 +        raise HTTPException(400, "Недопустимая фиатная валюта")
      rfq = RFQ(
-@@ -235,6 +240,23 @@ def update_fees(
+@@ -235,4 +240,23 @@ def update_fees(
      return RedirectResponse(f"/trades/{trade_id}", status_code=303)
  
 +
@@ -87,7 +87,7 @@ diff --git a/app/templates/index.html b/app/templates/index.html
 index 0000000..1111111 100644
 --- a/app/templates/index.html
 +++ b/app/templates/index.html
-@@ -2,7 +2,17 @@
+@@ -2,5 +2,13 @@
  <body><header><div><h1>Простой OTC Desk</h1><p>Учет RFQ, котировок и сделок</p></div><a class="header-link" href="/reports/trades">Сводный отчет</a></header><main>
  <section class="card"><h2>Новый запрос котировки</h2><form method="post" action="/rfqs" class="grid" id="rfq-form">
  <input name="client_name" placeholder="Клиент" required><select name="side"><option value="BUY">Купить</option><option value="SELL">Продать</option></select>
@@ -102,7 +102,7 @@ index 0000000..1111111 100644
 +<option value="KGS">KGS</option><option value="RUB">RUB</option>
 +</select>
  <select name="amount_type" id="amount-type"><option value="CRYPTO">Задать количество криптовалюты</option><option value="FIAT">Задать сумму фиата</option></select>
-@@ -11,7 +21,7 @@
+@@ -11,5 +21,5 @@
  {% for r in rfqs %}<tr><td>{{r.id}}</td><td>{{r.client_name}}</td><td>{{r.side}}</td><td>{{r.base_asset}}/{{r.quote_asset}}</td><td>{% if r.amount_type.value == 'FIAT' %}{{r.fiat_amount}} {{r.quote_asset}}{% else %}{{r.amount}} {{r.base_asset}}{% endif %}</td><td>{% if r.quote %}{{r.amount}} {{r.base_asset}} = {{r.fiat_amount}} {{r.quote_asset}}{% else %}—{% endif %}</td><td><span class="status">{{r.status.value}}</span>
  {% if r.status.value == 'SUBMITTED' %}<form class="inline" method="post" action="/rfqs/{{r.id}}/quote"><input name="price" type="number" step="0.00000001" placeholder="Цена" required><input name="valid_minutes" type="number" value="5" min="1" title="Минут"><input name="dealer_name" value="OTC Dealer" required><button>Котировать</button></form>{% endif %}
  {% if r.status.value == 'QUOTED' %}<div class="quote">Цена: {{r.quote.price}} {{r.quote_asset}}<br>{{r.amount}} {{r.base_asset}} = {{r.fiat_amount}} {{r.quote_asset}}</div><form method="post" action="/quotes/{{r.quote.id}}/accept"><button>Принять котировку</button></form>{% endif %}</td></tr>{% endfor %}</table></div></section>
@@ -113,7 +113,7 @@ diff --git a/app/templates/trade.html b/app/templates/trade.html
 index 0000000..1111111 100644
 --- a/app/templates/trade.html
 +++ b/app/templates/trade.html
-@@ -3,4 +3,5 @@
+@@ -3,3 +3,4 @@
  <section class="card"><h2>Изменить статус</h2>{% if allowed %}<form method="post" action="/trades/{{trade.id}}/status" class="grid"><select name="new_status">{% for s in allowed %}<option value="{{s.value}}">{{s.value}}</option>{% endfor %}</select><input name="changed_by" value="OTC Operator" required><input name="note" placeholder="Комментарий"><button>Применить</button></form>{% else %}<p>Сделка находится в финальном статусе.</p>{% endif %}</section>
  <section class="card"><h2>История</h2><div class="table"><table><tr><th>Дата</th><th>Переход</th><th>Кто</th><th>Комментарий</th></tr>{% for h in trade.history|sort(attribute='id', reverse=true) %}<tr><td>{{format_datetime(h.created_at)}}</td><td>{{h.old_status or '—'}} → {{h.new_status}}</td><td>{{h.changed_by}}</td><td>{{h.note or ''}}</td></tr>{% endfor %}</table></div></section>
 +<section class="card"><h2>Удаление сделки</h2><form method="post" action="/trades/{{trade.id}}/delete" onsubmit="return confirm('Удалить сделку #{{trade.id}}?');"><button type="submit">Удалить сделку</button></form></section>

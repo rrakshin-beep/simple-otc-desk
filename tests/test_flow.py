@@ -95,3 +95,16 @@ def test_regulatory_profile_parties_validation_and_xml():
     assert xml.status_code == 200
     decoded = xml.content.decode('windows-1251')
     assert '<ROWSET>' in decoded and '<MSGNUM>1</MSGNUM>' in decoded and '<PAGENUM>003Ф</PAGENUM>' in decoded
+
+def test_form1_routes_and_trade_button():
+    trade_page = client.get('/trades/1')
+    assert trade_page.status_code == 200
+    assert '/trades/1/form1' in trade_page.text
+    form_page = client.get('/trades/1/form1')
+    assert form_page.status_code == 200
+    assert 'Форма 1' in form_page.text
+    validation = client.get('/trades/1/form1/validate')
+    assert validation.status_code == 200
+    assert validation.json()['valid'] is True
+    xml = client.get('/trades/1/form1.xml')
+    assert xml.status_code == 200

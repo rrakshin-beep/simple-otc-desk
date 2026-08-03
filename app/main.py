@@ -415,6 +415,7 @@ def regulatory_dashboard(request: Request, db: Session = Depends(get_db)):
     return templates.TemplateResponse(request=request, name="regulatory.html", context={"reports": reports})
 
 
+@app.get("/trades/{trade_id}/form1", response_class=HTMLResponse)
 @app.get("/trades/{trade_id}/regulatory", response_class=HTMLResponse)
 def regulatory_trade_page(trade_id: int, request: Request, db: Session = Depends(get_db)):
     trade = db.query(Trade).options(joinedload(Trade.quote).joinedload(Quote.rfq)).filter(Trade.id == trade_id).first()
@@ -426,6 +427,7 @@ def regulatory_trade_page(trade_id: int, request: Request, db: Session = Depends
     return templates.TemplateResponse(request=request, name="trade_regulatory.html", context={"trade": trade, "reporting": reporting, "parties": parties, "profile": profile, "issues": issues, "currency_codes": CURRENCY_CODES})
 
 
+@app.post("/trades/{trade_id}/form1")
 @app.post("/trades/{trade_id}/regulatory")
 def save_trade_reporting(
     trade_id: int, client_party_id: int = Form(...), exchange_party_id: int = Form(...),
@@ -447,9 +449,23 @@ def save_trade_reporting(
     reporting.reason, reporting.unusual_code, reporting.unusual_codes = reason.strip(), unusual_code.strip(), unusual_codes.strip() or "00"
     reporting.operation_state, reporting.extra_info = operation_state, extra_info.strip() or "00"
     db.add(reporting); db.commit()
-    return RedirectResponse(f"/trades/{trade_id}/regulatory", 303)
+    return RedirectResponse(f"/trades/{trade_id}/form1", 303)
 
 
+@app.get("/trades/{trade_id}/form1/validate")
+def validate_trade_form1(trade_id: int, db: Session = Depends(get_db)):
+    trade = db.query(Trade).options(joinedload(Trade.quote).joinedload(Quote.rfq)).filter(Trade.id == trade_id).first()
+    reporting = db.query(TradeReporting).options(joinedload(TradeReporting.client_party), joinedload(TradeReporting.exchange_party)).filter_by(trade_id=trade_id).first()
+    profile = db.query(ReportingProfile).first()
+    if not trade:
+        raise HTTPException(404, "Сделка не найдена")
+    if not reporting or not profile:
+        return {"valid": False, "issues": [{"field": "FORM1", "message": "Сначала заполните профиль подотчетного лица и Форму 1", "code": 5}]}
+    issues = validate_report(profile, reporting, trade)
+    return {"valid": not issues, "issues": [{"field": x.field, "message": x.message, "code": x.code} for x in issues]}
+
+
+@app.get("/trades/{trade_id}/form1.xml")
 @app.get("/trades/{trade_id}/regulatory.xml")
 def export_trade_xml(trade_id: int, db: Session = Depends(get_db)):
     trade = db.query(Trade).options(joinedload(Trade.quote).joinedload(Quote.rfq)).filter(Trade.id == trade_id).first()

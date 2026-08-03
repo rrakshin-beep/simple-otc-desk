@@ -1,114 +1,114 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal, InvalidOperation
-from io import StringIO
+from io import BytesIO, StringIO
+from uuid import uuid4
+from zoneinfo import ZoneInfo
 import csv
 
-from fastapi import Depends, FastAPI, Form, HTTPException, Request
-from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
+from fastapi import Depends, FastAPI, Form, HTTPException, Query, Request
+from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from openpyxl import Workbook
 from sqlalchemy import inspect, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from .database import Base, engine, get_db
-from .models import AmountType, Quote, RFQ, RFQHistory, RFQStatus, Trade, TradeHistory, TradeStatus
+from .models import AuditLog, AmountType, Quote, QuoteAcceptance, RFQ, RFQStatus, Trade, TradeHistory, TradeStatus, Party, PartyType, ReportingProfile, TradeReporting
 
+Base.metadata.create_all(bind=engine)
 
-def reset_demo_database() -> None:
-    inspector = inspect(engine)
-    existing_tables = set(inspector.get_table_names())
-    if not existing_tables:
-        Base.metadata.create_all(bind=engine)
-        return
-
-    with engine.begin() as connection:
-        connection.execute(text("PRAGMA foreign_keys = OFF"))
-        for table_name in ("trade_history", "rfq_history", "trades", "quotes", "rfqs"):
-            if table_name in existing_tables:
-                connection.execute(text(f"DELETE FROM {table_name}"))
-        if "sqlite_sequence" in existing_tables:
-            connection.execute(text("DELETE FROM sqlite_sequence WHERE name IN ('rfqs', 'quotes', 'trades', 'trade_history', 'rfq_history')"))
-        connection.execute(text("PRAGMA foreign_keys = ON"))
-
-    Base.metadata.create_all(bind=engine)
-
-
-reset_demo_database()
+from .regulatory import CURRENCY_CODES, generate_xml, validate_report
 
 
 def migrate_sqlite_schema() -> None:
-    """Минимальная миграция старой демонстрационной SQLite-базы без Alembic."""
+    additions = {
+        "rfqs": {
+            "fiat_amount": "NUMERIC(30, 8)", "amount_type": "VARCHAR(16) DEFAULT 'CRYPTO'",
+            "network": "VARCHAR(40)", "rejected_at": "DATETIME", "rejected_by": "VARCHAR(120)",
+            "rejection_reason": "TEXT",
+        },
+        "trades": {
+            "bank_fee": "NUMERIC(30, 8) DEFAULT 0", "network_fee": "NUMERIC(30, 8) DEFAULT 0",
+            "bank_fee_payer": "VARCHAR(20) DEFAULT 'CLIENT'", "network_fee_payer": "VARCHAR(20) DEFAULT 'CLIENT'",
+            "fees_included_in_quote": "BOOLEAN DEFAULT 0", "bank_reference": "VARCHAR(120)",
+            "tx_hash": "VARCHAR(180)", "aml_risk": "VARCHAR(20)", "cancellation_reason": "TEXT",
+            "archived": "BOOLEAN DEFAULT 0", "archived_at": "DATETIME", "archived_by": "VARCHAR(120)",
+            "archive_reason": "TEXT",
+        },
+    }
     inspector = inspect(engine)
-    if "rfqs" in inspector.get_table_names():
-        columns = {c["name"] for c in inspector.get_columns("rfqs")}
+    for table_name, fields in additions.items():
+        if table_name not in inspector.get_table_names():
+            continue
+        columns = {c["name"] for c in inspector.get_columns(table_name)}
         with engine.begin() as connection:
-            if "fiat_amount" not in columns:
-                connection.execute(text("ALTER TABLE rfqs ADD COLUMN fiat_amount NUMERIC(30, 8)"))
-            if "amount_type" not in columns:
-                connection.execute(text("ALTER TABLE rfqs ADD COLUMN amount_type VARCHAR(16) DEFAULT 'CRYPTO'"))
-                connection.execute(text("UPDATE rfqs SET amount_type = 'CRYPTO' WHERE amount_type IS NULL"))
-    if "trades" in inspector.get_table_names():
-        columns = {c["name"] for c in inspector.get_columns("trades")}
-        with engine.begin() as connection:
-            if "bank_fee" not in columns:
-                connection.execute(text("ALTER TABLE trades ADD COLUMN bank_fee NUMERIC(30, 8) DEFAULT 0"))
-            if "network_fee" not in columns:
-                connection.execute(text("ALTER TABLE trades ADD COLUMN network_fee NUMERIC(30, 8) DEFAULT 0"))
+            for name, ddl in fields.items():
+                if name not in columns:
+                    connection.execute(text(f"ALTER TABLE {table_name} ADD COLUMN {name} {ddl}"))
 
 
 migrate_sqlite_schema()
-
-def migrate_legacy_trade_statuses() -> None:
-    with engine.begin() as connection:
-        connection.execute(
-            text(
-                "UPDATE trades SET status = 'APPROVED' "
-                "WHERE status IN ('EXECUTED', 'SETTLED', 'COMPLETED')"
-            )
-        )
-
-migrate_legacy_trade_statuses()
-
 app = FastAPI(title="Simple OTC Desk")
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
-
-CRYPTO_ASSETS = {"USDT", "BTC", "USDC", "TRX", "ETH", "TON"}
-FIAT_ASSETS = {"USD", "EUR", "KGS", "RUB"}
-
+BISHKEK = ZoneInfo("Asia/Bishkek")
+CRYPTO_ASSETS = ["USDT", "BTC", "USDC", "TRX", "ETH", "TON"]
+FIAT_ASSETS = ["KGS", "USD", "EUR", "RUB"]
+NETWORKS = ["TRC-20", "ERC-20", "TON", "BEP-20", "Bitcoin", "Ethereum", "Tron"]
+SIDE_LABELS = {"BUY": "Покупка", "SELL": "Продажа"}
+STATUS_LABELS = {
+    "SUBMITTED": "Запрос создан", "QUOTED": "Котировка выставлена", "ACCEPTED": "Принято",
+    "REJECTED": "Отклонено", "EXPIRED": "Срок истек", "CANCELLED": "Отменено",
+    "FUNDED": "Средства получены", "AML_REVIEW": "AML-проверка", "APPROVED": "Одобрено",
+    "EXECUTED": "Исполнено", "SETTLED": "Расчеты завершены", "COMPLETED": "Завершено",
+}
 ALLOWED_TRANSITIONS = {
     TradeStatus.ACCEPTED: {TradeStatus.FUNDED, TradeStatus.CANCELLED},
     TradeStatus.FUNDED: {TradeStatus.AML_REVIEW, TradeStatus.APPROVED, TradeStatus.CANCELLED},
     TradeStatus.AML_REVIEW: {TradeStatus.APPROVED, TradeStatus.CANCELLED},
-    TradeStatus.APPROVED: {TradeStatus.CANCELLED},
-    TradeStatus.CANCELLED: set(),
+    TradeStatus.APPROVED: {TradeStatus.EXECUTED, TradeStatus.CANCELLED},
+    TradeStatus.EXECUTED: {TradeStatus.SETTLED}, TradeStatus.SETTLED: {TradeStatus.COMPLETED},
+    TradeStatus.COMPLETED: set(), TradeStatus.CANCELLED: set(),
 }
-REPORT_STATUS_COLUMNS = [
-    TradeStatus.ACCEPTED,
-    TradeStatus.FUNDED,
-    TradeStatus.AML_REVIEW,
-    TradeStatus.APPROVED,
-    TradeStatus.CANCELLED,
-]
+REPORT_STATUS_COLUMNS = list(TradeStatus)
+
+
+def utcnow() -> datetime:
+    return datetime.utcnow()
+
 
 def format_datetime(value: datetime | None) -> str:
-    return value.strftime("%d.%m.%Y %H:%M:%S") if value else "—"
+    if not value:
+        return "—"
+    aware = value.replace(tzinfo=timezone.utc) if value.tzinfo is None else value.astimezone(timezone.utc)
+    return aware.astimezone(BISHKEK).strftime("%d.%m.%Y %H:%M:%S UTC+6")
 
 
-def status_timestamps(trade: Trade) -> dict[str, str]:
-    timestamps: dict[str, datetime] = {}
-    for item in sorted(trade.history, key=lambda record: (record.created_at, record.id)):
-        timestamps.setdefault(item.new_status, item.created_at)
-    timestamps.setdefault(TradeStatus.ACCEPTED.value, trade.created_at)
-    return {status.value: format_datetime(timestamps.get(status.value)) for status in REPORT_STATUS_COLUMNS}
+def label(value) -> str:
+    raw = value.value if hasattr(value, "value") else str(value)
+    return STATUS_LABELS.get(raw, SIDE_LABELS.get(raw, raw))
 
 
-templates.env.globals["format_datetime"] = format_datetime
+templates.env.globals.update(format_datetime=format_datetime, label=label)
 
 
-def money(value: Decimal | float | None) -> Decimal:
+def money(value) -> Decimal:
     return Decimal(str(value or 0))
+
+
+def audit(db: Session, entity_type: str, entity_id: int, action: str, actor: str, details: str = "") -> None:
+    db.add(AuditLog(entity_type=entity_type, entity_id=entity_id, action=action, actor=actor or "system", details=details))
+
+
+def expire_quotes(db: Session) -> None:
+    expired = db.query(RFQ).join(Quote).filter(RFQ.status == RFQStatus.QUOTED, Quote.expires_at < utcnow()).all()
+    for rfq in expired:
+        rfq.status = RFQStatus.EXPIRED
+        audit(db, "RFQ", rfq.id, "QUOTE_EXPIRED", "system")
+    if expired:
+        db.commit()
 
 
 def calculate_amounts(rfq: RFQ, price: Decimal) -> tuple[Decimal, Decimal]:
@@ -118,417 +118,345 @@ def calculate_amounts(rfq: RFQ, price: Decimal) -> tuple[Decimal, Decimal]:
         fiat_amount = money(rfq.fiat_amount)
         if fiat_amount <= 0:
             raise HTTPException(400, "Сумма фиата должна быть больше нуля")
-        crypto_amount = fiat_amount / price
-    else:
-        crypto_amount = money(rfq.amount)
-        if crypto_amount <= 0:
-            raise HTTPException(400, "Количество криптовалюты должно быть больше нуля")
-        fiat_amount = crypto_amount * price
-    return crypto_amount, fiat_amount
+        return fiat_amount / price, fiat_amount
+    crypto_amount = money(rfq.amount)
+    if crypto_amount <= 0:
+        raise HTTPException(400, "Количество криптовалюты должно быть больше нуля")
+    return crypto_amount, crypto_amount * price
 
 
-def trade_values(trade: Trade) -> dict[str, Decimal]:
-    crypto_amount = money(trade.quote.rfq.amount)
-    fiat_amount = money(trade.quote.rfq.fiat_amount)
-    bank_fee = money(trade.bank_fee)
-    network_fee = money(trade.network_fee)
+def status_timestamps(trade: Trade) -> dict[str, str]:
+    timestamps = {}
+    for item in sorted(trade.history, key=lambda x: (x.created_at, x.id)):
+        timestamps.setdefault(item.new_status, item.created_at)
+    timestamps.setdefault(TradeStatus.ACCEPTED.value, trade.created_at)
+    return {s.value: format_datetime(timestamps.get(s.value)) for s in REPORT_STATUS_COLUMNS}
+
+
+def current_status_time(trade: Trade) -> str:
+    matching = [h for h in trade.history if h.new_status == trade.status.value]
+    return format_datetime(max((h.created_at for h in matching), default=trade.created_at))
+
+
+def trade_values(trade: Trade) -> dict:
+    rfq = trade.quote.rfq
     return {
-        "crypto_amount": crypto_amount,
-        "fiat_amount": fiat_amount,
-        "bank_fee": bank_fee,
-        "network_fee": network_fee,
+        "crypto_amount": money(rfq.amount), "fiat_amount": money(rfq.fiat_amount),
+        "bank_fee": money(trade.bank_fee), "network_fee": money(trade.network_fee),
+        "status_times": status_timestamps(trade), "current_status_time": current_status_time(trade),
     }
 
 
+def dashboard_context(db: Session, role: str):
+    expire_quotes(db)
+    rfqs = db.query(RFQ).options(joinedload(RFQ.quote)).order_by(RFQ.id.desc()).all()
+    trades = db.query(Trade).options(joinedload(Trade.quote).joinedload(Quote.rfq)).filter(Trade.archived.is_(False)).order_by(Trade.id.desc()).all()
+    return {"rfqs": rfqs, "trades": trades, "role": role, "crypto_assets": CRYPTO_ASSETS,
+            "fiat_assets": FIAT_ASSETS, "networks": NETWORKS, "accept_key": str(uuid4())}
+
+
 @app.get("/", response_class=HTMLResponse)
-def dashboard(request: Request, db: Session = Depends(get_db)):
-    rfqs = db.query(RFQ).options(joinedload(RFQ.quote), selectinload(RFQ.rfq_history)).order_by(RFQ.id.desc()).all()
-    trades = (
-        db.query(Trade)
-        .options(joinedload(Trade.quote).joinedload(Quote.rfq))
-        .order_by(Trade.id.desc())
-        .all()
-    )
-    return templates.TemplateResponse(
-        request=request,
-        name="index.html",
-        context={"rfqs": rfqs, "trades": trades},
-    )
+def home(request: Request, db: Session = Depends(get_db)):
+    return templates.TemplateResponse(request=request, name="index.html", context=dashboard_context(db, "dealer"))
+
+
+@app.get("/client", response_class=HTMLResponse)
+def client_dashboard(request: Request, db: Session = Depends(get_db)):
+    return templates.TemplateResponse(request=request, name="index.html", context=dashboard_context(db, "client"))
+
+
+@app.get("/dealer", response_class=HTMLResponse)
+def dealer_dashboard(request: Request, db: Session = Depends(get_db)):
+    return templates.TemplateResponse(request=request, name="index.html", context=dashboard_context(db, "dealer"))
+
+
+@app.get("/compliance", response_class=HTMLResponse)
+def compliance_dashboard(request: Request, db: Session = Depends(get_db)):
+    return templates.TemplateResponse(request=request, name="index.html", context=dashboard_context(db, "compliance"))
 
 
 @app.post("/rfqs")
-def create_rfq(
-    client_name: str = Form(...),
-    side: str = Form(...),
-    base_asset: str = Form(...),
-    quote_asset: str = Form(...),
-    amount_type: AmountType = Form(...),
-    crypto_amount: str = Form(""),
-    fiat_amount: str = Form(""),
-    comment: str = Form(""),
-    db: Session = Depends(get_db),
-):
-    base_asset = base_asset.upper().strip()
-    quote_asset = quote_asset.upper().strip()
-    if not base_asset or not quote_asset:
-        raise HTTPException(400, "Укажите тикеры активов")
+def create_rfq(client_name: str = Form(...), side: str = Form(...), base_asset: str = Form(...),
+               quote_asset: str = Form(...), network: str = Form(""), amount_type: AmountType = Form(...),
+               crypto_amount: str = Form(""), fiat_amount: str = Form(""), comment: str = Form(""),
+               db: Session = Depends(get_db)):
+    if base_asset not in CRYPTO_ASSETS or quote_asset not in FIAT_ASSETS:
+        raise HTTPException(400, "Выберите валюту из перечня")
     try:
         crypto = Decimal(crypto_amount) if crypto_amount.strip() else None
         fiat = Decimal(fiat_amount) if fiat_amount.strip() else None
     except InvalidOperation as exc:
         raise HTTPException(400, "Количество должно быть числом") from exc
-
     if amount_type == AmountType.CRYPTO and (crypto is None or crypto <= 0):
         raise HTTPException(400, "Укажите количество криптовалюты")
     if amount_type == AmountType.FIAT and (fiat is None or fiat <= 0):
         raise HTTPException(400, "Укажите сумму фиата")
-
-    rfq = RFQ(
-        client_name=client_name.strip(),
-        side=side,
-        base_asset=base_asset,
-        quote_asset=quote_asset,
-        amount_type=amount_type,
-        amount=crypto if amount_type == AmountType.CRYPTO else None,
-        fiat_amount=fiat if amount_type == AmountType.FIAT else None,
-        comment=comment.strip(),
-    )
-    db.add(rfq)
-    db.commit()
-    return RedirectResponse("/", status_code=303)
+    rfq = RFQ(client_name=client_name.strip(), side=side, base_asset=base_asset, quote_asset=quote_asset,
+              network=network or None, amount_type=amount_type, amount=crypto if amount_type == AmountType.CRYPTO else None,
+              fiat_amount=fiat if amount_type == AmountType.FIAT else None, comment=comment.strip())
+    db.add(rfq); db.flush(); audit(db, "RFQ", rfq.id, "CREATED", client_name, comment); db.commit()
+    return RedirectResponse("/client", 303)
 
 
 @app.post("/rfqs/{rfq_id}/quote")
-def create_quote(
-    rfq_id: int,
-    price: Decimal = Form(...),
-    valid_minutes: int = Form(5),
-    dealer_name: str = Form(...),
-    quote_created_at: str = Form(""),
-    db: Session = Depends(get_db),
-):
+def create_quote(rfq_id: int, price: Decimal = Form(...), valid_minutes: int = Form(5),
+                 dealer_name: str = Form(...), db: Session = Depends(get_db)):
     rfq = db.get(RFQ, rfq_id)
     if not rfq or rfq.status != RFQStatus.SUBMITTED:
         raise HTTPException(400, "RFQ недоступен для котирования")
-    if price <= 0 or valid_minutes < 1:
-        raise HTTPException(400, "Некорректные параметры котировки")
-
-    crypto_amount, fiat_amount = calculate_amounts(rfq, price)
-    rfq.amount = crypto_amount
-    rfq.fiat_amount = fiat_amount
-    try:
-        created_at = datetime.fromisoformat(quote_created_at) if quote_created_at.strip() else datetime.utcnow()
-    except ValueError as exc:
-        raise HTTPException(400, "Некорректная дата и время создания котировки") from exc
-    quote = Quote(
-        rfq=rfq,
-        price=price,
-        expires_at=created_at + timedelta(minutes=valid_minutes),
-        dealer_name=dealer_name.strip(),
-        created_at=created_at,
-    )
-    rfq.status = RFQStatus.QUOTED
-    db.add(quote)
-    db.flush()
-    db.add(
-        RFQHistory(
-            rfq_id=rfq.id,
-            old_status=RFQStatus.SUBMITTED.value,
-            new_status=RFQStatus.QUOTED.value,
-            changed_by=dealer_name.strip(),
-            note="Котировка создана",
-            created_at=created_at,
-        )
-    )
-    db.commit()
-    return RedirectResponse("/", status_code=303)
+    crypto, fiat = calculate_amounts(rfq, price)
+    rfq.amount, rfq.fiat_amount, rfq.status = crypto, fiat, RFQStatus.QUOTED
+    quote = Quote(rfq=rfq, price=price, expires_at=utcnow() + timedelta(minutes=max(valid_minutes, 1)), dealer_name=dealer_name.strip())
+    db.add(quote); db.flush(); audit(db, "RFQ", rfq.id, "QUOTED", dealer_name, f"Цена {price}"); db.commit()
+    return RedirectResponse("/dealer", 303)
 
 
 @app.post("/quotes/{quote_id}/reject")
-def reject_quote(
-    quote_id: int,
-    rejected_by: str = Form(...),
-    reason: str = Form(""),
-    db: Session = Depends(get_db),
-):
-    quote = (
-        db.query(Quote)
-        .options(joinedload(Quote.rfq), joinedload(Quote.trade))
-        .filter(Quote.id == quote_id)
-        .first()
-    )
-    if not quote:
-        raise HTTPException(404, "Котировка не найдена")
-    if quote.trade:
-        raise HTTPException(400, "Принятую котировку отклонить нельзя")
-    if quote.rfq.status != RFQStatus.QUOTED:
+def reject_quote(quote_id: int, rejected_by: str = Form(...), reason: str = Form(...), db: Session = Depends(get_db)):
+    quote = db.get(Quote, quote_id)
+    if not quote or quote.rfq.status != RFQStatus.QUOTED:
         raise HTTPException(400, "Котировка недоступна для отклонения")
-
-    old_status = quote.rfq.status
-    quote.rfq.status = RFQStatus.REJECTED
-    db.add(
-        RFQHistory(
-            rfq_id=quote.rfq.id,
-            old_status=old_status.value,
-            new_status=RFQStatus.REJECTED.value,
-            changed_by=rejected_by.strip() or "OTC Operator",
-            note=reason.strip() or "Котировка отклонена",
-        )
-    )
-    db.commit()
-    return RedirectResponse("/", status_code=303)
+    quote.rfq.status, quote.rfq.rejected_at = RFQStatus.REJECTED, utcnow()
+    quote.rfq.rejected_by, quote.rfq.rejection_reason = rejected_by.strip(), reason.strip()
+    audit(db, "RFQ", quote.rfq.id, "QUOTE_REJECTED", rejected_by, reason); db.commit()
+    return RedirectResponse("/client", 303)
 
 
 @app.post("/quotes/{quote_id}/accept")
-def accept_quote(quote_id: int, db: Session = Depends(get_db)):
-    quote = (
-        db.query(Quote)
-        .options(joinedload(Quote.rfq), joinedload(Quote.trade))
-        .filter(Quote.id == quote_id)
-        .with_for_update()
-        .first()
-    )
-    if not quote:
-        raise HTTPException(404, "Котировка не найдена")
-    if quote.trade or quote.rfq.status == RFQStatus.ACCEPTED:
-        raise HTTPException(409, "Котировка уже принята")
-    if quote.rfq.status != RFQStatus.QUOTED:
-        raise HTTPException(400, "Котировка недоступна для принятия")
-    if quote.expires_at < datetime.utcnow():
-        raise HTTPException(400, "Срок котировки истек")
-
+def accept_quote(quote_id: int, idempotency_key: str = Form(...), confirm: str = Form(...), db: Session = Depends(get_db)):
+    if confirm != "yes":
+        raise HTTPException(400, "Необходимо подтвердить условия")
+    existing = db.query(QuoteAcceptance).filter(QuoteAcceptance.idempotency_key == idempotency_key).first()
+    if existing:
+        trade = db.query(Trade).filter(Trade.quote_id == existing.quote_id).first()
+        return RedirectResponse(f"/trades/{trade.id}", 303) if trade else RedirectResponse("/client", 303)
+    quote = db.query(Quote).options(joinedload(Quote.rfq), joinedload(Quote.trade)).filter(Quote.id == quote_id).with_for_update().first()
+    if not quote: raise HTTPException(404, "Котировка не найдена")
+    if quote.trade or quote.rfq.status == RFQStatus.ACCEPTED: raise HTTPException(409, "Котировка уже принята")
+    if quote.rfq.status != RFQStatus.QUOTED: raise HTTPException(400, "Котировка недоступна")
+    if quote.expires_at < utcnow():
+        quote.rfq.status = RFQStatus.EXPIRED; db.commit(); raise HTTPException(400, "Срок котировки истек")
     quote.rfq.status = RFQStatus.ACCEPTED
-    trade = Trade(quote=quote, status=TradeStatus.ACCEPTED, bank_fee=0, network_fee=0)
-    db.add(trade)
+    trade = Trade(quote=quote, status=TradeStatus.ACCEPTED)
+    db.add_all([trade, QuoteAcceptance(quote_id=quote.id, idempotency_key=idempotency_key)])
     try:
-        db.flush()
-        db.add(
-            TradeHistory(
-                trade_id=trade.id,
-                old_status=None,
-                new_status=TradeStatus.ACCEPTED.value,
-                changed_by=quote.rfq.client_name,
-                note="Котировка принята клиентом",
-            )
-        )
-        db.commit()
+        db.flush(); db.add(TradeHistory(trade_id=trade.id, old_status=None, new_status="ACCEPTED", changed_by=quote.rfq.client_name, note="Котировка принята клиентом")); audit(db, "TRADE", trade.id, "CREATED", quote.rfq.client_name); db.commit()
     except IntegrityError as exc:
-        db.rollback()
-        raise HTTPException(409, "Котировка уже принята другой операцией") from exc
-    return RedirectResponse(f"/trades/{trade.id}", status_code=303)
+        db.rollback(); raise HTTPException(409, "Котировка уже принята") from exc
+    return RedirectResponse(f"/trades/{trade.id}", 303)
 
 
-@app.post("/trades/{trade_id}/fees")
-def update_fees(
-    trade_id: int,
-    bank_fee: Decimal = Form(0),
-    network_fee: Decimal = Form(0),
-    db: Session = Depends(get_db),
-):
+@app.post("/trades/{trade_id}/details")
+def update_trade_details(trade_id: int, bank_fee: Decimal = Form(0), network_fee: Decimal = Form(0),
+                         bank_fee_payer: str = Form("CLIENT"), network_fee_payer: str = Form("CLIENT"),
+                         fees_included_in_quote: bool = Form(False), bank_reference: str = Form(""),
+                         tx_hash: str = Form(""), aml_risk: str = Form(""), actor: str = Form("OTC Operator"),
+                         db: Session = Depends(get_db)):
     trade = db.get(Trade, trade_id)
-    if not trade:
-        raise HTTPException(404, "Сделка не найдена")
-    if bank_fee < 0 or network_fee < 0:
-        raise HTTPException(400, "Комиссии не могут быть отрицательными")
-    trade.bank_fee = bank_fee
-    trade.network_fee = network_fee
-    db.commit()
-    return RedirectResponse(f"/trades/{trade_id}", status_code=303)
+    if not trade or trade.archived: raise HTTPException(404, "Сделка не найдена")
+    if bank_fee < 0 or network_fee < 0: raise HTTPException(400, "Комиссии не могут быть отрицательными")
+    trade.bank_fee, trade.network_fee = bank_fee, network_fee
+    trade.bank_fee_payer, trade.network_fee_payer = bank_fee_payer, network_fee_payer
+    trade.fees_included_in_quote, trade.bank_reference, trade.tx_hash, trade.aml_risk = fees_included_in_quote, bank_reference.strip(), tx_hash.strip(), aml_risk.strip()
+    audit(db, "TRADE", trade.id, "DETAILS_UPDATED", actor); db.commit()
+    return RedirectResponse(f"/trades/{trade_id}", 303)
 
 
 @app.post("/trades/{trade_id}/status")
-def change_status(
-    trade_id: int,
-    new_status: TradeStatus = Form(...),
-    changed_by: str = Form(...),
-    note: str = Form(""),
-    db: Session = Depends(get_db),
-):
+def change_status(trade_id: int, new_status: TradeStatus = Form(...), changed_by: str = Form(...),
+                  note: str = Form(""), db: Session = Depends(get_db)):
     trade = db.get(Trade, trade_id)
-    if not trade:
-        raise HTTPException(404, "Сделка не найдена")
-    if new_status not in ALLOWED_TRANSITIONS[trade.status]:
-        raise HTTPException(400, f"Переход {trade.status.value} → {new_status.value} запрещен")
-    old = trade.status
-    trade.status = new_status
-    db.add(
-        TradeHistory(
-            trade_id=trade.id,
-            old_status=old.value,
-            new_status=new_status.value,
-            changed_by=changed_by.strip(),
-            note=note.strip(),
-        )
-    )
-    db.commit()
-    return RedirectResponse(f"/trades/{trade_id}", status_code=303)
+    if not trade or trade.archived: raise HTTPException(404, "Сделка не найдена")
+    if new_status not in ALLOWED_TRANSITIONS[trade.status]: raise HTTPException(400, "Запрещенный переход статуса")
+    if new_status == TradeStatus.CANCELLED and not note.strip(): raise HTTPException(400, "Укажите причину отмены")
+    old = trade.status; trade.status = new_status
+    if new_status == TradeStatus.CANCELLED: trade.cancellation_reason = note.strip()
+    db.add(TradeHistory(trade_id=trade.id, old_status=old.value, new_status=new_status.value, changed_by=changed_by.strip(), note=note.strip()))
+    audit(db, "TRADE", trade.id, "STATUS_CHANGED", changed_by, f"{old.value}->{new_status.value}: {note}"); db.commit()
+    return RedirectResponse(f"/trades/{trade_id}", 303)
 
 
-
-@app.post("/trades/{trade_id}/edit")
-def edit_trade(
-    trade_id: int,
-    client_name: str = Form(...),
-    side: str = Form(...),
-    base_asset: str = Form(...),
-    quote_asset: str = Form(...),
-    crypto_amount: Decimal = Form(...),
-    price: Decimal = Form(...),
-    bank_fee: Decimal = Form(0),
-    network_fee: Decimal = Form(0),
-    comment: str = Form(""),
-    changed_by: str = Form("OTC Operator"),
-    db: Session = Depends(get_db),
-):
-    trade = (
-        db.query(Trade)
-        .options(joinedload(Trade.quote).joinedload(Quote.rfq))
-        .filter(Trade.id == trade_id)
-        .first()
-    )
-    if not trade:
-        raise HTTPException(404, "Сделка не найдена")
-
-    base_asset = base_asset.upper().strip()
-    quote_asset = quote_asset.upper().strip()
-    if base_asset not in {"USDT", "BTC", "USDC", "TRX", "ETH", "TON"}:
-        raise HTTPException(400, "Недопустимая криптовалюта")
-    if quote_asset not in {"USD", "EUR", "KGS", "RUB"}:
-        raise HTTPException(400, "Недопустимая фиатная валюта")
-    if side not in {"BUY", "SELL"}:
-        raise HTTPException(400, "Недопустимый тип операции")
-    if crypto_amount <= 0 or price <= 0:
-        raise HTTPException(400, "Количество и цена должны быть больше нуля")
-    if bank_fee < 0 or network_fee < 0:
-        raise HTTPException(400, "Комиссии не могут быть отрицательными")
-
-    rfq = trade.quote.rfq
-    old_values = (
-        f"Клиент: {rfq.client_name}; операция: {rfq.side}; "
-        f"пара: {rfq.base_asset}/{rfq.quote_asset}; "
-        f"количество: {rfq.amount}; цена: {trade.quote.price}; "
-        f"комиссия банка: {trade.bank_fee}; комиссия сети: {trade.network_fee}"
-    )
-
-    rfq.client_name = client_name.strip()
-    rfq.side = side
-    rfq.base_asset = base_asset
-    rfq.quote_asset = quote_asset
-    rfq.amount_type = AmountType.CRYPTO
-    rfq.amount = crypto_amount
-    rfq.fiat_amount = crypto_amount * price
-    rfq.comment = comment.strip()
-    trade.quote.price = price
-    trade.bank_fee = bank_fee
-    trade.network_fee = network_fee
-
-    db.add(
-        TradeHistory(
-            trade_id=trade.id,
-            old_status=trade.status.value,
-            new_status=trade.status.value,
-            changed_by=changed_by.strip() or "OTC Operator",
-            note=f"Параметры сделки изменены. Было: {old_values}",
-        )
-    )
-    db.commit()
-    return RedirectResponse(f"/trades/{trade_id}", status_code=303)
-
-
-@app.post("/trades/{trade_id}/delete")
-def delete_trade(
-    trade_id: int,
-    db: Session = Depends(get_db),
-):
-    trade = (
-        db.query(Trade)
-        .options(joinedload(Trade.quote).joinedload(Quote.rfq))
-        .filter(Trade.id == trade_id)
-        .first()
-    )
-    if not trade:
-        raise HTTPException(404, "Сделка не найдена")
-
-    rfq = trade.quote.rfq
-    rfq.status = RFQStatus.QUOTED
-    db.delete(trade)
-    db.commit()
-    return RedirectResponse("/", status_code=303)
+@app.post("/trades/{trade_id}/archive")
+def archive_trade(trade_id: int, archived_by: str = Form(...), reason: str = Form(...), db: Session = Depends(get_db)):
+    trade = db.get(Trade, trade_id)
+    if not trade: raise HTTPException(404, "Сделка не найдена")
+    if not reason.strip(): raise HTTPException(400, "Укажите причину архивирования")
+    trade.archived, trade.archived_at, trade.archived_by, trade.archive_reason = True, utcnow(), archived_by.strip(), reason.strip()
+    audit(db, "TRADE", trade.id, "ARCHIVED", archived_by, reason); db.commit()
+    return RedirectResponse("/dealer", 303)
 
 
 @app.get("/trades/{trade_id}", response_class=HTMLResponse)
 def trade_page(trade_id: int, request: Request, db: Session = Depends(get_db)):
-    trade = (
-        db.query(Trade)
-        .options(joinedload(Trade.quote).joinedload(Quote.rfq).selectinload(RFQ.rfq_history), joinedload(Trade.history))
-        .filter(Trade.id == trade_id)
-        .first()
-    )
-    if not trade:
-        raise HTTPException(404, "Сделка не найдена")
-    allowed = sorted(ALLOWED_TRANSITIONS[trade.status], key=lambda x: x.value)
-    return templates.TemplateResponse(
-        request=request,
-        name="trade.html",
-        context={"trade": trade, "allowed": allowed, **trade_values(trade)},
-    )
+    trade = db.query(Trade).options(joinedload(Trade.quote).joinedload(Quote.rfq), joinedload(Trade.history)).filter(Trade.id == trade_id).first()
+    if not trade: raise HTTPException(404, "Сделка не найдена")
+    return templates.TemplateResponse(request=request, name="trade.html", context={"trade": trade, "allowed": sorted(ALLOWED_TRANSITIONS[trade.status], key=lambda x: x.value), **trade_values(trade)})
+
+
+def filtered_trades(db: Session, client: str = "", status: str = "", side: str = "", base_asset: str = "", quote_asset: str = "", include_archived: bool = False):
+    q = db.query(Trade).options(joinedload(Trade.quote).joinedload(Quote.rfq), selectinload(Trade.history))
+    if not include_archived: q = q.filter(Trade.archived.is_(False))
+    if client: q = q.join(Quote).join(RFQ).filter(RFQ.client_name.contains(client))
+    if status: q = q.filter(Trade.status == TradeStatus(status))
+    if side: q = q.join(Quote, Trade.quote_id == Quote.id).join(RFQ, Quote.rfq_id == RFQ.id).filter(RFQ.side == side)
+    if base_asset: q = q.join(Quote, Trade.quote_id == Quote.id).join(RFQ, Quote.rfq_id == RFQ.id).filter(RFQ.base_asset == base_asset)
+    if quote_asset: q = q.join(Quote, Trade.quote_id == Quote.id).join(RFQ, Quote.rfq_id == RFQ.id).filter(RFQ.quote_asset == quote_asset)
+    return q.order_by(Trade.id.desc()).all()
 
 
 @app.get("/reports/trades", response_class=HTMLResponse)
-def trades_report(request: Request, db: Session = Depends(get_db)):
-    trades = (
-        db.query(Trade)
-        .options(joinedload(Trade.quote).joinedload(Quote.rfq), selectinload(Trade.history))
-        .order_by(Trade.id.desc())
-        .all()
-    )
-    rows = [{"trade": trade, "status_times": status_timestamps(trade), **trade_values(trade)} for trade in trades]
-    return templates.TemplateResponse(
-        request=request,
-        name="report.html",
-        context={"rows": rows, "status_columns": REPORT_STATUS_COLUMNS},
-    )
+def trades_report(request: Request, client: str = Query(""), status: str = Query(""), side: str = Query(""), base_asset: str = Query(""), quote_asset: str = Query(""), db: Session = Depends(get_db)):
+    trades = filtered_trades(db, client, status, side, base_asset, quote_asset)
+    rows = [{"trade": t, **trade_values(t)} for t in trades]
+    return templates.TemplateResponse(request=request, name="report.html", context={"rows": rows, "status_columns": REPORT_STATUS_COLUMNS, "filters": locals(), "crypto_assets": CRYPTO_ASSETS, "fiat_assets": FIAT_ASSETS})
+
+
+def report_matrix(trades):
+    headers = ["Trade ID", "RFQ ID", "Quote ID", "Создано", "Клиент", "Операция", "Пара", "Сеть", "Количество криптовалюты", "Цена", "Сумма сделки", "Комиссия банка", "Валюта комиссии банка", "Плательщик комиссии банка", "Комиссия сети", "Валюта комиссии сети", "Плательщик комиссии сети", "Комиссии включены", "Текущий статус", "Дата текущего статуса", "Дилер", "AML-риск", "Банковский референс", "TX hash", "Причина отмены", "Последнее изменение"] + [f"Статус {label(s)}" for s in REPORT_STATUS_COLUMNS]
+    rows = []
+    for t in trades:
+        r, v = t.quote.rfq, trade_values(t)
+        rows.append([t.id, r.id, t.quote.id, format_datetime(t.created_at), r.client_name, label(r.side), f"{r.base_asset}/{r.quote_asset}", r.network or "—", v["crypto_amount"], t.quote.price, v["fiat_amount"], v["bank_fee"], r.quote_asset, t.bank_fee_payer, v["network_fee"], r.base_asset, t.network_fee_payer, "Да" if t.fees_included_in_quote else "Нет", label(t.status), v["current_status_time"], t.quote.dealer_name, t.aml_risk or "—", t.bank_reference or "—", t.tx_hash or "—", t.cancellation_reason or "—", format_datetime(t.updated_at)] + [v["status_times"][s.value] for s in REPORT_STATUS_COLUMNS])
+    return headers, rows
 
 
 @app.get("/reports/trades.csv")
 def trades_report_csv(db: Session = Depends(get_db)):
-    trades = (
-        db.query(Trade)
-        .options(joinedload(Trade.quote).joinedload(Quote.rfq), selectinload(Trade.history))
-        .order_by(Trade.id.desc())
-        .all()
-    )
-    buffer = StringIO()
-    writer = csv.writer(buffer, delimiter=";")
-    writer.writerow(["ID", "Дата создания", "Клиент", "Операция", "Пара", "Криптовалюта", "Цена", "Сумма сделки", "Фиатная валюта", "Комиссия банка", "Валюта комиссии банка", "Комиссия сети", "Валюта комиссии сети", "Текущий статус"] + [f"Дата и время: {status.value}" for status in REPORT_STATUS_COLUMNS])
-    for trade in trades:
-        values = trade_values(trade)
-        rfq = trade.quote.rfq
-        times = status_timestamps(trade)
-        writer.writerow([trade.id, format_datetime(trade.created_at), rfq.client_name, rfq.side, f"{rfq.base_asset}/{rfq.quote_asset}", values["crypto_amount"], trade.quote.price, values["fiat_amount"], rfq.quote_asset, values["bank_fee"], rfq.quote_asset, values["network_fee"], rfq.base_asset, trade.status.value] + [times[status.value] for status in REPORT_STATUS_COLUMNS])
-    data = "\ufeff" + buffer.getvalue()
-    return StreamingResponse(iter([data]), media_type="text/csv; charset=utf-8", headers={"Content-Disposition": "attachment; filename=otc_trades_report.csv"})
+    headers, rows = report_matrix(filtered_trades(db)); buffer = StringIO(); writer = csv.writer(buffer, delimiter=";"); writer.writerow(headers); writer.writerows(rows)
+    return StreamingResponse(iter(["\ufeff" + buffer.getvalue()]), media_type="text/csv; charset=utf-8", headers={"Content-Disposition": "attachment; filename=otc_trades_report.csv"})
+
+
+@app.get("/reports/trades.xlsx")
+def trades_report_xlsx(db: Session = Depends(get_db)):
+    headers, rows = report_matrix(filtered_trades(db)); wb = Workbook(); ws = wb.active; ws.title = "OTC сделки"; ws.append(headers)
+    for row in rows: ws.append(row)
+    ws.freeze_panes = "A2"; ws.auto_filter.ref = ws.dimensions
+    for col in ws.columns: ws.column_dimensions[col[0].column_letter].width = min(max(len(str(c.value or "")) for c in col) + 2, 45)
+    output = BytesIO(); wb.save(output); output.seek(0)
+    return StreamingResponse(output, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers={"Content-Disposition": "attachment; filename=otc_trades_report.xlsx"})
 
 
 @app.get("/api/trades")
 def api_trades(db: Session = Depends(get_db)):
-    trades = db.query(Trade).options(joinedload(Trade.quote).joinedload(Quote.rfq)).all()
     result = []
-    for trade in trades:
-        values = trade_values(trade)
-        rfq = trade.quote.rfq
-        result.append({
-            "id": trade.id,
-            "status": trade.status.value,
-            "client": rfq.client_name,
-            "side": rfq.side,
-            "pair": f"{rfq.base_asset}/{rfq.quote_asset}",
-            "crypto_amount": float(values["crypto_amount"]),
-            "price": float(trade.quote.price),
-            "fiat_amount": float(values["fiat_amount"]),
-            "bank_fee": float(values["bank_fee"]),
-            "bank_fee_currency": rfq.quote_asset,
-            "network_fee": float(values["network_fee"]),
-            "network_fee_currency": rfq.base_asset,
-        })
+    for t in filtered_trades(db):
+        r, v = t.quote.rfq, trade_values(t)
+        result.append({"id": t.id, "status": t.status.value, "status_label": label(t.status), "client": r.client_name, "side": r.side, "pair": f"{r.base_asset}/{r.quote_asset}", "network": r.network, "crypto_amount": float(v["crypto_amount"]), "price": float(t.quote.price), "fiat_amount": float(v["fiat_amount"]), "bank_fee": float(v["bank_fee"]), "bank_fee_currency": r.quote_asset, "network_fee": float(v["network_fee"]), "network_fee_currency": r.base_asset})
     return result
+
+@app.get("/parties", response_class=HTMLResponse)
+def parties_page(request: Request, db: Session = Depends(get_db)):
+    parties = db.query(Party).order_by(Party.id.desc()).all()
+    return templates.TemplateResponse(request=request, name="parties.html", context={"parties": parties})
+
+
+@app.post("/parties")
+def create_party(
+    party_type: PartyType = Form(...), display_name: str = Form(...), inn: str = Form("00"),
+    okpo: str = Form("00"), country_code: str = Form("417"), resident_code: str = Form("1"),
+    orgform_code: str = Form("20"), registration_number: str = Form("00"),
+    registration_authority: str = Form("00"), activity: str = Form("00"),
+    last_name: str = Form("00"), first_name: str = Form("00"), middle_name: str = Form("00"),
+    document_code: str = Form("00"), document_series: str = Form("00"), document_number: str = Form("00"),
+    birth_place: str = Form("00"), legal_postcode: str = Form("00"), legal_town_code: str = Form("00"),
+    legal_region: str = Form("00"), legal_area: str = Form("00"), legal_town: str = Form("00"),
+    legal_street: str = Form("00"), legal_house: str = Form("00"), legal_room: str = Form("00"),
+    account_number: str = Form("00"), account_bank: str = Form("00"), account_bic: str = Form("00"),
+    account_country_code: str = Form("00"), account_address: str = Form("00"), db: Session = Depends(get_db)
+):
+    party = Party(
+        party_type=party_type, display_name=display_name.strip(), inn=inn.strip() or "00", okpo=okpo.strip() or "00",
+        country_code=country_code.strip() or "00", resident_code=resident_code, orgform_code=orgform_code,
+        registration_number=registration_number.strip() or "00", registration_authority=registration_authority.strip() or "00",
+        activity=activity.strip() or "00", last_name=last_name.strip() or "00", first_name=first_name.strip() or "00",
+        middle_name=middle_name.strip() or "00", document_code=document_code.strip() or "00",
+        document_series=document_series.strip() or "00", document_number=document_number.strip() or "00",
+        birth_place=birth_place.strip() or "00", legal_postcode=legal_postcode.strip() or "00",
+        legal_town_code=legal_town_code.strip() or "00", legal_region=legal_region.strip() or "00",
+        legal_area=legal_area.strip() or "00", legal_town=legal_town.strip() or "00",
+        legal_street=legal_street.strip() or "00", legal_house=legal_house.strip() or "00", legal_room=legal_room.strip() or "00",
+        actual_postcode=legal_postcode.strip() or "00", actual_town_code=legal_town_code.strip() or "00",
+        actual_region=legal_region.strip() or "00", actual_area=legal_area.strip() or "00", actual_town=legal_town.strip() or "00",
+        actual_street=legal_street.strip() or "00", actual_house=legal_house.strip() or "00", actual_room=legal_room.strip() or "00",
+        account_number=account_number.strip() or "00", account_bank=account_bank.strip() or "00",
+        account_bic=account_bic.strip() or "00", account_country_code=account_country_code.strip() or "00",
+        account_address=account_address.strip() or "00",
+    )
+    db.add(party); db.commit()
+    return RedirectResponse("/parties", 303)
+
+
+@app.get("/settings/reporting", response_class=HTMLResponse)
+def reporting_settings(request: Request, db: Session = Depends(get_db)):
+    profile = db.query(ReportingProfile).first()
+    return templates.TemplateResponse(request=request, name="reporting_settings.html", context={"profile": profile})
+
+
+@app.post("/settings/reporting")
+def save_reporting_settings(
+    inn: str = Form(...), person_name: str = Form(...), org_kind: str = Form("28"), bank_bic: str = Form("00"),
+    okpo: str = Form("00"), orgform_code: str = Form("20"), branch: str = Form("00"),
+    legal_postcode: str = Form("00"), legal_town_code: str = Form("00"), legal_region: str = Form("00"),
+    legal_area: str = Form("00"), legal_town: str = Form("00"), legal_street: str = Form("00"),
+    legal_house: str = Form("00"), legal_room: str = Form("00"), performer_name: str = Form("00"),
+    performer_post: str = Form("00"), phone: str = Form("00"), db: Session = Depends(get_db)
+):
+    profile = db.query(ReportingProfile).first() or ReportingProfile(inn=inn, person_name=person_name)
+    for key, value in locals().copy().items():
+        if key in {"db", "profile"}: continue
+        if hasattr(profile, key): setattr(profile, key, (value.strip() or "00") if isinstance(value, str) else value)
+    db.add(profile); db.commit()
+    return RedirectResponse("/settings/reporting", 303)
+
+
+@app.get("/regulatory", response_class=HTMLResponse)
+def regulatory_dashboard(request: Request, db: Session = Depends(get_db)):
+    reports = db.query(TradeReporting).options(joinedload(TradeReporting.trade).joinedload(Trade.quote).joinedload(Quote.rfq)).order_by(TradeReporting.id.desc()).all()
+    return templates.TemplateResponse(request=request, name="regulatory.html", context={"reports": reports})
+
+
+@app.get("/trades/{trade_id}/regulatory", response_class=HTMLResponse)
+def regulatory_trade_page(trade_id: int, request: Request, db: Session = Depends(get_db)):
+    trade = db.query(Trade).options(joinedload(Trade.quote).joinedload(Quote.rfq)).filter(Trade.id == trade_id).first()
+    if not trade: raise HTTPException(404, "Сделка не найдена")
+    reporting = db.query(TradeReporting).filter_by(trade_id=trade_id).first()
+    parties = db.query(Party).order_by(Party.display_name).all()
+    profile = db.query(ReportingProfile).first()
+    issues = validate_report(profile, reporting, trade) if profile and reporting else []
+    return templates.TemplateResponse(request=request, name="trade_regulatory.html", context={"trade": trade, "reporting": reporting, "parties": parties, "profile": profile, "issues": issues, "currency_codes": CURRENCY_CODES})
+
+
+@app.post("/trades/{trade_id}/regulatory")
+def save_trade_reporting(
+    trade_id: int, client_party_id: int = Form(...), exchange_party_id: int = Form(...),
+    message_number: int = Form(...), message_type: str = Form("1"), operation_date: str = Form(...),
+    operation_code: str = Form("8001"), additional_operation_codes: str = Form("00"), currency_codes: str = Form("00"),
+    kgs_equivalent: Decimal = Form(...), reason: str = Form(...), unusual_code: str = Form(...),
+    unusual_codes: str = Form("00"), operation_state: str = Form("1"), extra_info: str = Form("00"),
+    db: Session = Depends(get_db)
+):
+    trade = db.get(Trade, trade_id)
+    if not trade: raise HTTPException(404, "Сделка не найдена")
+    try: parsed_dt = datetime.fromisoformat(operation_date)
+    except ValueError as exc: raise HTTPException(400, "Неверная дата операции") from exc
+    reporting = db.query(TradeReporting).filter_by(trade_id=trade_id).first() or TradeReporting(trade_id=trade_id)
+    reporting.client_party_id, reporting.exchange_party_id = client_party_id, exchange_party_id
+    reporting.message_number, reporting.message_type, reporting.operation_date = message_number, message_type, parsed_dt
+    reporting.operation_code, reporting.additional_operation_codes = operation_code.strip(), additional_operation_codes.strip() or "00"
+    reporting.currency_codes, reporting.kgs_equivalent = currency_codes.strip(), kgs_equivalent
+    reporting.reason, reporting.unusual_code, reporting.unusual_codes = reason.strip(), unusual_code.strip(), unusual_codes.strip() or "00"
+    reporting.operation_state, reporting.extra_info = operation_state, extra_info.strip() or "00"
+    db.add(reporting); db.commit()
+    return RedirectResponse(f"/trades/{trade_id}/regulatory", 303)
+
+
+@app.get("/trades/{trade_id}/regulatory.xml")
+def export_trade_xml(trade_id: int, db: Session = Depends(get_db)):
+    trade = db.query(Trade).options(joinedload(Trade.quote).joinedload(Quote.rfq)).filter(Trade.id == trade_id).first()
+    reporting = db.query(TradeReporting).options(joinedload(TradeReporting.client_party), joinedload(TradeReporting.exchange_party)).filter_by(trade_id=trade_id).first()
+    profile = db.query(ReportingProfile).first()
+    if not trade or not reporting or not profile: raise HTTPException(400, "Сначала заполните профиль и регуляторные данные сделки")
+    issues = validate_report(profile, reporting, trade)
+    if issues: raise HTTPException(422, detail=[{"field": x.field, "message": x.message, "code": x.code} for x in issues])
+    payload = generate_xml(profile, reporting, trade)
+    return Response(content=payload, media_type="application/xml; charset=windows-1251", headers={"Content-Disposition": f"attachment; filename=form1_trade_{trade_id}.xml"})

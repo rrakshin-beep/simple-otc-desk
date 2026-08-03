@@ -1,67 +1,7 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Сделка #{{trade.id}}</title><link rel="stylesheet" href="/static/style.css"></head><body><header><div><h1>Сделка #{{trade.id}}</h1><a href="/">← На главную</a></div><a class="header-link" href="/reports/trades">Сводный отчет</a></header><main>
-<section class="card"><h2>Данные заявки</h2>
-<p><b>Клиент:</b> {{trade.quote.rfq.client_name}}</p>
-<p><b>Операция:</b> {{trade.quote.rfq.side}}</p>
-<p><b>Пара:</b> {{trade.quote.rfq.base_asset}}/{{trade.quote.rfq.quote_asset}}</p>
-<p><b>Вводная заявки:</b> {% if trade.quote.rfq.amount_type.value == 'FIAT' %}{{trade.quote.rfq.fiat_amount}} {{trade.quote.rfq.quote_asset}}{% else %}{{trade.quote.rfq.amount}} {{trade.quote.rfq.base_asset}}{% endif %}</p>
-<p><b>Дата заявки:</b> {{format_datetime(trade.quote.rfq.created_at)}}</p>
-<p><b>Дата котировки:</b> {{format_datetime(trade.quote.created_at)}}</p>
-<p><b>Цена котировки:</b> {{trade.quote.price}} {{trade.quote.rfq.quote_asset}}</p>
-</section>
-<section class="card"><h2>Параметры</h2><div class="facts"><div>Клиент<b>{{trade.quote.rfq.client_name}}</b></div><div>Операция<b>{{trade.quote.rfq.side}}</b></div><div>Пара<b>{{trade.quote.rfq.base_asset}}/{{trade.quote.rfq.quote_asset}}</b></div><div>Количество криптовалюты<b>{{crypto_amount}} {{trade.quote.rfq.base_asset}}</b></div><div>Цена<b>{{trade.quote.price}} {{trade.quote.rfq.quote_asset}}</b></div><div>Сумма сделки<b>{{fiat_amount}} {{trade.quote.rfq.quote_asset}}</b></div><div>Комиссия банка<b>{{bank_fee}} {{trade.quote.rfq.quote_asset}}</b></div><div>Комиссия сети<b>{{network_fee}} {{trade.quote.rfq.base_asset}}</b></div><div>Статус<b>{{trade.status.value}}</b></div></div></section>
-<section class="card"><h2>Расходы по сделке</h2><form method="post" action="/trades/{{trade.id}}/fees" class="grid"><label>Комиссия банка, {{trade.quote.rfq.quote_asset}}<input name="bank_fee" type="number" step="0.00000001" min="0" value="{{bank_fee}}" placeholder="Комиссия банка"></label><label>Комиссия сети, {{trade.quote.rfq.base_asset}}<input name="network_fee" type="number" step="0.00000001" min="0" value="{{network_fee}}" placeholder="Комиссия сети"></label><button>Сохранить расходы</button></form></section>
-<section class="card"><h2>Изменить статус</h2>{% if allowed %}<form method="post" action="/trades/{{trade.id}}/status" class="grid"><select name="new_status">{% for s in allowed %}<option value="{{s.value}}">{{s.value}}</option>{% endfor %}</select><input name="changed_by" value="OTC Operator" required><input name="note" placeholder="Комментарий"><button>Применить</button></form>{% else %}<p>Сделка находится в финальном статусе.</p>{% endif %}</section>
-<section class="card"><h2>Удаление сделки</h2><p>Доступно на любом этапе, включая завершенную сделку.</p><form method="post" action="/trades/{{trade.id}}/delete" onsubmit="return confirm('Удалить сделку #{{trade.id}}? Это действие нельзя отменить.');"><button type="submit">Удалить сделку</button></form></section>
-
-<section class="card">
-<h2>Редактирование сделки</h2>
-<form method="post" action="/trades/{{trade.id}}/edit" class="grid" id="trade-edit-form">
-<label>Клиент<input name="client_name" value="{{trade.quote.rfq.client_name}}" required></label>
-<label>Операция<select name="side"><option value="BUY" {% if trade.quote.rfq.side == 'BUY' %}selected{% endif %}>Купить</option><option value="SELL" {% if trade.quote.rfq.side == 'SELL' %}selected{% endif %}>Продать</option></select></label>
-<label>Криптовалюта<select name="base_asset">
-<option value="USDT" {% if trade.quote.rfq.base_asset == 'USDT' %}selected{% endif %}>USDT</option>
-<option value="BTC" {% if trade.quote.rfq.base_asset == 'BTC' %}selected{% endif %}>Bitcoin (BTC)</option>
-<option value="USDC" {% if trade.quote.rfq.base_asset == 'USDC' %}selected{% endif %}>USDC</option>
-<option value="TRX" {% if trade.quote.rfq.base_asset == 'TRX' %}selected{% endif %}>Tron (TRX)</option>
-<option value="ETH" {% if trade.quote.rfq.base_asset == 'ETH' %}selected{% endif %}>Эфир (ETH)</option>
-<option value="TON" {% if trade.quote.rfq.base_asset == 'TON' %}selected{% endif %}>TON</option>
-</select></label>
-<label>Фиатная валюта<select name="quote_asset">
-<option value="USD" {% if trade.quote.rfq.quote_asset == 'USD' %}selected{% endif %}>USD</option>
-<option value="EUR" {% if trade.quote.rfq.quote_asset == 'EUR' %}selected{% endif %}>EUR</option>
-<option value="KGS" {% if trade.quote.rfq.quote_asset == 'KGS' %}selected{% endif %}>KGS</option>
-<option value="RUB" {% if trade.quote.rfq.quote_asset == 'RUB' %}selected{% endif %}>RUB</option>
-</select></label>
-<label>Количество криптовалюты<input name="crypto_amount" id="edit-crypto-amount" type="number" step="0.00000001" min="0.00000001" value="{{crypto_amount}}" required></label>
-<label>Цена<input name="price" id="edit-price" type="number" step="0.00000001" min="0.00000001" value="{{trade.quote.price}}" required></label>
-<label>Расчетная сумма сделки<input id="edit-fiat-amount" type="number" step="0.00000001" value="{{fiat_amount}}" readonly></label>
-<label>Комиссия банка<input name="bank_fee" type="number" step="0.00000001" min="0" value="{{bank_fee}}"></label>
-<label>Комиссия сети<input name="network_fee" type="number" step="0.00000001" min="0" value="{{network_fee}}"></label>
-<label>Комментарий<input name="comment" value="{{trade.quote.rfq.comment or ''}}"></label>
-<label>Кто изменил<input name="changed_by" value="OTC Operator" required></label>
-<button type="submit">Сохранить изменения</button>
-</form>
-</section>
-<section class="card">
-<h2>Удаление сделки</h2>
-<p>Удаление доступно при любом статусе. Связанная котировка вернется в статус QUOTED.</p>
-<form method="post" action="/trades/{{trade.id}}/delete" onsubmit="return confirm('Удалить сделку #{{trade.id}}? Действие нельзя отменить.');">
-<button type="submit">Удалить сделку</button>
-</form>
-</section>
-<section class="card"><h2>История</h2><div class="table"><table><tr><th>Дата</th><th>Переход</th><th>Кто</th><th>Комментарий</th></tr>{% for h in trade.history|sort(attribute='id', reverse=true) %}<tr><td>{{format_datetime(h.created_at)}}</td><td>{{h.old_status or '—'}} → {{h.new_status}}</td><td>{{h.changed_by}}</td><td>{{h.note or ''}}</td></tr>{% endfor %}</table></div></section>
-</main>
-<script>
-const editCrypto = document.getElementById('edit-crypto-amount');
-const editPrice = document.getElementById('edit-price');
-const editFiat = document.getElementById('edit-fiat-amount');
-function recalculateTrade() {
-  const crypto = Number(editCrypto.value || 0);
-  const price = Number(editPrice.value || 0);
-  editFiat.value = (crypto * price).toFixed(8);
-}
-editCrypto.addEventListener('input', recalculateTrade);
-editPrice.addEventListener('input', recalculateTrade);
-recalculateTrade();
-</script>
-</body></html>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Сделка #{{trade.id}}</title><link rel="stylesheet" href="/static/style.css"></head><body><header><div><h1>Сделка #{{trade.id}}</h1><a href="/dealer">← К сделкам</a></div><a class="header-link" href="/reports/trades">Отчет</a></header><main>
+{% if trade.archived %}<div class="alert">Сделка архивирована: {{trade.archive_reason}} ({{trade.archived_by}}, {{format_datetime(trade.archived_at)}})</div>{% endif %}
+<section class="card"><h2>Неизменяемые условия сделки</h2><div class="facts"><div>Клиент<b>{{trade.quote.rfq.client_name}}</b></div><div>Операция<b>{{label(trade.quote.rfq.side)}}</b></div><div>Пара<b>{{trade.quote.rfq.base_asset}}/{{trade.quote.rfq.quote_asset}}</b></div><div>Сеть<b>{{trade.quote.rfq.network or '—'}}</b></div><div>Количество<b>{{crypto_amount}} {{trade.quote.rfq.base_asset}}</b></div><div>Цена<b>{{trade.quote.price}} {{trade.quote.rfq.quote_asset}} за 1 {{trade.quote.rfq.base_asset}}</b></div><div>Сумма сделки<b>{{fiat_amount}} {{trade.quote.rfq.quote_asset}}</b></div><div>Дилер<b>{{trade.quote.dealer_name}}</b></div><div>Статус<b>{{label(trade.status)}}</b></div><div>Дата статуса<b>{{current_status_time}}</b></div></div></section>
+{% if not trade.archived %}<section class="card"><h2>Расходы и расчетные реквизиты</h2><form method="post" action="/trades/{{trade.id}}/details" class="grid"><label>Комиссия банка, {{trade.quote.rfq.quote_asset}}<input name="bank_fee" type="number" step="0.00000001" min="0" value="{{bank_fee}}"></label><label>Плательщик<select name="bank_fee_payer"><option value="CLIENT" {% if trade.bank_fee_payer=='CLIENT' %}selected{% endif %}>Клиент</option><option value="EXCHANGE" {% if trade.bank_fee_payer=='EXCHANGE' %}selected{% endif %}>Биржа</option></select></label><label>Комиссия сети, {{trade.quote.rfq.base_asset}}<input name="network_fee" type="number" step="0.00000001" min="0" value="{{network_fee}}"></label><label>Плательщик<select name="network_fee_payer"><option value="CLIENT" {% if trade.network_fee_payer=='CLIENT' %}selected{% endif %}>Клиент</option><option value="EXCHANGE" {% if trade.network_fee_payer=='EXCHANGE' %}selected{% endif %}>Биржа</option></select></label><label>Банковский референс<input name="bank_reference" value="{{trade.bank_reference or ''}}"></label><label>TX hash<input name="tx_hash" value="{{trade.tx_hash or ''}}"></label><label>AML-риск<select name="aml_risk"><option value="">Не указан</option>{% for x in ['LOW','MEDIUM','HIGH'] %}<option {% if trade.aml_risk==x %}selected{% endif %}>{{x}}</option>{% endfor %}</select></label><label><input type="checkbox" name="fees_included_in_quote" value="true" {% if trade.fees_included_in_quote %}checked{% endif %}> Комиссии включены в котировку</label><input name="actor" value="OTC Operator" required><button>Сохранить</button></form></section>
+<section class="card"><h2>Изменить статус</h2>{% if allowed %}<form method="post" action="/trades/{{trade.id}}/status" class="grid"><select name="new_status">{% for s in allowed %}<option value="{{s.value}}">{{label(s)}}</option>{% endfor %}</select><input name="changed_by" value="OTC Operator" required><input name="note" placeholder="Комментарий; для отмены обязателен"><button>Применить</button></form>{% else %}<p>Финальный статус.</p>{% endif %}</section>
+<section class="card danger-zone"><h2>Архивирование сделки</h2><p>Запись не удаляется физически и остается в журнале аудита.</p><form method="post" action="/trades/{{trade.id}}/archive" class="grid"><input name="archived_by" value="Administrator" required><input name="reason" placeholder="Причина архивирования" required><button class="danger">Архивировать</button></form></section>{% endif %}
+<section class="card"><h2>Таймлайн статусов</h2><div class="timeline">{% for h in trade.history|sort(attribute='id') %}<div class="timeline-item"><span>✓</span><div><b>{{label(h.new_status)}}</b><small>{{format_datetime(h.created_at)}} · {{h.changed_by}}</small><p>{{h.note or ''}}</p></div></div>{% endfor %}</div></section></main></body></html>

@@ -74,7 +74,7 @@ def test_regulatory_profile_parties_validation_and_xml():
     physical = client.post('/parties', data={
         'party_type':'PHYSICAL','display_name':'Иванов Иван','inn':'12345678901234','okpo':'00','country_code':'643',
         'resident_code':'2','orgform_code':'00','registration_number':'00','registration_authority':'00','activity':'00',
-        'last_name':'Иванов','first_name':'Иван','middle_name':'Иванович','document_code':'01','document_series':'00',
+        'last_name':'Иванов','first_name':'Иван','middle_name':'Иванович','document_code':'001','document_series':'00',
         'document_number':'1234567890','birth_place':'Россия','legal_postcode':'00','legal_town_code':'643',
         'legal_region':'Москва','legal_area':'00','legal_town':'Москва','legal_street':'Тверская',
         'legal_house':'1','legal_room':'1','account_number':'TClientWallet','account_bank':'00',
@@ -85,7 +85,7 @@ def test_regulatory_profile_parties_validation_and_xml():
         'client_party_id':'2','exchange_party_id':'1','message_number':'1','message_type':'1',
         'operation_date':'2026-07-29T21:59','operation_code':'8001','additional_operation_codes':'2004',
         'currency_codes':'643','kgs_equivalent':'10000000','reason':'согласно ордеру клиента',
-        'unusual_code':'1000','unusual_codes':'00','operation_state':'1',
+        'unusual_code':'10007','unusual_codes':'00','operation_state':'1',
         'extra_info':'Покупка BTC за рубли'
     }, follow_redirects=False)
     assert report.status_code == 303

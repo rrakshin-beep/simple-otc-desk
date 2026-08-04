@@ -4,7 +4,9 @@ from datetime import datetime
 from decimal import Decimal
 from xml.etree.ElementTree import Element, SubElement, tostring
 
-CURRENCY_CODES = {"KGS": "417", "RUB": "643", "USD": "840", "EUR": "978"}
+from .reference_data import code_exists, currency_numeric_by_alpha
+
+CURRENCY_CODES = {asset: currency_numeric_by_alpha(asset) or "00" for asset in ("KGS", "RUB", "USD", "EUR")}
 
 @dataclass
 class ValidationIssue:
@@ -56,6 +58,25 @@ def validate_report(profile, reporting, trade) -> list[ValidationIssue]:
         issues.append(ValidationIssue("OPER.SUMCUR", "Сумма в исходной валюте должна быть больше нуля", 6))
     if Decimal(str(rfq.amount or 0)) <= 0:
         issues.append(ValidationIssue("OPER.SUMTGT", "Сумма в целевой валюте должна быть больше нуля", 6))
+    if reporting.operation_code and not code_exists("operation_codes", reporting.operation_code):
+        issues.append(ValidationIssue("OPER.OPER_CODE", f"Код операции {reporting.operation_code} отсутствует в справочнике", 4))
+    for code in [c.strip() for c in str(reporting.additional_operation_codes or "").split(",") if c.strip() and c.strip() != "00"]:
+        if not code_exists("operation_codes", code):
+            issues.append(ValidationIssue("OPER.OPER_CODES", f"Дополнительный код операции {code} отсутствует в справочнике", 4))
+    if reporting.unusual_code and reporting.unusual_code != "00" and not code_exists("unusual_codes", reporting.unusual_code):
+        issues.append(ValidationIssue("OPER.UNUSUAL_CODE", f"Код {reporting.unusual_code} отсутствует в справочнике критериев/признаков", 4))
+    for code in [c.strip() for c in str(reporting.unusual_codes or "").split(",") if c.strip() and c.strip() != "00"]:
+        if not code_exists("unusual_codes", code):
+            issues.append(ValidationIssue("OPER.UNUSUAL_CODES", f"Код {code} отсутствует в справочнике критериев/признаков", 4))
+    for role, party in (("CLIENT", reporting.client_party), ("EXCHANGE", reporting.exchange_party)):
+        if not party:
+            continue
+        if party.party_type.value == "LEGAL" and not code_exists("organization_forms", party.orgform_code):
+            issues.append(ValidationIssue(f"{role}.JURNAME.ORGFORM_CODE", f"Код ОПФ {party.orgform_code} отсутствует в справочнике", 4))
+        if party.party_type.value == "PHYSICAL" and party.document_code != "00" and not code_exists("document_codes", party.document_code):
+            issues.append(ValidationIssue(f"{role}.DOC.DOC_CODE", f"Код документа {party.document_code} отсутствует в справочнике", 4))
+        if party.country_code != "00" and not code_exists("countries", party.country_code.lstrip("0") or "0") and not code_exists("countries", party.country_code):
+            issues.append(ValidationIssue(f"{role}.NATION_CODE", f"Код страны {party.country_code} отсутствует в справочнике", 4))
     return issues
 
 

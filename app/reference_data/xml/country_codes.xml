@@ -1,0 +1,1788 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataroot xmlns:od="urn:schemas-microsoft-com:officedata" generated="2015-04-01T14:52:03">
+<ROW>
+<CODE>36</CODE>
+<CODE2>AU</CODE2>
+<CODE3>AUS</CODE3>
+<NAME>Австралия</NAME>
+<LONGNAME>Australia</LONGNAME>
+</ROW>
+<ROW>
+<CODE>40</CODE>
+<CODE2>AT</CODE2>
+<CODE3>AUT</CODE3>
+<NAME>Австрия</NAME>
+<LONGNAME>Austria</LONGNAME>
+</ROW>
+<ROW>
+<CODE>31</CODE>
+<CODE2>AZ</CODE2>
+<CODE3>AZE</CODE3>
+<NAME>Азербайджан</NAME>
+<LONGNAME>Azerbaijan</LONGNAME>
+</ROW>
+<ROW>
+<CODE>248</CODE>
+<CODE2>AX</CODE2>
+<CODE3>ALA</CODE3>
+<NAME>Аландские острова</NAME>
+<LONGNAME>Аland Islands</LONGNAME>
+</ROW>
+<ROW>
+<CODE>8</CODE>
+<CODE2>AL</CODE2>
+<CODE3>ALB</CODE3>
+<NAME>Албания </NAME>
+<LONGNAME>Albania</LONGNAME>
+</ROW>
+<ROW>
+<CODE>12</CODE>
+<CODE2>DZ</CODE2>
+<CODE3>DZA</CODE3>
+<NAME>Алжир </NAME>
+<LONGNAME>Algeria</LONGNAME>
+</ROW>
+<ROW>
+<CODE>16</CODE>
+<CODE2>AS</CODE2>
+<CODE3>ASM</CODE3>
+<NAME>Американское Самоа</NAME>
+<LONGNAME>American Samoa</LONGNAME>
+</ROW>
+<ROW>
+<CODE>660</CODE>
+<CODE2>AI</CODE2>
+<CODE3>AIA</CODE3>
+<NAME>Ангилья </NAME>
+<LONGNAME>Anguilla</LONGNAME>
+</ROW>
+<ROW>
+<CODE>24</CODE>
+<CODE2>AO</CODE2>
+<CODE3>AGO</CODE3>
+<NAME>Ангола </NAME>
+<LONGNAME>Angola</LONGNAME>
+</ROW>
+<ROW>
+<CODE>20</CODE>
+<CODE2>AD</CODE2>
+<CODE3>AND</CODE3>
+<NAME>Андорра </NAME>
+<LONGNAME>Andorra</LONGNAME>
+</ROW>
+<ROW>
+<CODE>10</CODE>
+<CODE2>AQ</CODE2>
+<CODE3>ATA</CODE3>
+<NAME>Антарктида</NAME>
+<LONGNAME>Antarctica</LONGNAME>
+</ROW>
+<ROW>
+<CODE>28</CODE>
+<CODE2>AG</CODE2>
+<CODE3>ATG</CODE3>
+<NAME>Антигуа и Барбуда </NAME>
+<LONGNAME>Antigua and Barbuda</LONGNAME>
+</ROW>
+<ROW>
+<CODE>530</CODE>
+<CODE2>AN</CODE2>
+<CODE3>ANT</CODE3>
+<NAME>Антильские острова</NAME>
+<LONGNAME>Antilles Island</LONGNAME>
+</ROW>
+<ROW>
+<CODE>32</CODE>
+<CODE2>AR</CODE2>
+<CODE3>ARG</CODE3>
+<NAME>Аргентина </NAME>
+<LONGNAME>Argentina</LONGNAME>
+</ROW>
+<ROW>
+<CODE>51</CODE>
+<CODE2>AM</CODE2>
+<CODE3>ARM</CODE3>
+<NAME>Армения</NAME>
+<LONGNAME>Armenia</LONGNAME>
+</ROW>
+<ROW>
+<CODE>533</CODE>
+<CODE2>AW</CODE2>
+<CODE3>ABW</CODE3>
+<NAME>Аруба</NAME>
+<LONGNAME>Aruba</LONGNAME>
+</ROW>
+<ROW>
+<CODE>396</CODE>
+<CODE2>JT</CODE2>
+<CODE3>JTN</CODE3>
+<NAME>Атолл Джонстон</NAME>
+<LONGNAME>Johnston Atoll</LONGNAME>
+</ROW>
+<ROW>
+<CODE>4</CODE>
+<CODE2>AF</CODE2>
+<CODE3>AFG</CODE3>
+<NAME>Афганистан </NAME>
+<LONGNAME>Afghanistan</LONGNAME>
+</ROW>
+<ROW>
+<CODE>44</CODE>
+<CODE2>BS</CODE2>
+<CODE3>BHS</CODE3>
+<NAME>Багамские Острова</NAME>
+<LONGNAME>Bahamas </LONGNAME>
+</ROW>
+<ROW>
+<CODE>50</CODE>
+<CODE2>BD</CODE2>
+<CODE3>BGD</CODE3>
+<NAME>Бангладеш</NAME>
+<LONGNAME>Bangladesh</LONGNAME>
+</ROW>
+<ROW>
+<CODE>52</CODE>
+<CODE2>BB</CODE2>
+<CODE3>BRB</CODE3>
+<NAME>Барбадос</NAME>
+<LONGNAME>Barbados</LONGNAME>
+</ROW>
+<ROW>
+<CODE>48</CODE>
+<CODE2>BH</CODE2>
+<CODE3>BHR</CODE3>
+<NAME>Бахрейн</NAME>
+<LONGNAME>Bahrain</LONGNAME>
+</ROW>
+<ROW>
+<CODE>112</CODE>
+<CODE2>BY</CODE2>
+<CODE3>BLR</CODE3>
+<NAME>Беларусь</NAME>
+<LONGNAME>Belarus</LONGNAME>
+</ROW>
+<ROW>
+<CODE>84</CODE>
+<CODE2>BZ</CODE2>
+<CODE3>BLZ</CODE3>
+<NAME>Белиз</NAME>
+<LONGNAME>Belize</LONGNAME>
+</ROW>
+<ROW>
+<CODE>56</CODE>
+<CODE2>BE</CODE2>
+<CODE3>BEL</CODE3>
+<NAME>Бельгия</NAME>
+<LONGNAME>Belgium</LONGNAME>
+</ROW>
+<ROW>
+<CODE>204</CODE>
+<CODE2>BJ</CODE2>
+<CODE3>BEN</CODE3>
+<NAME>Бенин</NAME>
+<LONGNAME>Benin</LONGNAME>
+</ROW>
+<ROW>
+<CODE>60</CODE>
+<CODE2>BM</CODE2>
+<CODE3>BMU</CODE3>
+<NAME>Бермудские Острова</NAME>
+<LONGNAME>Bermuda</LONGNAME>
+</ROW>
+<ROW>
+<CODE>100</CODE>
+<CODE2>BG</CODE2>
+<CODE3>BGR</CODE3>
+<NAME>Болгария</NAME>
+<LONGNAME>Bulgaria</LONGNAME>
+</ROW>
+<ROW>
+<CODE>68</CODE>
+<CODE2>BO</CODE2>
+<CODE3>BOL</CODE3>
+<NAME>Боливия</NAME>
+<LONGNAME>Bolivia (Plurinational State of Bolivia) </LONGNAME>
+</ROW>
+<ROW>
+<CODE>535</CODE>
+<CODE2>BQ</CODE2>
+<CODE3>BES</CODE3>
+<NAME>Бонэйр, Синт-Эстатиус и Саба (Карибские Нидерланды)</NAME>
+<LONGNAME>Bonaire, Sint Eustatius and Saba</LONGNAME>
+</ROW>
+<ROW>
+<CODE>70</CODE>
+<CODE2>BA</CODE2>
+<CODE3>BIH</CODE3>
+<NAME>Босния и Герцеговина</NAME>
+<LONGNAME>Bosnia and Herzegovina</LONGNAME>
+</ROW>
+<ROW>
+<CODE>72</CODE>
+<CODE2>BW</CODE2>
+<CODE3>BWA</CODE3>
+<NAME>Ботсвана</NAME>
+<LONGNAME>Botswana</LONGNAME>
+</ROW>
+<ROW>
+<CODE>76</CODE>
+<CODE2>BR</CODE2>
+<CODE3>BRA</CODE3>
+<NAME>Бразилия</NAME>
+<LONGNAME>Brazil</LONGNAME>
+</ROW>
+<ROW>
+<CODE>92</CODE>
+<CODE2>VG</CODE2>
+<CODE3>VGB</CODE3>
+<NAME>Британские Виргинские острова</NAME>
+<LONGNAME>Virgin Islands (British)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>86</CODE>
+<CODE2>IO</CODE2>
+<CODE3>IOT</CODE3>
+<NAME>Британские территории в Индийском океане</NAME>
+<LONGNAME>British Indian Ocean Territory (the)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>96</CODE>
+<CODE2>BN</CODE2>
+<CODE3>BRN</CODE3>
+<NAME>Бруней-Даруссалам</NAME>
+<LONGNAME>Brunei Darussalam</LONGNAME>
+</ROW>
+<ROW>
+<CODE>854</CODE>
+<CODE2>BF</CODE2>
+<CODE3>BFA</CODE3>
+<NAME>Буркина - Фасо</NAME>
+<LONGNAME>Burkina Faso</LONGNAME>
+</ROW>
+<ROW>
+<CODE>108</CODE>
+<CODE2>BI</CODE2>
+<CODE3>BDI</CODE3>
+<NAME>Бурунди</NAME>
+<LONGNAME>Burundi</LONGNAME>
+</ROW>
+<ROW>
+<CODE>64</CODE>
+<CODE2>BT</CODE2>
+<CODE3>BTN</CODE3>
+<NAME>Бутан</NAME>
+<LONGNAME>Bhutan</LONGNAME>
+</ROW>
+<ROW>
+<CODE>548</CODE>
+<CODE2>VU</CODE2>
+<CODE3>VUT</CODE3>
+<NAME>Вануату</NAME>
+<LONGNAME>Vanuatu</LONGNAME>
+</ROW>
+<ROW>
+<CODE>348</CODE>
+<CODE2>HU</CODE2>
+<CODE3>HUN</CODE3>
+<NAME>Венгрия</NAME>
+<LONGNAME>Hungary</LONGNAME>
+</ROW>
+<ROW>
+<CODE>862</CODE>
+<CODE2>VE</CODE2>
+<CODE3>VEN</CODE3>
+<NAME>Венесуэла</NAME>
+<LONGNAME>Venezuela (Bolivarian Republic of)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>850</CODE>
+<CODE2>VI</CODE2>
+<CODE3>VIR</CODE3>
+<NAME>Виргинские Острова (США)</NAME>
+<LONGNAME>Virgin Islands (U.S.)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>704</CODE>
+<CODE2>VN</CODE2>
+<CODE3>VNM</CODE3>
+<NAME>Вьетнам</NAME>
+<LONGNAME>Viet Nam</LONGNAME>
+</ROW>
+<ROW>
+<CODE>266</CODE>
+<CODE2>GA</CODE2>
+<CODE3>GAB</CODE3>
+<NAME>Габон</NAME>
+<LONGNAME>Gabon</LONGNAME>
+</ROW>
+<ROW>
+<CODE>328</CODE>
+<CODE2>GY</CODE2>
+<CODE3>GUY</CODE3>
+<NAME>Гайана</NAME>
+<LONGNAME>Guyana</LONGNAME>
+</ROW>
+<ROW>
+<CODE>332</CODE>
+<CODE2>HT</CODE2>
+<CODE3>HTI</CODE3>
+<NAME>Гаити</NAME>
+<LONGNAME>Haiti</LONGNAME>
+</ROW>
+<ROW>
+<CODE>270</CODE>
+<CODE2>GM</CODE2>
+<CODE3>GMB</CODE3>
+<NAME>Гамбия</NAME>
+<LONGNAME>Gambia (the)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>288</CODE>
+<CODE2>GH</CODE2>
+<CODE3>GHA</CODE3>
+<NAME>Гана</NAME>
+<LONGNAME>Ghana</LONGNAME>
+</ROW>
+<ROW>
+<CODE>312</CODE>
+<CODE2>GP</CODE2>
+<CODE3>GLP</CODE3>
+<NAME>Гваделупа</NAME>
+<LONGNAME>Guadeloupe</LONGNAME>
+</ROW>
+<ROW>
+<CODE>320</CODE>
+<CODE2>GT</CODE2>
+<CODE3>GTM</CODE3>
+<NAME>Гватемала</NAME>
+<LONGNAME>Guatemala</LONGNAME>
+</ROW>
+<ROW>
+<CODE>324</CODE>
+<CODE2>GN</CODE2>
+<CODE3>GIN</CODE3>
+<NAME>Гвинея</NAME>
+<LONGNAME>Guinea</LONGNAME>
+</ROW>
+<ROW>
+<CODE>624</CODE>
+<CODE2>GW</CODE2>
+<CODE3>GNB</CODE3>
+<NAME>Гвинея-Бисау</NAME>
+<LONGNAME>Guinea-Bissau</LONGNAME>
+</ROW>
+<ROW>
+<CODE>276</CODE>
+<CODE2>DE</CODE2>
+<CODE3>DEU</CODE3>
+<NAME>Германия</NAME>
+<LONGNAME>Germany</LONGNAME>
+</ROW>
+<ROW>
+<CODE>831</CODE>
+<CODE2>GG</CODE2>
+<CODE3>GGY</CODE3>
+<NAME>Гернси</NAME>
+<LONGNAME>Guernsey</LONGNAME>
+</ROW>
+<ROW>
+<CODE>292</CODE>
+<CODE2>GI</CODE2>
+<CODE3>GIB</CODE3>
+<NAME>Гибралтар</NAME>
+<LONGNAME>Gibraltar</LONGNAME>
+</ROW>
+<ROW>
+<CODE>340</CODE>
+<CODE2>HN</CODE2>
+<CODE3>HND</CODE3>
+<NAME>Гондурас</NAME>
+<LONGNAME>Honduras</LONGNAME>
+</ROW>
+<ROW>
+<CODE>344</CODE>
+<CODE2>HK</CODE2>
+<CODE3>HKG</CODE3>
+<NAME>Гонконг</NAME>
+<LONGNAME>Hong Kong</LONGNAME>
+</ROW>
+<ROW>
+<CODE>308</CODE>
+<CODE2>GD</CODE2>
+<CODE3>GRD</CODE3>
+<NAME>Гренада</NAME>
+<LONGNAME>Grenada</LONGNAME>
+</ROW>
+<ROW>
+<CODE>304</CODE>
+<CODE2>GL</CODE2>
+<CODE3>GRL</CODE3>
+<NAME>Гренландия</NAME>
+<LONGNAME>Greenland</LONGNAME>
+</ROW>
+<ROW>
+<CODE>300</CODE>
+<CODE2>GR</CODE2>
+<CODE3>GRC</CODE3>
+<NAME>Греция</NAME>
+<LONGNAME>Greece</LONGNAME>
+</ROW>
+<ROW>
+<CODE>268</CODE>
+<CODE2>GE</CODE2>
+<CODE3>GEO</CODE3>
+<NAME>Грузия</NAME>
+<LONGNAME>Georgia</LONGNAME>
+</ROW>
+<ROW>
+<CODE>316</CODE>
+<CODE2>GU</CODE2>
+<CODE3>GUM</CODE3>
+<NAME>Гуам </NAME>
+<LONGNAME>Guam</LONGNAME>
+</ROW>
+<ROW>
+<CODE>208</CODE>
+<CODE2>DK</CODE2>
+<CODE3>DNK</CODE3>
+<NAME>Дания</NAME>
+<LONGNAME>Denmark</LONGNAME>
+</ROW>
+<ROW>
+<CODE>180</CODE>
+<CODE2>CD</CODE2>
+<CODE3>COD</CODE3>
+<NAME>Демократическая Республика Конго (Республика Заир)</NAME>
+<LONGNAME>Congo (the Democratic Republic of the)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>832</CODE>
+<CODE2>JE</CODE2>
+<CODE3>JEY</CODE3>
+<NAME>Джерси</NAME>
+<LONGNAME>Jersey</LONGNAME>
+</ROW>
+<ROW>
+<CODE>262</CODE>
+<CODE2>DJ</CODE2>
+<CODE3>DJI</CODE3>
+<NAME>Джибути</NAME>
+<LONGNAME>Djibouti</LONGNAME>
+</ROW>
+<ROW>
+<CODE>212</CODE>
+<CODE2>DM</CODE2>
+<CODE3>DMA</CODE3>
+<NAME>Доминика</NAME>
+<LONGNAME>Dominica</LONGNAME>
+</ROW>
+<ROW>
+<CODE>214</CODE>
+<CODE2>DO</CODE2>
+<CODE3>DOM</CODE3>
+<NAME>Доминиканская Республика</NAME>
+<LONGNAME>Dominican Republic (the)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>818</CODE>
+<CODE2>EG</CODE2>
+<CODE3>EGY</CODE3>
+<NAME>Египет</NAME>
+<LONGNAME>Egypt</LONGNAME>
+</ROW>
+<ROW>
+<CODE>894</CODE>
+<CODE2>ZM</CODE2>
+<CODE3>ZMB</CODE3>
+<NAME>Замбия</NAME>
+<LONGNAME>Zambia</LONGNAME>
+</ROW>
+<ROW>
+<CODE>732</CODE>
+<CODE2>EH</CODE2>
+<CODE3>ESH</CODE3>
+<NAME>Западная Сахара</NAME>
+<LONGNAME>Western Sahara</LONGNAME>
+</ROW>
+<ROW>
+<CODE>716</CODE>
+<CODE2>ZW</CODE2>
+<CODE3>ZWE</CODE3>
+<NAME>Зимбабве</NAME>
+<LONGNAME>Zimbabwe</LONGNAME>
+</ROW>
+<ROW>
+<CODE>887</CODE>
+<CODE2>YE</CODE2>
+<CODE3>YEM</CODE3>
+<NAME>Йемен</NAME>
+<LONGNAME>Yemen</LONGNAME>
+</ROW>
+<ROW>
+<CODE>376</CODE>
+<CODE2>IL</CODE2>
+<CODE3>ISR</CODE3>
+<NAME>Израиль</NAME>
+<LONGNAME>Israel</LONGNAME>
+</ROW>
+<ROW>
+<CODE>356</CODE>
+<CODE2>IN</CODE2>
+<CODE3>IND</CODE3>
+<NAME>Индия</NAME>
+<LONGNAME>India</LONGNAME>
+</ROW>
+<ROW>
+<CODE>360</CODE>
+<CODE2>ID</CODE2>
+<CODE3>IDN</CODE3>
+<NAME>Индонезия</NAME>
+<LONGNAME>Indonesia</LONGNAME>
+</ROW>
+<ROW>
+<CODE>400</CODE>
+<CODE2>JO</CODE2>
+<CODE3>JOR</CODE3>
+<NAME>Иордания</NAME>
+<LONGNAME>Jordan</LONGNAME>
+</ROW>
+<ROW>
+<CODE>368</CODE>
+<CODE2>IQ</CODE2>
+<CODE3>IRQ</CODE3>
+<NAME>Ирак</NAME>
+<LONGNAME>Iraq</LONGNAME>
+</ROW>
+<ROW>
+<CODE>364</CODE>
+<CODE2>IR</CODE2>
+<CODE3>IRN</CODE3>
+<NAME>Иран (Исламская Республика Иран)</NAME>
+<LONGNAME>Iran (Islamic Republic of Iran)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>372</CODE>
+<CODE2>IE</CODE2>
+<CODE3>IRL</CODE3>
+<NAME>Ирландия</NAME>
+<LONGNAME>Ireland</LONGNAME>
+</ROW>
+<ROW>
+<CODE>352</CODE>
+<CODE2>IS</CODE2>
+<CODE3>ISL</CODE3>
+<NAME>Исландия</NAME>
+<LONGNAME>Iceland</LONGNAME>
+</ROW>
+<ROW>
+<CODE>724</CODE>
+<CODE2>ES</CODE2>
+<CODE3>ESP</CODE3>
+<NAME>Испания</NAME>
+<LONGNAME>Spain</LONGNAME>
+</ROW>
+<ROW>
+<CODE>380</CODE>
+<CODE2>IT</CODE2>
+<CODE3>ITA</CODE3>
+<NAME>Италия</NAME>
+<LONGNAME>Italy</LONGNAME>
+</ROW>
+<ROW>
+<CODE>132</CODE>
+<CODE2>CV</CODE2>
+<CODE3>CPV</CODE3>
+<NAME>Кабо-Верде</NAME>
+<LONGNAME>Cabo Verde</LONGNAME>
+</ROW>
+<ROW>
+<CODE>398</CODE>
+<CODE2>KZ</CODE2>
+<CODE3>KAZ</CODE3>
+<NAME>Казахстан</NAME>
+<LONGNAME>Kazakhstan</LONGNAME>
+</ROW>
+<ROW>
+<CODE>116</CODE>
+<CODE2>KH</CODE2>
+<CODE3>KHM</CODE3>
+<NAME>Камбоджа</NAME>
+<LONGNAME>Cambodia</LONGNAME>
+</ROW>
+<ROW>
+<CODE>120</CODE>
+<CODE2>CM</CODE2>
+<CODE3>CMR</CODE3>
+<NAME>Камерун</NAME>
+<LONGNAME>Cameroon</LONGNAME>
+</ROW>
+<ROW>
+<CODE>124</CODE>
+<CODE2>CA</CODE2>
+<CODE3>CAN</CODE3>
+<NAME>Канада</NAME>
+<LONGNAME>Canada</LONGNAME>
+</ROW>
+<ROW>
+<CODE>634</CODE>
+<CODE2>QA</CODE2>
+<CODE3>QAT</CODE3>
+<NAME>Катар</NAME>
+<LONGNAME>Qatar</LONGNAME>
+</ROW>
+<ROW>
+<CODE>404</CODE>
+<CODE2>KE</CODE2>
+<CODE3>KEN</CODE3>
+<NAME>Кения</NAME>
+<LONGNAME>Kenya</LONGNAME>
+</ROW>
+<ROW>
+<CODE>196</CODE>
+<CODE2>CY</CODE2>
+<CODE3>CYP</CODE3>
+<NAME>Кипр</NAME>
+<LONGNAME>Cyprus</LONGNAME>
+</ROW>
+<ROW>
+<CODE>296</CODE>
+<CODE2>KI</CODE2>
+<CODE3>KIR</CODE3>
+<NAME>Кирибати</NAME>
+<LONGNAME>Kiribati</LONGNAME>
+</ROW>
+<ROW>
+<CODE>156</CODE>
+<CODE2>CN</CODE2>
+<CODE3>CHN</CODE3>
+<NAME>Китай</NAME>
+<LONGNAME>China</LONGNAME>
+</ROW>
+<ROW>
+<CODE>166</CODE>
+<CODE2>CC</CODE2>
+<CODE3>CCK</CODE3>
+<NAME>Кокосовые острова или Килинг</NAME>
+<LONGNAME>Cocos (Keeling) Islands (the)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>170</CODE>
+<CODE2>CO</CODE2>
+<CODE3>COL</CODE3>
+<NAME>Колумбия</NAME>
+<LONGNAME>Colombia</LONGNAME>
+</ROW>
+<ROW>
+<CODE>174</CODE>
+<CODE2>KM</CODE2>
+<CODE3>COM</CODE3>
+<NAME>Коморские Острова</NAME>
+<LONGNAME>Comoros (the)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>178</CODE>
+<CODE2>CG</CODE2>
+<CODE3>COG</CODE3>
+<NAME>Конго (Браззавиль)</NAME>
+<LONGNAME>Congo (the)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>408</CODE>
+<CODE2>KP</CODE2>
+<CODE3>PRK</CODE3>
+<NAME>Корейская Народно- Демократическая Республика</NAME>
+<LONGNAME>Democratic People’s Republic of Korea</LONGNAME>
+</ROW>
+<ROW>
+<CODE>188</CODE>
+<CODE2>CR</CODE2>
+<CODE3>CRI</CODE3>
+<NAME>Коста-Pика</NAME>
+<LONGNAME>Costa Rica</LONGNAME>
+</ROW>
+<ROW>
+<CODE>384</CODE>
+<CODE2>CI</CODE2>
+<CODE3>CIV</CODE3>
+<NAME>Кот-д’ Ивуар</NAME>
+<LONGNAME>Côte d&apos;Ivoire</LONGNAME>
+</ROW>
+<ROW>
+<CODE>192</CODE>
+<CODE2>CU</CODE2>
+<CODE3>CUB</CODE3>
+<NAME>Куба</NAME>
+<LONGNAME>Cuba</LONGNAME>
+</ROW>
+<ROW>
+<CODE>414</CODE>
+<CODE2>KW</CODE2>
+<CODE3>KWT</CODE3>
+<NAME>Кувейт</NAME>
+<LONGNAME>Kuwait</LONGNAME>
+</ROW>
+<ROW>
+<CODE>417</CODE>
+<CODE2>KG</CODE2>
+<CODE3>KGZ</CODE3>
+<NAME>Кыргызстан</NAME>
+<LONGNAME>Kyrgyzstan</LONGNAME>
+</ROW>
+<ROW>
+<CODE>531</CODE>
+<CODE2>CW</CODE2>
+<CODE3>CUW</CODE3>
+<NAME>Кюрасао</NAME>
+<LONGNAME>Curaçao</LONGNAME>
+</ROW>
+<ROW>
+<CODE>458</CODE>
+<CODE2>MY</CODE2>
+<CODE3>MYS</CODE3>
+<NAME>Лабуан (Малайзия)</NAME>
+<LONGNAME> Labuan (Malaysia)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>418</CODE>
+<CODE2>LA</CODE2>
+<CODE3>LAO</CODE3>
+<NAME>Лаос</NAME>
+<LONGNAME>Lao People&apos;s Democratic Republic (the)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>428</CODE>
+<CODE2>LV</CODE2>
+<CODE3>LVA</CODE3>
+<NAME>Латвия</NAME>
+<LONGNAME>Latvia</LONGNAME>
+</ROW>
+<ROW>
+<CODE>426</CODE>
+<CODE2>LS</CODE2>
+<CODE3>LSO</CODE3>
+<NAME>Лесото</NAME>
+<LONGNAME>Lesotho</LONGNAME>
+</ROW>
+<ROW>
+<CODE>430</CODE>
+<CODE2>LR</CODE2>
+<CODE3>LBR</CODE3>
+<NAME>Либерия </NAME>
+<LONGNAME>Liberia</LONGNAME>
+</ROW>
+<ROW>
+<CODE>422</CODE>
+<CODE2>LB</CODE2>
+<CODE3>LBN</CODE3>
+<NAME>Ливан</NAME>
+<LONGNAME>Lebanon</LONGNAME>
+</ROW>
+<ROW>
+<CODE>434</CODE>
+<CODE2>LY</CODE2>
+<CODE3>LBY</CODE3>
+<NAME>Ливия</NAME>
+<LONGNAME>Libya</LONGNAME>
+</ROW>
+<ROW>
+<CODE>440</CODE>
+<CODE2>LT</CODE2>
+<CODE3>LTU</CODE3>
+<NAME>Литва</NAME>
+<LONGNAME>Lithuania</LONGNAME>
+</ROW>
+<ROW>
+<CODE>438</CODE>
+<CODE2>LI</CODE2>
+<CODE3>LIE</CODE3>
+<NAME>Лихтенштейн</NAME>
+<LONGNAME>Liechtenstein</LONGNAME>
+</ROW>
+<ROW>
+<CODE>442</CODE>
+<CODE2>LU</CODE2>
+<CODE3>LUX</CODE3>
+<NAME>Люксембург</NAME>
+<LONGNAME>Luxembourg</LONGNAME>
+</ROW>
+<ROW>
+<CODE>480</CODE>
+<CODE2>MU</CODE2>
+<CODE3>MUS</CODE3>
+<NAME>Маврикий</NAME>
+<LONGNAME>Mauritius</LONGNAME>
+</ROW>
+<ROW>
+<CODE>478</CODE>
+<CODE2>MR</CODE2>
+<CODE3>MRT</CODE3>
+<NAME>Мавритания</NAME>
+<LONGNAME>Mauritania</LONGNAME>
+</ROW>
+<ROW>
+<CODE>450</CODE>
+<CODE2>MG</CODE2>
+<CODE3>MDG</CODE3>
+<NAME>Мадагаскар</NAME>
+<LONGNAME>Madagascar</LONGNAME>
+</ROW>
+<ROW>
+<CODE>175</CODE>
+<CODE2>YT</CODE2>
+<CODE3>MYT</CODE3>
+<NAME>Майотта </NAME>
+<LONGNAME>Mayotte</LONGNAME>
+</ROW>
+<ROW>
+<CODE>446</CODE>
+<CODE2>MO</CODE2>
+<CODE3>MAC</CODE3>
+<NAME>Макао (Специальный административный район Китая)</NAME>
+<LONGNAME>Macao (Special Administrative Region of China)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>807</CODE>
+<CODE2>MK</CODE2>
+<CODE3>MKD</CODE3>
+<NAME>Македония (бывшая югославская Республика Македония)</NAME>
+<LONGNAME>Macedonia (the former Yugoslav Republic of Macedonia) </LONGNAME>
+</ROW>
+<ROW>
+<CODE>454</CODE>
+<CODE2>MW</CODE2>
+<CODE3>MWI</CODE3>
+<NAME>Малави</NAME>
+<LONGNAME>Malawi</LONGNAME>
+</ROW>
+<ROW>
+<CODE>458</CODE>
+<CODE2>MY</CODE2>
+<CODE3>MYS</CODE3>
+<NAME>Малайзия</NAME>
+<LONGNAME>Malaysia</LONGNAME>
+</ROW>
+<ROW>
+<CODE>466</CODE>
+<CODE2>ML</CODE2>
+<CODE3>MLI</CODE3>
+<NAME>Мали</NAME>
+<LONGNAME>Mali</LONGNAME>
+</ROW>
+<ROW>
+<CODE>581</CODE>
+<CODE2>UM</CODE2>
+<CODE3>UMI</CODE3>
+<NAME>Малые отдаленные острова Соединенных Штатов</NAME>
+<LONGNAME>United States Minor Outlying Islands (the)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>462</CODE>
+<CODE2>MV</CODE2>
+<CODE3>MDV</CODE3>
+<NAME>Мальдивы</NAME>
+<LONGNAME>Maldives</LONGNAME>
+</ROW>
+<ROW>
+<CODE>470</CODE>
+<CODE2>MT</CODE2>
+<CODE3>MLT</CODE3>
+<NAME>Мальта</NAME>
+<LONGNAME>Malta</LONGNAME>
+</ROW>
+<ROW>
+<CODE>504</CODE>
+<CODE2>MA</CODE2>
+<CODE3>MAR</CODE3>
+<NAME>Марокко</NAME>
+<LONGNAME>Morocco </LONGNAME>
+</ROW>
+<ROW>
+<CODE>474</CODE>
+<CODE2>MQ</CODE2>
+<CODE3>MTQ</CODE3>
+<NAME>Мартиника</NAME>
+<LONGNAME>Martinique</LONGNAME>
+</ROW>
+<ROW>
+<CODE>584</CODE>
+<CODE2>MH</CODE2>
+<CODE3>MHL</CODE3>
+<NAME>Маршалловы Острова</NAME>
+<LONGNAME>Marshall Islands (the)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>484</CODE>
+<CODE2>MX</CODE2>
+<CODE3>MEX</CODE3>
+<NAME>Мексика</NAME>
+<LONGNAME>Mexico</LONGNAME>
+</ROW>
+<ROW>
+<CODE>583</CODE>
+<CODE2>FM</CODE2>
+<CODE3>FSM</CODE3>
+<NAME>Микронезия (Федера­тивные Штаты)</NAME>
+<LONGNAME>Micronesia (Federated States of)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>508</CODE>
+<CODE2>MZ</CODE2>
+<CODE3>MOZ</CODE3>
+<NAME>Мозамбик</NAME>
+<LONGNAME>Mozambique</LONGNAME>
+</ROW>
+<ROW>
+<CODE>498</CODE>
+<CODE2>MD</CODE2>
+<CODE3>MDA</CODE3>
+<NAME>Молдавия (Республика Молдова)</NAME>
+<LONGNAME>Moldova (the Republic of)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>492</CODE>
+<CODE2>MC</CODE2>
+<CODE3>MCO</CODE3>
+<NAME>Монако</NAME>
+<LONGNAME>Monaco</LONGNAME>
+</ROW>
+<ROW>
+<CODE>496</CODE>
+<CODE2>MN</CODE2>
+<CODE3>MNG</CODE3>
+<NAME>Монголия</NAME>
+<LONGNAME>Mongolia</LONGNAME>
+</ROW>
+<ROW>
+<CODE>500</CODE>
+<CODE2>MS</CODE2>
+<CODE3>MSR</CODE3>
+<NAME>Монтсеррат</NAME>
+<LONGNAME>Montserrat</LONGNAME>
+</ROW>
+<ROW>
+<CODE>104</CODE>
+<CODE2>MM</CODE2>
+<CODE3>MMR</CODE3>
+<NAME>Мьянма</NAME>
+<LONGNAME>Myanmar</LONGNAME>
+</ROW>
+<ROW>
+<CODE>516</CODE>
+<CODE2>NA</CODE2>
+<CODE3>NAM</CODE3>
+<NAME>Намибия</NAME>
+<LONGNAME>Namibia</LONGNAME>
+</ROW>
+<ROW>
+<CODE>520</CODE>
+<CODE2>NR</CODE2>
+<CODE3>NRU</CODE3>
+<NAME>Науру</NAME>
+<LONGNAME>Nauru</LONGNAME>
+</ROW>
+<ROW>
+<CODE>524</CODE>
+<CODE2>NP</CODE2>
+<CODE3>NPL</CODE3>
+<NAME>Непал</NAME>
+<LONGNAME>Nepal</LONGNAME>
+</ROW>
+<ROW>
+<CODE>562</CODE>
+<CODE2>NE</CODE2>
+<CODE3>NER</CODE3>
+<NAME>Нигер</NAME>
+<LONGNAME>Niger (the)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>566</CODE>
+<CODE2>NG</CODE2>
+<CODE3>NGA</CODE3>
+<NAME>Нигерия</NAME>
+<LONGNAME>Nigeria</LONGNAME>
+</ROW>
+<ROW>
+<CODE>528</CODE>
+<CODE2>NL</CODE2>
+<CODE3>NLD</CODE3>
+<NAME>Нидерланды</NAME>
+<LONGNAME>Netherlands (the)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>558</CODE>
+<CODE2>NI</CODE2>
+<CODE3>NIC</CODE3>
+<NAME>Никарагуа</NAME>
+<LONGNAME>Nicaragua</LONGNAME>
+</ROW>
+<ROW>
+<CODE>570</CODE>
+<CODE2>NU</CODE2>
+<CODE3>NIU</CODE3>
+<NAME>Ниуэ</NAME>
+<LONGNAME>Niue</LONGNAME>
+</ROW>
+<ROW>
+<CODE>554</CODE>
+<CODE2>NZ</CODE2>
+<CODE3>NZL</CODE3>
+<NAME>Новая Зеландия</NAME>
+<LONGNAME>New Zealand</LONGNAME>
+</ROW>
+<ROW>
+<CODE>540</CODE>
+<CODE2>NC</CODE2>
+<CODE3>NCL</CODE3>
+<NAME>Новая Каледония</NAME>
+<LONGNAME>New Caledonia</LONGNAME>
+</ROW>
+<ROW>
+<CODE>578</CODE>
+<CODE2>NO</CODE2>
+<CODE3>NOR</CODE3>
+<NAME>Норвегия</NAME>
+<LONGNAME>Norway</LONGNAME>
+</ROW>
+<ROW>
+<CODE>784</CODE>
+<CODE2>AE</CODE2>
+<CODE3>ARE</CODE3>
+<NAME>Объединенные Арабские Эмираты</NAME>
+<LONGNAME>United Arab Emirates (the)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>512</CODE>
+<CODE2>OM</CODE2>
+<CODE3>OMN</CODE3>
+<NAME>Оман</NAME>
+<LONGNAME>Oman</LONGNAME>
+</ROW>
+<ROW>
+<CODE>74</CODE>
+<CODE2>BV</CODE2>
+<CODE3>BVT</CODE3>
+<NAME>Остров Буве</NAME>
+<LONGNAME>Bouvet Island</LONGNAME>
+</ROW>
+<ROW>
+<CODE>833</CODE>
+<CODE2>IM</CODE2>
+<CODE3>IMN</CODE3>
+<NAME>Остров Мен</NAME>
+<LONGNAME>Isle of Man</LONGNAME>
+</ROW>
+<ROW>
+<CODE>574</CODE>
+<CODE2>NF</CODE2>
+<CODE3>NFK</CODE3>
+<NAME>Остров Норфолк</NAME>
+<LONGNAME>Norfolk Island</LONGNAME>
+</ROW>
+<ROW>
+<CODE>162</CODE>
+<CODE2>CX</CODE2>
+<CODE3>CXR</CODE3>
+<NAME>Остров Рождества</NAME>
+<LONGNAME>Christmas Island</LONGNAME>
+</ROW>
+<ROW>
+<CODE>872</CODE>
+<CODE2>WK</CODE2>
+<CODE3>WAK</CODE3>
+<NAME>Остров Уэйк</NAME>
+<LONGNAME>Wake Island</LONGNAME>
+</ROW>
+<ROW>
+<CODE>334</CODE>
+<CODE2>HM</CODE2>
+<CODE3>HMD</CODE3>
+<NAME>Остров Херд и острова Макдональд</NAME>
+<LONGNAME>Heard Island and McDonald Islands</LONGNAME>
+</ROW>
+<ROW>
+<CODE>136</CODE>
+<CODE2>KY</CODE2>
+<CODE3>CYM</CODE3>
+<NAME>Острова Кайман</NAME>
+<LONGNAME>Cayman Islands (the)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>184</CODE>
+<CODE2>CK</CODE2>
+<CODE3>COK</CODE3>
+<NAME>Острова Кука</NAME>
+<LONGNAME>Cook Islands (the)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>488</CODE>
+<CODE2>MI</CODE2>
+<CODE3>MID</CODE3>
+<NAME>Острова Мидуэй</NAME>
+<LONGNAME>Midway atoll</LONGNAME>
+</ROW>
+<ROW>
+<CODE>654</CODE>
+<CODE2>SH</CODE2>
+<CODE3>SHN</CODE3>
+<NAME>Острова Святой Елены, Вознесения и Тристан-да-Кунья</NAME>
+<LONGNAME>Saint Helena, Ascension and Tristan da Cunha</LONGNAME>
+</ROW>
+<ROW>
+<CODE>796</CODE>
+<CODE2>TC</CODE2>
+<CODE3>TCA</CODE3>
+<NAME>Острова Теркс и Кайкос</NAME>
+<LONGNAME>Turks and Caicos Islands (the)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>876</CODE>
+<CODE2>WF</CODE2>
+<CODE3>WLF</CODE3>
+<NAME>Острова Уоллис и Футуна</NAME>
+<LONGNAME>Wallis and Futuna</LONGNAME>
+</ROW>
+<ROW>
+<CODE>586</CODE>
+<CODE2>PK</CODE2>
+<CODE3>PAK</CODE3>
+<NAME>Пакистан</NAME>
+<LONGNAME>Pakistan</LONGNAME>
+</ROW>
+<ROW>
+<CODE>585</CODE>
+<CODE2>PW</CODE2>
+<CODE3>PLW</CODE3>
+<NAME>Палау</NAME>
+<LONGNAME>Palau</LONGNAME>
+</ROW>
+<ROW>
+<CODE>275</CODE>
+<CODE2>PS</CODE2>
+<CODE3>PSE</CODE3>
+<NAME>Палестина </NAME>
+<LONGNAME>Palestine, State of</LONGNAME>
+</ROW>
+<ROW>
+<CODE>591</CODE>
+<CODE2>PA</CODE2>
+<CODE3>PAN</CODE3>
+<NAME>Панама</NAME>
+<LONGNAME>Panama</LONGNAME>
+</ROW>
+<ROW>
+<CODE>598</CODE>
+<CODE2>PG</CODE2>
+<CODE3>PNG</CODE3>
+<NAME>Папуа-Новая Гвинея</NAME>
+<LONGNAME>Papua New Guinea</LONGNAME>
+</ROW>
+<ROW>
+<CODE>600</CODE>
+<CODE2>PY</CODE2>
+<CODE3>PRY</CODE3>
+<NAME>Парагвай</NAME>
+<LONGNAME>Paraguay</LONGNAME>
+</ROW>
+<ROW>
+<CODE>604</CODE>
+<CODE2>PE</CODE2>
+<CODE3>PER</CODE3>
+<NAME>Перу</NAME>
+<LONGNAME>Peru</LONGNAME>
+</ROW>
+<ROW>
+<CODE>612</CODE>
+<CODE2>PN</CODE2>
+<CODE3>PCN</CODE3>
+<NAME>Питкэрн</NAME>
+<LONGNAME>Pitcairn</LONGNAME>
+</ROW>
+<ROW>
+<CODE>616</CODE>
+<CODE2>PL</CODE2>
+<CODE3>POL</CODE3>
+<NAME>Польша</NAME>
+<LONGNAME>Poland</LONGNAME>
+</ROW>
+<ROW>
+<CODE>620</CODE>
+<CODE2>PT</CODE2>
+<CODE3>PRT</CODE3>
+<NAME>Португалия</NAME>
+<LONGNAME>Portugal</LONGNAME>
+</ROW>
+<ROW>
+<CODE>630</CODE>
+<CODE2>PR</CODE2>
+<CODE3>PRI</CODE3>
+<NAME>Пуэрто-Рико</NAME>
+<LONGNAME>Puerto Rico</LONGNAME>
+</ROW>
+<ROW>
+<CODE>410</CODE>
+<CODE2>KR</CODE2>
+<CODE3>KOR</CODE3>
+<NAME>Республика Корея (Южная Корея)</NAME>
+<LONGNAME>Korea (the Republic of)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>638</CODE>
+<CODE2>RE</CODE2>
+<CODE3>REU</CODE3>
+<NAME>Реюньон</NAME>
+<LONGNAME>Reunion</LONGNAME>
+</ROW>
+<ROW>
+<CODE>643</CODE>
+<CODE2>RU</CODE2>
+<CODE3>RUS</CODE3>
+<NAME>Россия</NAME>
+<LONGNAME>Russian Federation (the)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>646</CODE>
+<CODE2>RW</CODE2>
+<CODE3>RWA</CODE3>
+<NAME>Руанда</NAME>
+<LONGNAME>Rwanda</LONGNAME>
+</ROW>
+<ROW>
+<CODE>642</CODE>
+<CODE2>RO</CODE2>
+<CODE3>ROU</CODE3>
+<NAME>Румыния</NAME>
+<LONGNAME>Romania</LONGNAME>
+</ROW>
+<ROW>
+<CODE>222</CODE>
+<CODE2>SV</CODE2>
+<CODE3>SLV</CODE3>
+<NAME>Сальвадор</NAME>
+<LONGNAME>El Salvador</LONGNAME>
+</ROW>
+<ROW>
+<CODE>882</CODE>
+<CODE2>WS</CODE2>
+<CODE3>WSM</CODE3>
+<NAME>Самоа</NAME>
+<LONGNAME>Samoa</LONGNAME>
+</ROW>
+<ROW>
+<CODE>674</CODE>
+<CODE2>SM</CODE2>
+<CODE3>SMR</CODE3>
+<NAME>Сан-Марино</NAME>
+<LONGNAME>San Marino</LONGNAME>
+</ROW>
+<ROW>
+<CODE>678</CODE>
+<CODE2>ST</CODE2>
+<CODE3>STP</CODE3>
+<NAME>Сан-Томе и Принсипи</NAME>
+<LONGNAME>Sao Tome and Principe</LONGNAME>
+</ROW>
+<ROW>
+<CODE>682</CODE>
+<CODE2>SA</CODE2>
+<CODE3>SAU</CODE3>
+<NAME>Саудовская Аравия</NAME>
+<LONGNAME>Saudi Arabia</LONGNAME>
+</ROW>
+<ROW>
+<CODE>748</CODE>
+<CODE2>SZ</CODE2>
+<CODE3>SWZ</CODE3>
+<NAME>Свазиленд</NAME>
+<LONGNAME>Swaziland</LONGNAME>
+</ROW>
+<ROW>
+<CODE>336</CODE>
+<CODE2>VA</CODE2>
+<CODE3>VAT</CODE3>
+<NAME>Святой Престол (Ватикан)</NAME>
+<LONGNAME>Holy See (the)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>580</CODE>
+<CODE2>MP</CODE2>
+<CODE3>MNP</CODE3>
+<NAME>Северные Марианские Острова</NAME>
+<LONGNAME>Northern Mariana Islands (the)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>690</CODE>
+<CODE2>SC</CODE2>
+<CODE3>SYC</CODE3>
+<NAME>Сейшельские Острова</NAME>
+<LONGNAME>Seychelles</LONGNAME>
+</ROW>
+<ROW>
+<CODE>274</CODE>
+<CODE2>-</CODE2>
+<CODE3>-</CODE3>
+<NAME>Сектор Газа</NAME>
+<LONGNAME>Gaza strip</LONGNAME>
+</ROW>
+<ROW>
+<CODE>652</CODE>
+<CODE2>BL</CODE2>
+<CODE3>BLM</CODE3>
+<NAME>Сен-Бартелеми</NAME>
+<LONGNAME>Saint Barthélemy</LONGNAME>
+</ROW>
+<ROW>
+<CODE>686</CODE>
+<CODE2>SN</CODE2>
+<CODE3>SEN</CODE3>
+<NAME>Сенегал</NAME>
+<LONGNAME>Senegal</LONGNAME>
+</ROW>
+<ROW>
+<CODE>663</CODE>
+<CODE2>MF</CODE2>
+<CODE3>MAF</CODE3>
+<NAME>Сен-Мартен</NAME>
+<LONGNAME>Saint Martin (French part)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>670</CODE>
+<CODE2>VC</CODE2>
+<CODE3>VCT</CODE3>
+<NAME>Сент-Винсент и Гренадины</NAME>
+<LONGNAME>Saint Vincent and the Grenadines</LONGNAME>
+</ROW>
+<ROW>
+<CODE>659</CODE>
+<CODE2>KN</CODE2>
+<CODE3>KNA</CODE3>
+<NAME>Сент-Китс и Невис</NAME>
+<LONGNAME>Saint Kitts and Nevis</LONGNAME>
+</ROW>
+<ROW>
+<CODE>662</CODE>
+<CODE2>LC</CODE2>
+<CODE3>LCA</CODE3>
+<NAME>Сент-Люсия</NAME>
+<LONGNAME>Saint Lucia</LONGNAME>
+</ROW>
+<ROW>
+<CODE>666</CODE>
+<CODE2>PM</CODE2>
+<CODE3>SPM</CODE3>
+<NAME>Сент-Пьер и Mикелон</NAME>
+<LONGNAME>Saint Pierre and Miquelon</LONGNAME>
+</ROW>
+<ROW>
+<CODE>688</CODE>
+<CODE2>RS</CODE2>
+<CODE3>SRB</CODE3>
+<NAME>Сербия</NAME>
+<LONGNAME>Serbia</LONGNAME>
+</ROW>
+<ROW>
+<CODE>702</CODE>
+<CODE2>SG</CODE2>
+<CODE3>SGP</CODE3>
+<NAME>Сингапур</NAME>
+<LONGNAME>Singapore</LONGNAME>
+</ROW>
+<ROW>
+<CODE>534</CODE>
+<CODE2>SX</CODE2>
+<CODE3>SXM</CODE3>
+<NAME>Синт-Маартен (Северная Голландия)</NAME>
+<LONGNAME>Sint Maarten (Dutch part)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>760</CODE>
+<CODE2>SY</CODE2>
+<CODE3>SYR</CODE3>
+<NAME>Сирия</NAME>
+<LONGNAME>Syrian Arab Republic</LONGNAME>
+</ROW>
+<ROW>
+<CODE>703</CODE>
+<CODE2>SK</CODE2>
+<CODE3>SVK</CODE3>
+<NAME>Словакия</NAME>
+<LONGNAME>Slovakia</LONGNAME>
+</ROW>
+<ROW>
+<CODE>705</CODE>
+<CODE2>SI</CODE2>
+<CODE3>SVN</CODE3>
+<NAME>Словения</NAME>
+<LONGNAME>Slovenia</LONGNAME>
+</ROW>
+<ROW>
+<CODE>826</CODE>
+<CODE2>GB</CODE2>
+<CODE3>GBR</CODE3>
+<NAME>Соединенное Королевство Великобритании и Северной Ирландии</NAME>
+<LONGNAME>United Kingdom of Great Britain and Northern Ireland (the)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>840</CODE>
+<CODE2>US</CODE2>
+<CODE3>USA</CODE3>
+<NAME>Соединенные Штаты Америки</NAME>
+<LONGNAME>United States of America (the)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>90</CODE>
+<CODE2>SB</CODE2>
+<CODE3>SLB</CODE3>
+<NAME>Соломоновы Острова</NAME>
+<LONGNAME>Solomon Islands</LONGNAME>
+</ROW>
+<ROW>
+<CODE>706</CODE>
+<CODE2>SO</CODE2>
+<CODE3>SOM</CODE3>
+<NAME>Сомали</NAME>
+<LONGNAME>Somalia</LONGNAME>
+</ROW>
+<ROW>
+<CODE>729</CODE>
+<CODE2>SD</CODE2>
+<CODE3>SDN</CODE3>
+<NAME>Судан</NAME>
+<LONGNAME>Sudan (the)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>740</CODE>
+<CODE2>SR</CODE2>
+<CODE3>SUR</CODE3>
+<NAME>Суринам</NAME>
+<LONGNAME>Suriname</LONGNAME>
+</ROW>
+<ROW>
+<CODE>694</CODE>
+<CODE2>SL</CODE2>
+<CODE3>SLE</CODE3>
+<NAME>Сьерра-Леоне</NAME>
+<LONGNAME>Sierra Leone</LONGNAME>
+</ROW>
+<ROW>
+<CODE>762</CODE>
+<CODE2>TJ</CODE2>
+<CODE3>TJK</CODE3>
+<NAME>Таджикистан</NAME>
+<LONGNAME>Tajikistan</LONGNAME>
+</ROW>
+<ROW>
+<CODE>158</CODE>
+<CODE2>TW</CODE2>
+<CODE3>TWN</CODE3>
+<NAME>Тайвань</NAME>
+<LONGNAME>Taiwan (Province of China)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>764</CODE>
+<CODE2>TH</CODE2>
+<CODE3>THA</CODE3>
+<NAME>Таиланд</NAME>
+<LONGNAME>Thailand</LONGNAME>
+</ROW>
+<ROW>
+<CODE>834</CODE>
+<CODE2>TZ</CODE2>
+<CODE3>TZA</CODE3>
+<NAME>Танзания </NAME>
+<LONGNAME>United Republic of Tanzania</LONGNAME>
+</ROW>
+<ROW>
+<CODE>626</CODE>
+<CODE2>TL</CODE2>
+<CODE3>TLS</CODE3>
+<NAME>Тимор-Лесте (Демократическая Республика Восточный Тимор)</NAME>
+<LONGNAME>Timor-Leste</LONGNAME>
+</ROW>
+<ROW>
+<CODE>768</CODE>
+<CODE2>TG</CODE2>
+<CODE3>TGO</CODE3>
+<NAME>Того</NAME>
+<LONGNAME>Togo</LONGNAME>
+</ROW>
+<ROW>
+<CODE>772</CODE>
+<CODE2>TK</CODE2>
+<CODE3>TKL</CODE3>
+<NAME>Токелау</NAME>
+<LONGNAME>Tokelau</LONGNAME>
+</ROW>
+<ROW>
+<CODE>776</CODE>
+<CODE2>TO</CODE2>
+<CODE3>TON</CODE3>
+<NAME>Тонга</NAME>
+<LONGNAME>Tonga</LONGNAME>
+</ROW>
+<ROW>
+<CODE>780</CODE>
+<CODE2>TT</CODE2>
+<CODE3>TTO</CODE3>
+<NAME>Тринидад и Тобаго </NAME>
+<LONGNAME>Trinidad and Tobago</LONGNAME>
+</ROW>
+<ROW>
+<CODE>798</CODE>
+<CODE2>TV</CODE2>
+<CODE3>TUV</CODE3>
+<NAME>Тувалу</NAME>
+<LONGNAME>Tuvalu</LONGNAME>
+</ROW>
+<ROW>
+<CODE>788</CODE>
+<CODE2>TN</CODE2>
+<CODE3>TUN</CODE3>
+<NAME>Тунис</NAME>
+<LONGNAME>Tunisia</LONGNAME>
+</ROW>
+<ROW>
+<CODE>795</CODE>
+<CODE2>TM</CODE2>
+<CODE3>TKM</CODE3>
+<NAME>Туркменистан</NAME>
+<LONGNAME>Turkmenistan</LONGNAME>
+</ROW>
+<ROW>
+<CODE>792</CODE>
+<CODE2>TR</CODE2>
+<CODE3>TUR</CODE3>
+<NAME>Турция</NAME>
+<LONGNAME>Turkey</LONGNAME>
+</ROW>
+<ROW>
+<CODE>800</CODE>
+<CODE2>UG</CODE2>
+<CODE3>UGA</CODE3>
+<NAME>Уганда</NAME>
+<LONGNAME>Uganda</LONGNAME>
+</ROW>
+<ROW>
+<CODE>860</CODE>
+<CODE2>UZ</CODE2>
+<CODE3>UZB</CODE3>
+<NAME>Узбекистан</NAME>
+<LONGNAME>Uzbekistan</LONGNAME>
+</ROW>
+<ROW>
+<CODE>804</CODE>
+<CODE2>UA</CODE2>
+<CODE3>UKR</CODE3>
+<NAME>Украина</NAME>
+<LONGNAME>Ukraine</LONGNAME>
+</ROW>
+<ROW>
+<CODE>858</CODE>
+<CODE2>UY</CODE2>
+<CODE3>URY</CODE3>
+<NAME>Уругвай</NAME>
+<LONGNAME>Uruguay</LONGNAME>
+</ROW>
+<ROW>
+<CODE>234</CODE>
+<CODE2>FO</CODE2>
+<CODE3>FRO</CODE3>
+<NAME>Фарерские Острова</NAME>
+<LONGNAME>Faroe Islands (the)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>242</CODE>
+<CODE2>FJ</CODE2>
+<CODE3>FJI</CODE3>
+<NAME>Фиджи</NAME>
+<LONGNAME>Fiji</LONGNAME>
+</ROW>
+<ROW>
+<CODE>608</CODE>
+<CODE2>PH</CODE2>
+<CODE3>PHL</CODE3>
+<NAME>Филиппины</NAME>
+<LONGNAME>Philippines (the)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>246</CODE>
+<CODE2>FI</CODE2>
+<CODE3>FIN</CODE3>
+<NAME>Финляндия</NAME>
+<LONGNAME>Finland</LONGNAME>
+</ROW>
+<ROW>
+<CODE>238</CODE>
+<CODE2>FK</CODE2>
+<CODE3>FLK</CODE3>
+<NAME>Фолклендские острова (Мальвинские острова)</NAME>
+<LONGNAME>Falkland Islands (the) (Malvinas)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>250</CODE>
+<CODE2>FR</CODE2>
+<CODE3>FRA</CODE3>
+<NAME>Франция</NAME>
+<LONGNAME>France </LONGNAME>
+</ROW>
+<ROW>
+<CODE>254</CODE>
+<CODE2>GF</CODE2>
+<CODE3>GUF</CODE3>
+<NAME>Французская Гвиана</NAME>
+<LONGNAME>French Guiana</LONGNAME>
+</ROW>
+<ROW>
+<CODE>258</CODE>
+<CODE2>PF</CODE2>
+<CODE3>PYF</CODE3>
+<NAME>Французская Полинезия</NAME>
+<LONGNAME>French Polynesia</LONGNAME>
+</ROW>
+<ROW>
+<CODE>260</CODE>
+<CODE2>TF</CODE2>
+<CODE3>ATF</CODE3>
+<NAME>Французские южные территории</NAME>
+<LONGNAME>French Southern Territories (the)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>191</CODE>
+<CODE2>HR</CODE2>
+<CODE3>HRV</CODE3>
+<NAME>Хорватия</NAME>
+<LONGNAME>Croatia</LONGNAME>
+</ROW>
+<ROW>
+<CODE>140</CODE>
+<CODE2>CF</CODE2>
+<CODE3>CAF</CODE3>
+<NAME>Центральноафриканская Республика</NAME>
+<LONGNAME>Central African Republic (the)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>148</CODE>
+<CODE2>TD</CODE2>
+<CODE3>TCD</CODE3>
+<NAME>Чад</NAME>
+<LONGNAME>Chad</LONGNAME>
+</ROW>
+<ROW>
+<CODE>499</CODE>
+<CODE2>ME</CODE2>
+<CODE3>MNE</CODE3>
+<NAME>Черногория</NAME>
+<LONGNAME>Montenegro</LONGNAME>
+</ROW>
+<ROW>
+<CODE>203</CODE>
+<CODE2>CZ</CODE2>
+<CODE3>CZE</CODE3>
+<NAME>Чехия (Чешская Республика)</NAME>
+<LONGNAME>Czech Republic (the)</LONGNAME>
+</ROW>
+<ROW>
+<CODE>152</CODE>
+<CODE2>CL</CODE2>
+<CODE3>CHL</CODE3>
+<NAME>Чили</NAME>
+<LONGNAME>Chile</LONGNAME>
+</ROW>
+<ROW>
+<CODE>756</CODE>
+<CODE2>CH</CODE2>
+<CODE3>CHE</CODE3>
+<NAME>Швейцария</NAME>
+<LONGNAME>Switzerland</LONGNAME>
+</ROW>
+<ROW>
+<CODE>752</CODE>
+<CODE2>SE</CODE2>
+<CODE3>SWE</CODE3>
+<NAME>Швеция</NAME>
+<LONGNAME>Sweden</LONGNAME>
+</ROW>
+<ROW>
+<CODE>744</CODE>
+<CODE2>SJ</CODE2>
+<CODE3>SJM</CODE3>
+<NAME>Шпицберген и Ян-Майен Острова</NAME>
+<LONGNAME>Svalbard and Jan Mayen</LONGNAME>
+</ROW>
+<ROW>
+<CODE>144</CODE>
+<CODE2>LK</CODE2>
+<CODE3>LKA</CODE3>
+<NAME>Шри-Ланка</NAME>
+<LONGNAME>Sri Lanka</LONGNAME>
+</ROW>
+<ROW>
+<CODE>218</CODE>
+<CODE2>EC</CODE2>
+<CODE3>ECU</CODE3>
+<NAME>Эквадор</NAME>
+<LONGNAME>Ecuador</LONGNAME>
+</ROW>
+<ROW>
+<CODE>226</CODE>
+<CODE2>GQ</CODE2>
+<CODE3>GNQ</CODE3>
+<NAME>Экваториальная Гвинея</NAME>
+<LONGNAME>Equatorial Guinea</LONGNAME>
+</ROW>
+<ROW>
+<CODE>232</CODE>
+<CODE2>ER</CODE2>
+<CODE3>ERI</CODE3>
+<NAME>Эритрея</NAME>
+<LONGNAME>Eritrea</LONGNAME>
+</ROW>
+<ROW>
+<CODE>233</CODE>
+<CODE2>EE</CODE2>
+<CODE3>EST</CODE3>
+<NAME>Эстония</NAME>
+<LONGNAME>Estonia</LONGNAME>
+</ROW>
+<ROW>
+<CODE>231</CODE>
+<CODE2>ET</CODE2>
+<CODE3>ETH</CODE3>
+<NAME>Эфиопия</NAME>
+<LONGNAME>Ethiopia</LONGNAME>
+</ROW>
+<ROW>
+<CODE>239</CODE>
+<CODE2>GS</CODE2>
+<CODE3>SGS</CODE3>
+<NAME>Южная Георгия и Южные Сандвичевы острова</NAME>
+<LONGNAME>South Georgia and the South Sandwich Islands</LONGNAME>
+</ROW>
+<ROW>
+<CODE>710</CODE>
+<CODE2>ZA</CODE2>
+<CODE3>ZAF</CODE3>
+<NAME>Южно-Африканская Республика</NAME>
+<LONGNAME>South Africa</LONGNAME>
+</ROW>
+<ROW>
+<CODE>728</CODE>
+<CODE2>SS</CODE2>
+<CODE3>SSD</CODE3>
+<NAME>Южный Судан</NAME>
+<LONGNAME>South Sudan</LONGNAME>
+</ROW>
+<ROW>
+<CODE>388</CODE>
+<CODE2>JM</CODE2>
+<CODE3>JAM</CODE3>
+<NAME>Ямайка</NAME>
+<LONGNAME>Jamaica</LONGNAME>
+</ROW>
+<ROW>
+<CODE>392</CODE>
+<CODE2>JP</CODE2>
+<CODE3>JPN</CODE3>
+<NAME>Япония</NAME>
+<LONGNAME>Japan</LONGNAME>
+</ROW>
+</dataroot>

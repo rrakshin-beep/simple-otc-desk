@@ -1,0 +1,938 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataroot xmlns:od="urn:schemas-microsoft-com:officedata" generated="2015-04-01T15:45:43">
+<ROW>
+<CODE>947</CODE>
+<CODELAT>CHE</CODELAT>
+<NAME>WIR-евро</NAME>
+</ROW>
+<ROW>
+<CODE>948</CODE>
+<CODELAT>CHW</CODELAT>
+<NAME>WIR-франк</NAME>
+</ROW>
+<ROW>
+<CODE>36</CODE>
+<CODELAT>AUD</CODELAT>
+<NAME>Австралийский доллар </NAME>
+</ROW>
+<ROW>
+<CODE>944</CODE>
+<CODELAT>AZM</CODELAT>
+<NAME>Азербайджанский Манат </NAME>
+</ROW>
+<ROW>
+<CODE>12</CODE>
+<CODELAT>DZD</CODELAT>
+<NAME>Алжирский динар </NAME>
+</ROW>
+<ROW>
+<CODE>32</CODE>
+<CODELAT>ARS</CODELAT>
+<NAME>Аргентинское песо </NAME>
+</ROW>
+<ROW>
+<CODE>51</CODE>
+<CODELAT>AMD</CODELAT>
+<NAME>Армянский драм </NAME>
+</ROW>
+<ROW>
+<CODE>533</CODE>
+<CODELAT>AWG</CODELAT>
+<NAME>Арубанский флорин </NAME>
+</ROW>
+<ROW>
+<CODE>971</CODE>
+<CODELAT>AFN</CODELAT>
+<NAME>Афгани</NAME>
+</ROW>
+<ROW>
+<CODE>44</CODE>
+<CODELAT>BSD</CODELAT>
+<NAME>Багамский доллар </NAME>
+</ROW>
+<ROW>
+<CODE>590</CODE>
+<CODELAT>PAB</CODELAT>
+<NAME>Бальбоа </NAME>
+</ROW>
+<ROW>
+<CODE>52</CODE>
+<CODELAT>BBD</CODELAT>
+<NAME>Барбадосский доллар </NAME>
+</ROW>
+<ROW>
+<CODE>764</CODE>
+<CODELAT>THB</CODELAT>
+<NAME>Бат </NAME>
+</ROW>
+<ROW>
+<CODE>48</CODE>
+<CODELAT>BHD</CODELAT>
+<NAME>Бахрейнский динар </NAME>
+</ROW>
+<ROW>
+<CODE>999</CODE>
+<CODELAT>XXX</CODELAT>
+<NAME>Без валюты</NAME>
+</ROW>
+<ROW>
+<CODE>974</CODE>
+<CODELAT>BYR</CODELAT>
+<NAME>Беларусский рубль </NAME>
+</ROW>
+<ROW>
+<CODE>84</CODE>
+<CODELAT>BZD</CODELAT>
+<NAME>Белизский доллар </NAME>
+</ROW>
+<ROW>
+<CODE>60</CODE>
+<CODELAT>BMD</CODELAT>
+<NAME>Бермудский доллар </NAME>
+</ROW>
+<ROW>
+<CODE>975</CODE>
+<CODELAT>BGN</CODELAT>
+<NAME>Болгарский лев </NAME>
+</ROW>
+<ROW>
+<CODE>937</CODE>
+<CODELAT>VEF</CODELAT>
+<NAME>Боливар </NAME>
+</ROW>
+<ROW>
+<CODE>68</CODE>
+<CODELAT>BOB</CODELAT>
+<NAME>Боливиано </NAME>
+</ROW>
+<ROW>
+<CODE>986</CODE>
+<CODELAT>BRL</CODELAT>
+<NAME>Бразильский реал </NAME>
+</ROW>
+<ROW>
+<CODE>96</CODE>
+<CODELAT>BND</CODELAT>
+<NAME>Брунейский доллар </NAME>
+</ROW>
+<ROW>
+<CODE>108</CODE>
+<CODELAT>BIF</CODELAT>
+<NAME>Бурундийский франк </NAME>
+</ROW>
+<ROW>
+<CODE>548</CODE>
+<CODELAT>VUV</CODELAT>
+<NAME>Вату </NAME>
+</ROW>
+<ROW>
+<CODE>410</CODE>
+<CODELAT>KRW</CODELAT>
+<NAME>Вона </NAME>
+</ROW>
+<ROW>
+<CODE>951</CODE>
+<CODELAT>XCD</CODELAT>
+<NAME>Восточно-карибский доллaр </NAME>
+</ROW>
+<ROW>
+<CODE>328</CODE>
+<CODELAT>GYD</CODELAT>
+<NAME>Гайанский доллар </NAME>
+</ROW>
+<ROW>
+<CODE>936</CODE>
+<CODELAT>GHS</CODELAT>
+<NAME>Ганский седи</NAME>
+</ROW>
+<ROW>
+<CODE>324</CODE>
+<CODELAT>GNF</CODELAT>
+<NAME>Гвинейский франк </NAME>
+</ROW>
+<ROW>
+<CODE>292</CODE>
+<CODELAT>GIP</CODELAT>
+<NAME>Гибралтарский фунт </NAME>
+</ROW>
+<ROW>
+<CODE>344</CODE>
+<CODELAT>HKD</CODELAT>
+<NAME>Гонконгский доллар </NAME>
+</ROW>
+<ROW>
+<CODE>980</CODE>
+<CODELAT>UAH</CODELAT>
+<NAME>Гривна </NAME>
+</ROW>
+<ROW>
+<CODE>600</CODE>
+<CODELAT>PYG</CODELAT>
+<NAME>Гуарани </NAME>
+</ROW>
+<ROW>
+<CODE>332</CODE>
+<CODELAT>HTG</CODELAT>
+<NAME>Гурд </NAME>
+</ROW>
+<ROW>
+<CODE>807</CODE>
+<CODELAT>MKD</CODELAT>
+<NAME>Дeнар </NAME>
+</ROW>
+<ROW>
+<CODE>270</CODE>
+<CODELAT>GMD</CODELAT>
+<NAME>Даласи </NAME>
+</ROW>
+<ROW>
+<CODE>208</CODE>
+<CODELAT>DKK</CODELAT>
+<NAME>Датская крона </NAME>
+</ROW>
+<ROW>
+<CODE>784</CODE>
+<CODELAT>AED</CODELAT>
+<NAME>Дирхам ОАЭ </NAME>
+</ROW>
+<ROW>
+<CODE>678</CODE>
+<CODELAT>STD</CODELAT>
+<NAME>Добра </NAME>
+</ROW>
+<ROW>
+<CODE>932</CODE>
+<CODELAT>ZWL</CODELAT>
+<NAME>Доллар Зимбабве </NAME>
+</ROW>
+<ROW>
+<CODE>516</CODE>
+<CODELAT>NAD</CODELAT>
+<NAME>Доллар Намибии </NAME>
+</ROW>
+<ROW>
+<CODE>136</CODE>
+<CODELAT>KYD</CODELAT>
+<NAME>Доллар островов Кайман </NAME>
+</ROW>
+<ROW>
+<CODE>997</CODE>
+<CODELAT>USN</CODELAT>
+<NAME>Доллар следующего дня</NAME>
+</ROW>
+<ROW>
+<CODE>90</CODE>
+<CODELAT>SBD</CODELAT>
+<NAME>Доллар Соломоновых Островов </NAME>
+</ROW>
+<ROW>
+<CODE>840</CODE>
+<CODELAT>USD</CODELAT>
+<NAME>Доллар США</NAME>
+</ROW>
+<ROW>
+<CODE>780</CODE>
+<CODELAT>TTD</CODELAT>
+<NAME>Доллар Тринидада и Тобаго </NAME>
+</ROW>
+<ROW>
+<CODE>242</CODE>
+<CODELAT>FJD</CODELAT>
+<NAME>Доллар Фиджи</NAME>
+</ROW>
+<ROW>
+<CODE>214</CODE>
+<CODELAT>DOP</CODELAT>
+<NAME>Доминиканское песо </NAME>
+</ROW>
+<ROW>
+<CODE>704</CODE>
+<CODELAT>VND</CODELAT>
+<NAME>Донг </NAME>
+</ROW>
+<ROW>
+<CODE>978</CODE>
+<CODELAT>EUR</CODELAT>
+<NAME>Евро </NAME>
+</ROW>
+<ROW>
+<CODE>956</CODE>
+<CODELAT>XBB</CODELAT>
+<NAME>Европейская валютная единица  </NAME>
+</ROW>
+<ROW>
+<CODE>957</CODE>
+<CODELAT>XBC</CODELAT>
+<NAME>Европейская расчётная единица</NAME>
+</ROW>
+<ROW>
+<CODE>958</CODE>
+<CODELAT>XBD</CODELAT>
+<NAME>Европейская расчётная единица</NAME>
+</ROW>
+<ROW>
+<CODE>955</CODE>
+<CODELAT>XBA</CODELAT>
+<NAME>Европейская составная единица</NAME>
+</ROW>
+<ROW>
+<CODE>818</CODE>
+<CODELAT>EGP</CODELAT>
+<NAME>Египетский фунт </NAME>
+</ROW>
+<ROW>
+<CODE>990</CODE>
+<CODELAT>CLF</CODELAT>
+<NAME>Единица развития</NAME>
+</ROW>
+<ROW>
+<CODE>970</CODE>
+<CODELAT>COU</CODELAT>
+<NAME>Единица реальной стоимости</NAME>
+</ROW>
+<ROW>
+<CODE>967</CODE>
+<CODELAT>ZMW</CODELAT>
+<NAME>Замбийская квача</NAME>
+</ROW>
+<ROW>
+<CODE>985</CODE>
+<CODELAT>PLN</CODELAT>
+<NAME>Злотый </NAME>
+</ROW>
+<ROW>
+<CODE>558</CODE>
+<CODELAT>NIO</CODELAT>
+<NAME>Золотая кордоба </NAME>
+</ROW>
+<ROW>
+<CODE>959</CODE>
+<CODELAT>XAU</CODELAT>
+<NAME>Золото</NAME>
+</ROW>
+<ROW>
+<CODE>886</CODE>
+<CODELAT>YER</CODELAT>
+<NAME>Йеменский риал </NAME>
+</ROW>
+<ROW>
+<CODE>392</CODE>
+<CODELAT>JPY</CODELAT>
+<NAME>Йена </NAME>
+</ROW>
+<ROW>
+<CODE>356</CODE>
+<CODELAT>INR</CODELAT>
+<NAME>Индийская рупия </NAME>
+</ROW>
+<ROW>
+<CODE>400</CODE>
+<CODELAT>JOD</CODELAT>
+<NAME>Иорданский динар </NAME>
+</ROW>
+<ROW>
+<CODE>368</CODE>
+<CODELAT>IQD</CODELAT>
+<NAME>Иракский динар </NAME>
+</ROW>
+<ROW>
+<CODE>364</CODE>
+<CODELAT>IRR</CODELAT>
+<NAME>Иранский риал </NAME>
+</ROW>
+<ROW>
+<CODE>352</CODE>
+<CODELAT>ISK</CODELAT>
+<NAME>Исландская крона </NAME>
+</ROW>
+<ROW>
+<CODE>124</CODE>
+<CODELAT>CAD</CODELAT>
+<NAME>Канадский доллар </NAME>
+</ROW>
+<ROW>
+<CODE>634</CODE>
+<CODELAT>QAR</CODELAT>
+<NAME>Катарский риал </NAME>
+</ROW>
+<ROW>
+<CODE>973</CODE>
+<CODELAT>AOA</CODELAT>
+<NAME>Кванза </NAME>
+</ROW>
+<ROW>
+<CODE>454</CODE>
+<CODELAT>MWK</CODELAT>
+<NAME>Квача Малавийская</NAME>
+</ROW>
+<ROW>
+<CODE>404</CODE>
+<CODELAT>KES</CODELAT>
+<NAME>Кенийский шиллинг </NAME>
+</ROW>
+<ROW>
+<CODE>320</CODE>
+<CODELAT>GTQ</CODELAT>
+<NAME>Кетсаль </NAME>
+</ROW>
+<ROW>
+<CODE>598</CODE>
+<CODELAT>PGK</CODELAT>
+<NAME>Кина </NAME>
+</ROW>
+<ROW>
+<CODE>418</CODE>
+<CODELAT>LAK</CODELAT>
+<NAME>Кип </NAME>
+</ROW>
+<ROW>
+<CODE>196</CODE>
+<CODELAT>CYP</CODELAT>
+<NAME>Кипрский фунт </NAME>
+</ROW>
+<ROW>
+<CODE>963</CODE>
+<CODELAT>XTS</CODELAT>
+<NAME>Коды специально зарезервированы для целей тестирования</NAME>
+</ROW>
+<ROW>
+<CODE>170</CODE>
+<CODELAT>COP</CODELAT>
+<NAME>Колумбийское песо </NAME>
+</ROW>
+<ROW>
+<CODE>977</CODE>
+<CODELAT>BAM</CODELAT>
+<NAME>Конвертируемая марка </NAME>
+</ROW>
+<ROW>
+<CODE>976</CODE>
+<CODELAT>CDF</CODELAT>
+<NAME>Конголезский франк </NAME>
+</ROW>
+<ROW>
+<CODE>188</CODE>
+<CODELAT>CRC</CODELAT>
+<NAME>Костaриканский колон </NAME>
+</ROW>
+<ROW>
+<CODE>233</CODE>
+<CODELAT>EEK</CODELAT>
+<NAME>Крона </NAME>
+</ROW>
+<ROW>
+<CODE>931</CODE>
+<CODELAT>CUC</CODELAT>
+<NAME>Кубинское конвертируемое песо</NAME>
+</ROW>
+<ROW>
+<CODE>192</CODE>
+<CODELAT>CUP</CODELAT>
+<NAME>Кубинское песо </NAME>
+</ROW>
+<ROW>
+<CODE>414</CODE>
+<CODELAT>KWD</CODELAT>
+<NAME>Кувейтский динар </NAME>
+</ROW>
+<ROW>
+<CODE>104</CODE>
+<CODELAT>MMK</CODELAT>
+<NAME>Кьят </NAME>
+</ROW>
+<ROW>
+<CODE>981</CODE>
+<CODELAT>GEL</CODELAT>
+<NAME>Лари </NAME>
+</ROW>
+<ROW>
+<CODE>428</CODE>
+<CODELAT>LVL</CODELAT>
+<NAME>Латвийский лат </NAME>
+</ROW>
+<ROW>
+<CODE>8</CODE>
+<CODELAT>ALL</CODELAT>
+<NAME>Лек </NAME>
+</ROW>
+<ROW>
+<CODE>340</CODE>
+<CODELAT>HNL</CODELAT>
+<NAME>Лемпира </NAME>
+</ROW>
+<ROW>
+<CODE>694</CODE>
+<CODELAT>SLL</CODELAT>
+<NAME>Леоне </NAME>
+</ROW>
+<ROW>
+<CODE>430</CODE>
+<CODELAT>LRD</CODELAT>
+<NAME>Либерийский доллар </NAME>
+</ROW>
+<ROW>
+<CODE>422</CODE>
+<CODELAT>LBP</CODELAT>
+<NAME>Ливанский фунт </NAME>
+</ROW>
+<ROW>
+<CODE>434</CODE>
+<CODELAT>LYD</CODELAT>
+<NAME>Ливийский динар </NAME>
+</ROW>
+<ROW>
+<CODE>748</CODE>
+<CODELAT>SZL</CODELAT>
+<NAME>Лилангени</NAME>
+</ROW>
+<ROW>
+<CODE>440</CODE>
+<CODELAT>LTL</CODELAT>
+<NAME>Литовский лит </NAME>
+</ROW>
+<ROW>
+<CODE>426</CODE>
+<CODELAT>LSL</CODELAT>
+<NAME>Лоти </NAME>
+</ROW>
+<ROW>
+<CODE>480</CODE>
+<CODELAT>MUR</CODELAT>
+<NAME>Маврикийская рупия </NAME>
+</ROW>
+<ROW>
+<CODE>969</CODE>
+<CODELAT>MGA</CODELAT>
+<NAME>Малагасийский ариари </NAME>
+</ROW>
+<ROW>
+<CODE>458</CODE>
+<CODELAT>MYR</CODELAT>
+<NAME>Малайзийский ринггит </NAME>
+</ROW>
+<ROW>
+<CODE>470</CODE>
+<CODELAT>MTL</CODELAT>
+<NAME>Мальтийская лира </NAME>
+</ROW>
+<ROW>
+<CODE>795</CODE>
+<CODELAT>TMM</CODELAT>
+<NAME>Манат </NAME>
+</ROW>
+<ROW>
+<CODE>504</CODE>
+<CODELAT>MAD</CODELAT>
+<NAME>Марокканский дирхам </NAME>
+</ROW>
+<ROW>
+<CODE>984</CODE>
+<CODELAT>BOV</CODELAT>
+<NAME>Мвдол</NAME>
+</ROW>
+<ROW>
+<CODE>979</CODE>
+<CODELAT>MXV</CODELAT>
+<NAME>Мексиканская инверсионная единица</NAME>
+</ROW>
+<ROW>
+<CODE>484</CODE>
+<CODELAT>MXN</CODELAT>
+<NAME>Мексиканское песо </NAME>
+</ROW>
+<ROW>
+<CODE>943</CODE>
+<CODELAT>MZN</CODELAT>
+<NAME>Мозамбикский метикал </NAME>
+</ROW>
+<ROW>
+<CODE>498</CODE>
+<CODELAT>MDL</CODELAT>
+<NAME>Молдавский лей </NAME>
+</ROW>
+<ROW>
+<CODE>566</CODE>
+<CODELAT>NGN</CODELAT>
+<NAME>Найра </NAME>
+</ROW>
+<ROW>
+<CODE>232</CODE>
+<CODELAT>ERN</CODELAT>
+<NAME>Накфа </NAME>
+</ROW>
+<ROW>
+<CODE>64</CODE>
+<CODELAT>BTN</CODELAT>
+<NAME>Нгултрум </NAME>
+</ROW>
+<ROW>
+<CODE>524</CODE>
+<CODELAT>NPR</CODELAT>
+<NAME>Непальская рупия </NAME>
+</ROW>
+<ROW>
+<CODE>532</CODE>
+<CODELAT>ANG</CODELAT>
+<NAME>Нидерландский антильский гульден </NAME>
+</ROW>
+<ROW>
+<CODE>554</CODE>
+<CODELAT>NZD</CODELAT>
+<NAME>Новозеландский доллар </NAME>
+</ROW>
+<ROW>
+<CODE>376</CODE>
+<CODELAT>ILS</CODELAT>
+<NAME>Новый израильский шекель </NAME>
+</ROW>
+<ROW>
+<CODE>946</CODE>
+<CODELAT>RON</CODELAT>
+<NAME>Новый румынский лей </NAME>
+</ROW>
+<ROW>
+<CODE>604</CODE>
+<CODELAT>PEN</CODELAT>
+<NAME>Новый соль </NAME>
+</ROW>
+<ROW>
+<CODE>901</CODE>
+<CODELAT>TWD</CODELAT>
+<NAME>Новый тайваньский доллар </NAME>
+</ROW>
+<ROW>
+<CODE>934</CODE>
+<CODELAT>TMT</CODELAT>
+<NAME>Новый туркменский манат</NAME>
+</ROW>
+<ROW>
+<CODE>578</CODE>
+<CODELAT>NOK</CODELAT>
+<NAME>Норвежская крона </NAME>
+</ROW>
+<ROW>
+<CODE>512</CODE>
+<CODELAT>OMR</CODELAT>
+<NAME>Оманский риал </NAME>
+</ROW>
+<ROW>
+<CODE>776</CODE>
+<CODELAT>TOP</CODELAT>
+<NAME>Паанга </NAME>
+</ROW>
+<ROW>
+<CODE>586</CODE>
+<CODELAT>PKR</CODELAT>
+<NAME>Пакистанская рупия </NAME>
+</ROW>
+<ROW>
+<CODE>964</CODE>
+<CODELAT>XPD</CODELAT>
+<NAME>Палладиум</NAME>
+</ROW>
+<ROW>
+<CODE>446</CODE>
+<CODELAT>MOP</CODELAT>
+<NAME>Патака </NAME>
+</ROW>
+<ROW>
+<CODE>624</CODE>
+<CODELAT>GWP</CODELAT>
+<NAME>Песо Гвинеи-Бисау </NAME>
+</ROW>
+<ROW>
+<CODE>962</CODE>
+<CODELAT>XPT</CODELAT>
+<NAME>Платинум</NAME>
+</ROW>
+<ROW>
+<CODE>72</CODE>
+<CODELAT>BWP</CODELAT>
+<NAME>Пула </NAME>
+</ROW>
+<ROW>
+<CODE>965</CODE>
+<CODELAT>XUA</CODELAT>
+<NAME>Расчетная единица ADB</NAME>
+</ROW>
+<ROW>
+<CODE>116</CODE>
+<CODELAT>KHR</CODELAT>
+<NAME>Риель </NAME>
+</ROW>
+<ROW>
+<CODE>643</CODE>
+<CODELAT>RUB</CODELAT>
+<NAME>Российский рубль </NAME>
+</ROW>
+<ROW>
+<CODE>360</CODE>
+<CODELAT>IDR</CODELAT>
+<NAME>Рупия </NAME>
+</ROW>
+<ROW>
+<CODE>462</CODE>
+<CODELAT>MVR</CODELAT>
+<NAME>Руфия </NAME>
+</ROW>
+<ROW>
+<CODE>710</CODE>
+<CODELAT>ZAR</CODELAT>
+<NAME>Рэнд </NAME>
+</ROW>
+<ROW>
+<CODE>222</CODE>
+<CODELAT>SVC</CODELAT>
+<NAME>Сальвадорский колон </NAME>
+</ROW>
+<ROW>
+<CODE>682</CODE>
+<CODELAT>SAR</CODELAT>
+<NAME>Саудовский риял </NAME>
+</ROW>
+<ROW>
+<CODE>960</CODE>
+<CODELAT>XDR</CODELAT>
+<NAME>СДР (Специальные права заимствования) </NAME>
+</ROW>
+<ROW>
+<CODE>408</CODE>
+<CODELAT>KPW</CODELAT>
+<NAME>Северокорейская вона </NAME>
+</ROW>
+<ROW>
+<CODE>288</CODE>
+<CODELAT>GHC </CODELAT>
+<NAME>Седи </NAME>
+</ROW>
+<ROW>
+<CODE>690</CODE>
+<CODELAT>SCR</CODELAT>
+<NAME>Сейшельская рупия </NAME>
+</ROW>
+<ROW>
+<CODE>941</CODE>
+<CODELAT>RSD</CODELAT>
+<NAME>Сербский динар </NAME>
+</ROW>
+<ROW>
+<CODE>961</CODE>
+<CODELAT>XAG</CODELAT>
+<NAME>Серебро</NAME>
+</ROW>
+<ROW>
+<CODE>702</CODE>
+<CODELAT>SGD</CODELAT>
+<NAME>Сингапурский доллар </NAME>
+</ROW>
+<ROW>
+<CODE>760</CODE>
+<CODELAT>SYP</CODELAT>
+<NAME>Сирийский фунт </NAME>
+</ROW>
+<ROW>
+<CODE>703</CODE>
+<CODELAT>SKK</CODELAT>
+<NAME>Словацкая крона </NAME>
+</ROW>
+<ROW>
+<CODE>417</CODE>
+<CODELAT>KGS</CODELAT>
+<NAME>Сом </NAME>
+</ROW>
+<ROW>
+<CODE>706</CODE>
+<CODELAT>SOS</CODELAT>
+<NAME>Сомалийский шиллинг </NAME>
+</ROW>
+<ROW>
+<CODE>972</CODE>
+<CODELAT>TJS</CODELAT>
+<NAME>Сомони </NAME>
+</ROW>
+<ROW>
+<CODE>938</CODE>
+<CODELAT>SDG </CODELAT>
+<NAME>Суданский динар </NAME>
+</ROW>
+<ROW>
+<CODE>994</CODE>
+<CODELAT>XSU</CODELAT>
+<NAME>Сукре</NAME>
+</ROW>
+<ROW>
+<CODE>968</CODE>
+<CODELAT>SRD</CODELAT>
+<NAME>Суринамский доллар </NAME>
+</ROW>
+<ROW>
+<CODE>50</CODE>
+<CODELAT>BDT</CODELAT>
+<NAME>Така </NAME>
+</ROW>
+<ROW>
+<CODE>882</CODE>
+<CODELAT>WST</CODELAT>
+<NAME>Тала </NAME>
+</ROW>
+<ROW>
+<CODE>834</CODE>
+<CODELAT>TZS</CODELAT>
+<NAME>Танзанийский шиллинг </NAME>
+</ROW>
+<ROW>
+<CODE>398</CODE>
+<CODELAT>KZT</CODELAT>
+<NAME>Тенге </NAME>
+</ROW>
+<ROW>
+<CODE>496</CODE>
+<CODELAT>MNT</CODELAT>
+<NAME>Тугрик </NAME>
+</ROW>
+<ROW>
+<CODE>788</CODE>
+<CODELAT>TND</CODELAT>
+<NAME>Тунисский динар </NAME>
+</ROW>
+<ROW>
+<CODE>949</CODE>
+<CODELAT>TRY</CODELAT>
+<NAME>Турецкая лира </NAME>
+</ROW>
+<ROW>
+<CODE>800</CODE>
+<CODELAT>UGX</CODELAT>
+<NAME>Угандийский шиллинг </NAME>
+</ROW>
+<ROW>
+<CODE>478</CODE>
+<CODELAT>MRO</CODELAT>
+<NAME>Угия </NAME>
+</ROW>
+<ROW>
+<CODE>860</CODE>
+<CODELAT>UZS</CODELAT>
+<NAME>Узбекский сум </NAME>
+</ROW>
+<ROW>
+<CODE>858</CODE>
+<CODELAT>UYU</CODELAT>
+<NAME>Уругвайское песо </NAME>
+</ROW>
+<ROW>
+<CODE>940</CODE>
+<CODELAT>UYI</CODELAT>
+<NAME>Уругвайское песо в индексированных единицах</NAME>
+</ROW>
+<ROW>
+<CODE>608</CODE>
+<CODELAT>PHP</CODELAT>
+<NAME>Филиппинское песо </NAME>
+</ROW>
+<ROW>
+<CODE>348</CODE>
+<CODELAT>HUF</CODELAT>
+<NAME>Форинт </NAME>
+</ROW>
+<ROW>
+<CODE>262</CODE>
+<CODELAT>DJF</CODELAT>
+<NAME>Франк Джибути </NAME>
+</ROW>
+<ROW>
+<CODE>174</CODE>
+<CODELAT>KMF</CODELAT>
+<NAME>Франк Комор </NAME>
+</ROW>
+<ROW>
+<CODE>950</CODE>
+<CODELAT>XAF</CODELAT>
+<NAME>Франк КФА ВЕАС </NAME>
+</ROW>
+<ROW>
+<CODE>952</CODE>
+<CODELAT>XOF</CODELAT>
+<NAME>Франк КФА ВСЕАО </NAME>
+</ROW>
+<ROW>
+<CODE>953</CODE>
+<CODELAT>XPF</CODELAT>
+<NAME>Франк КФП </NAME>
+</ROW>
+<ROW>
+<CODE>646</CODE>
+<CODELAT>RWF</CODELAT>
+<NAME>Франк Руанды </NAME>
+</ROW>
+<ROW>
+<CODE>654</CODE>
+<CODELAT>SHP</CODELAT>
+<NAME>Фунт Святой Елены </NAME>
+</ROW>
+<ROW>
+<CODE>826</CODE>
+<CODELAT>GBP</CODELAT>
+<NAME>Фунт стерлингов </NAME>
+</ROW>
+<ROW>
+<CODE>238</CODE>
+<CODELAT>FKP</CODELAT>
+<NAME>Фунт Фолклендских Островов</NAME>
+</ROW>
+<ROW>
+<CODE>191</CODE>
+<CODELAT>HRK</CODELAT>
+<NAME>Хорватская куна </NAME>
+</ROW>
+<ROW>
+<CODE>203</CODE>
+<CODELAT>CZK</CODELAT>
+<NAME>Чешская крона </NAME>
+</ROW>
+<ROW>
+<CODE>152</CODE>
+<CODELAT>CLP</CODELAT>
+<NAME>Чилийское песо </NAME>
+</ROW>
+<ROW>
+<CODE>752</CODE>
+<CODELAT>SEK</CODELAT>
+<NAME>Шведская крона </NAME>
+</ROW>
+<ROW>
+<CODE>756</CODE>
+<CODELAT>CHF </CODELAT>
+<NAME>Швейцарский франк </NAME>
+</ROW>
+<ROW>
+<CODE>144</CODE>
+<CODELAT>LKR</CODELAT>
+<NAME>Шри-Ланкийская рупия </NAME>
+</ROW>
+<ROW>
+<CODE>132</CODE>
+<CODELAT>CVE</CODELAT>
+<NAME>Эскудо Кабо-Верде </NAME>
+</ROW>
+<ROW>
+<CODE>230</CODE>
+<CODELAT>ETB</CODELAT>
+<NAME>Эфиопский быр </NAME>
+</ROW>
+<ROW>
+<CODE>156</CODE>
+<CODELAT>CNY</CODELAT>
+<NAME>Юань ренминби </NAME>
+</ROW>
+<ROW>
+<CODE>728</CODE>
+<CODELAT>SSP</CODELAT>
+<NAME>Южно-суданский фунт</NAME>
+</ROW>
+<ROW>
+<CODE>388</CODE>
+<CODELAT>JMD</CODELAT>
+<NAME>Ямайский доллар </NAME>
+</ROW>
+</dataroot>

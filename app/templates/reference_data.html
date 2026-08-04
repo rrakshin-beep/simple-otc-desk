@@ -1,0 +1,4 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Справочники НСИ</title><link rel="stylesheet" href="/static/style.css"></head><body>
+<header><div><h1>Справочники НСИ</h1><p>Загруженные официальные XML-справочники АРМ ФУС</p></div><nav><a href="/dealer">Сделки</a><a href="/parties">Контрагенты</a><a href="/regulatory">Отчетность СФР</a><a href="/settings/reporting">Профиль</a></nav></header><main>
+<section class="card"><h2>Состав справочников</h2><div class="table"><table><tr><th>Справочник</th><th>Количество записей</th></tr>{% for name,count in counts.items() %}<tr><td>{{name}}</td><td>{{count}}</td></tr>{% endfor %}</table></div><p>Справочники встроены в проект и используются в выпадающих списках и при валидации Формы 1.</p></section>
+</main></body></html>

@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session, joinedload, selectinload
 
 from .database import Base, engine, get_db
 from .models import AuditLog, AmountType, Quote, QuoteAcceptance, RFQ, RFQStatus, Trade, TradeHistory, TradeStatus, Party, PartyType, ReportingProfile, TradeReporting
+from .reference_data import get_reference, reference_context
 
 Base.metadata.create_all(bind=engine)
 
@@ -347,7 +348,7 @@ def api_trades(db: Session = Depends(get_db)):
 @app.get("/parties", response_class=HTMLResponse)
 def parties_page(request: Request, db: Session = Depends(get_db)):
     parties = db.query(Party).order_by(Party.id.desc()).all()
-    return templates.TemplateResponse(request=request, name="parties.html", context={"parties": parties})
+    return templates.TemplateResponse(request=request, name="parties.html", context={"parties": parties, **reference_context()})
 
 
 @app.post("/parties")
@@ -389,7 +390,7 @@ def create_party(
 @app.get("/settings/reporting", response_class=HTMLResponse)
 def reporting_settings(request: Request, db: Session = Depends(get_db)):
     profile = db.query(ReportingProfile).first()
-    return templates.TemplateResponse(request=request, name="reporting_settings.html", context={"profile": profile})
+    return templates.TemplateResponse(request=request, name="reporting_settings.html", context={"profile": profile, **reference_context()})
 
 
 @app.post("/settings/reporting")
@@ -409,6 +410,13 @@ def save_reporting_settings(
     return RedirectResponse("/settings/reporting", 303)
 
 
+@app.get("/settings/reference-data", response_class=HTMLResponse)
+def reference_data_page(request: Request):
+    refs = reference_context()
+    counts = {name: len(items) for name, items in refs.items()}
+    return templates.TemplateResponse(request=request, name="reference_data.html", context={"counts": counts})
+
+
 @app.get("/regulatory", response_class=HTMLResponse)
 def regulatory_dashboard(request: Request, db: Session = Depends(get_db)):
     reports = db.query(TradeReporting).options(joinedload(TradeReporting.trade).joinedload(Trade.quote).joinedload(Quote.rfq)).order_by(TradeReporting.id.desc()).all()
@@ -424,7 +432,7 @@ def regulatory_trade_page(trade_id: int, request: Request, db: Session = Depends
     parties = db.query(Party).order_by(Party.display_name).all()
     profile = db.query(ReportingProfile).first()
     issues = validate_report(profile, reporting, trade) if profile and reporting else []
-    return templates.TemplateResponse(request=request, name="trade_regulatory.html", context={"trade": trade, "reporting": reporting, "parties": parties, "profile": profile, "issues": issues, "currency_codes": CURRENCY_CODES})
+    return templates.TemplateResponse(request=request, name="trade_regulatory.html", context={"trade": trade, "reporting": reporting, "parties": parties, "profile": profile, "issues": issues, "currency_codes": CURRENCY_CODES, **reference_context()})
 
 
 @app.post("/trades/{trade_id}/form1")

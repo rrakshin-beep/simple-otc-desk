@@ -182,7 +182,7 @@ def compliance_dashboard(request: Request, db: Session = Depends(get_db)):
 def create_rfq(client_name: str = Form(...), side: str = Form(...), base_asset: str = Form(...),
                quote_asset: str = Form(...), network: str = Form(""), amount_type: AmountType = Form(...),
                crypto_amount: str = Form(""), fiat_amount: str = Form(""), comment: str = Form(""),
-               db: Session = Depends(get_db)):
+               return_to: str = Form("/client"), db: Session = Depends(get_db)):
     if base_asset not in CRYPTO_ASSETS or quote_asset not in FIAT_ASSETS:
         raise HTTPException(400, "Выберите валюту из перечня")
     try:
@@ -198,7 +198,8 @@ def create_rfq(client_name: str = Form(...), side: str = Form(...), base_asset: 
               network=network or None, amount_type=amount_type, amount=crypto if amount_type == AmountType.CRYPTO else None,
               fiat_amount=fiat if amount_type == AmountType.FIAT else None, comment=comment.strip())
     db.add(rfq); db.flush(); audit(db, "RFQ", rfq.id, "CREATED", client_name, comment); db.commit()
-    return RedirectResponse("/client", 303)
+    redirect_target = "/dealer" if return_to == "/dealer" else "/client"
+    return RedirectResponse(redirect_target, 303)
 
 
 @app.post("/rfqs/{rfq_id}/quote")

@@ -51,6 +51,10 @@ def validate_report(profile, reporting, trade) -> list[ValidationIssue]:
             required(f"{role}.PHYSNAME.FIRSTNAME", party.first_name, "Не указано имя")
         else:
             required(f"{role}.JURNAME.ORGNAME", party.display_name, "Не указано наименование юридического лица")
+    if reporting.client_participant_kind and not code_exists("participant_kinds", reporting.client_participant_kind):
+        issues.append(ValidationIssue("CLIENT.PARTIC_KIND", f"Тип участника {reporting.client_participant_kind} отсутствует в справочнике", 4))
+    if reporting.exchange_participant_kind and not code_exists("participant_kinds", reporting.exchange_participant_kind):
+        issues.append(ValidationIssue("EXCHANGE.PARTIC_KIND", f"Тип участника {reporting.exchange_participant_kind} отсутствует в справочнике", 4))
     rfq = trade.quote.rfq
     if rfq.quote_asset not in CURRENCY_CODES:
         issues.append(ValidationIssue("OPER.CUR_CODES", f"Нет цифрового кода для валюты {rfq.quote_asset}", 4))
@@ -174,8 +178,7 @@ def generate_xml(profile, reporting, trade) -> bytes:
     add_text(oper, "EXTRAINFO", reporting.extra_info)
     prt = SubElement(row, "PRTLIST")
     is_buy = rfq.side == "BUY"
-    # Тип участника определяется относительно целевой валюты: покупатель 05, продавец 04.
-    add_party(prt, 1, "002Ю" if reporting.exchange_party.party_type.value == "LEGAL" else "002Ф", reporting.exchange_party, "05" if is_buy else "04", "1" if is_buy else "2")
-    add_party(prt, 2, "003Ю" if reporting.client_party.party_type.value == "LEGAL" else "003Ф", reporting.client_party, "04" if is_buy else "05", "2" if is_buy else "1")
+    add_party(prt, 1, "002Ю" if reporting.exchange_party.party_type.value == "LEGAL" else "002Ф", reporting.exchange_party, reporting.exchange_participant_kind or ("05" if is_buy else "04"), "1" if is_buy else "2")
+    add_party(prt, 2, "003Ю" if reporting.client_party.party_type.value == "LEGAL" else "003Ф", reporting.client_party, reporting.client_participant_kind or ("04" if is_buy else "05"), "2" if is_buy else "1")
     raw = tostring(root, encoding="windows-1251", xml_declaration=True)
     return raw

@@ -128,6 +128,7 @@ class Party(Base):
     __tablename__ = "parties"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     party_type: Mapped[PartyType] = mapped_column(Enum(PartyType))
+    party_type_code: Mapped[str] = mapped_column(String(3), default="002")
     display_name: Mapped[str] = mapped_column(String(254))
     inn: Mapped[str] = mapped_column(String(14), default="00")
     okpo: Mapped[str] = mapped_column(String(8), default="00")
@@ -207,6 +208,8 @@ class TradeReporting(Base):
     operation_code: Mapped[str] = mapped_column(String(6), default="8001")
     additional_operation_codes: Mapped[str] = mapped_column(String(29), default="00")
     currency_codes: Mapped[str] = mapped_column(String(27), default="00")
+    client_participant_kind: Mapped[str] = mapped_column(String(2), default="05")
+    exchange_participant_kind: Mapped[str] = mapped_column(String(2), default="04")
     kgs_equivalent: Mapped[float | None] = mapped_column(Numeric(30, 2), nullable=True)
     reason: Mapped[str] = mapped_column(String(254), default="00")
     unusual_code: Mapped[str] = mapped_column(String(4), default="00")

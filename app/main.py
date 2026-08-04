@@ -30,6 +30,8 @@ def migrate_sqlite_schema() -> None:
             "network": "VARCHAR(40)", "rejected_at": "DATETIME", "rejected_by": "VARCHAR(120)",
             "rejection_reason": "TEXT",
         },
+        "parties": {"party_type_code": "VARCHAR(3) DEFAULT '002'"},
+        "trade_reporting": {"client_participant_kind": "VARCHAR(2) DEFAULT '05'", "exchange_participant_kind": "VARCHAR(2) DEFAULT '04'"},
         "trades": {
             "bank_fee": "NUMERIC(30, 8) DEFAULT 0", "network_fee": "NUMERIC(30, 8) DEFAULT 0",
             "bank_fee_payer": "VARCHAR(20) DEFAULT 'CLIENT'", "network_fee_payer": "VARCHAR(20) DEFAULT 'CLIENT'",
@@ -173,7 +175,7 @@ def dealer_dashboard(request: Request, db: Session = Depends(get_db)):
 
 @app.get("/compliance", response_class=HTMLResponse)
 def compliance_dashboard(request: Request, db: Session = Depends(get_db)):
-    return templates.TemplateResponse(request=request, name="index.html", context=dashboard_context(db, "compliance"))
+    return RedirectResponse("/regulatory", 302)
 
 
 @app.post("/rfqs")
@@ -346,44 +348,60 @@ def api_trades(db: Session = Depends(get_db)):
     return result
 
 @app.get("/parties", response_class=HTMLResponse)
-def parties_page(request: Request, db: Session = Depends(get_db)):
+def parties_page(request: Request, edit: int | None = Query(None), db: Session = Depends(get_db)):
     parties = db.query(Party).order_by(Party.id.desc()).all()
-    return templates.TemplateResponse(request=request, name="parties.html", context={"parties": parties, **reference_context()})
+    edited = db.get(Party, edit) if edit else None
+    return templates.TemplateResponse(request=request, name="parties.html", context={"parties": parties, "edited": edited, **reference_context()})
+
+
+def _parse_optional_date(value: str):
+    if not value or value == "00":
+        return None
+    try:
+        return datetime.fromisoformat(value)
+    except ValueError as exc:
+        raise HTTPException(400, "Неверный формат даты") from exc
+
+
+def _apply_party_form(party: Party, *, party_type: PartyType, display_name: str, inn: str, okpo: str, country_code: str, resident_code: str, orgform_code: str, registration_number: str, registration_authority: str, activity: str, last_name: str, first_name: str, middle_name: str, document_code: str, document_series: str, document_number: str, document_issue_date: str, document_issuer: str, birth_date: str, birth_place: str, legal_postcode: str, legal_town_code: str, legal_region: str, legal_area: str, legal_town: str, legal_street: str, legal_house: str, legal_room: str, account_number: str, account_bank: str, account_bic: str, account_country_code: str, account_address: str):
+    def clean(v): return (v or "").strip() or "00"
+    party.party_type = party_type
+    party.party_type_code = "002" if party_type == PartyType.LEGAL else "003"
+    party.display_name = display_name.strip()
+    party.inn, party.okpo = clean(inn), clean(okpo)
+    party.country_code, party.resident_code = clean(country_code), resident_code
+    party.orgform_code = clean(orgform_code) if party_type == PartyType.LEGAL else "00"
+    party.registration_number, party.registration_authority, party.activity = clean(registration_number), clean(registration_authority), clean(activity)
+    party.last_name, party.first_name, party.middle_name = clean(last_name), clean(first_name), clean(middle_name)
+    party.document_code, party.document_series, party.document_number = clean(document_code), clean(document_series), clean(document_number)
+    party.document_issue_date, party.document_issuer = _parse_optional_date(document_issue_date), clean(document_issuer)
+    party.birth_date, party.birth_place = _parse_optional_date(birth_date), clean(birth_place)
+    party.legal_postcode, party.legal_town_code = clean(legal_postcode), clean(legal_town_code)
+    party.legal_region, party.legal_area, party.legal_town = clean(legal_region), clean(legal_area), clean(legal_town)
+    party.legal_street, party.legal_house, party.legal_room = clean(legal_street), clean(legal_house), clean(legal_room)
+    party.actual_postcode, party.actual_town_code = party.legal_postcode, party.legal_town_code
+    party.actual_region, party.actual_area, party.actual_town = party.legal_region, party.legal_area, party.legal_town
+    party.actual_street, party.actual_house, party.actual_room = party.legal_street, party.legal_house, party.legal_room
+    party.account_number, party.account_bank, party.account_bic = clean(account_number), clean(account_bank), clean(account_bic)
+    party.account_country_code, party.account_address = clean(account_country_code), clean(account_address)
 
 
 @app.post("/parties")
 def create_party(
-    party_type: PartyType = Form(...), display_name: str = Form(...), inn: str = Form("00"),
-    okpo: str = Form("00"), country_code: str = Form("417"), resident_code: str = Form("1"),
-    orgform_code: str = Form("20"), registration_number: str = Form("00"),
-    registration_authority: str = Form("00"), activity: str = Form("00"),
-    last_name: str = Form("00"), first_name: str = Form("00"), middle_name: str = Form("00"),
-    document_code: str = Form("00"), document_series: str = Form("00"), document_number: str = Form("00"),
-    birth_place: str = Form("00"), legal_postcode: str = Form("00"), legal_town_code: str = Form("00"),
-    legal_region: str = Form("00"), legal_area: str = Form("00"), legal_town: str = Form("00"),
-    legal_street: str = Form("00"), legal_house: str = Form("00"), legal_room: str = Form("00"),
-    account_number: str = Form("00"), account_bank: str = Form("00"), account_bic: str = Form("00"),
-    account_country_code: str = Form("00"), account_address: str = Form("00"), db: Session = Depends(get_db)
+    party_type: PartyType = Form(...), display_name: str = Form(...), inn: str = Form("00"), okpo: str = Form("00"), country_code: str = Form("417"), resident_code: str = Form("1"), orgform_code: str = Form("20"), registration_number: str = Form("00"), registration_authority: str = Form("00"), activity: str = Form("00"), last_name: str = Form("00"), first_name: str = Form("00"), middle_name: str = Form("00"), document_code: str = Form("00"), document_series: str = Form("00"), document_number: str = Form("00"), document_issue_date: str = Form(""), document_issuer: str = Form("00"), birth_date: str = Form(""), birth_place: str = Form("00"), legal_postcode: str = Form("00"), legal_town_code: str = Form("00"), legal_region: str = Form("00"), legal_area: str = Form("00"), legal_town: str = Form("00"), legal_street: str = Form("00"), legal_house: str = Form("00"), legal_room: str = Form("00"), account_number: str = Form("00"), account_bank: str = Form("00"), account_bic: str = Form("00"), account_country_code: str = Form("00"), account_address: str = Form("00"), db: Session = Depends(get_db)
 ):
-    party = Party(
-        party_type=party_type, display_name=display_name.strip(), inn=inn.strip() or "00", okpo=okpo.strip() or "00",
-        country_code=country_code.strip() or "00", resident_code=resident_code, orgform_code=orgform_code,
-        registration_number=registration_number.strip() or "00", registration_authority=registration_authority.strip() or "00",
-        activity=activity.strip() or "00", last_name=last_name.strip() or "00", first_name=first_name.strip() or "00",
-        middle_name=middle_name.strip() or "00", document_code=document_code.strip() or "00",
-        document_series=document_series.strip() or "00", document_number=document_number.strip() or "00",
-        birth_place=birth_place.strip() or "00", legal_postcode=legal_postcode.strip() or "00",
-        legal_town_code=legal_town_code.strip() or "00", legal_region=legal_region.strip() or "00",
-        legal_area=legal_area.strip() or "00", legal_town=legal_town.strip() or "00",
-        legal_street=legal_street.strip() or "00", legal_house=legal_house.strip() or "00", legal_room=legal_room.strip() or "00",
-        actual_postcode=legal_postcode.strip() or "00", actual_town_code=legal_town_code.strip() or "00",
-        actual_region=legal_region.strip() or "00", actual_area=legal_area.strip() or "00", actual_town=legal_town.strip() or "00",
-        actual_street=legal_street.strip() or "00", actual_house=legal_house.strip() or "00", actual_room=legal_room.strip() or "00",
-        account_number=account_number.strip() or "00", account_bank=account_bank.strip() or "00",
-        account_bic=account_bic.strip() or "00", account_country_code=account_country_code.strip() or "00",
-        account_address=account_address.strip() or "00",
-    )
+    party = Party(party_type=party_type, display_name=display_name.strip())
+    _apply_party_form(party, **{k:v for k,v in locals().items() if k not in {"party","db"}})
     db.add(party); db.commit()
+    return RedirectResponse("/parties", 303)
+
+
+@app.post("/parties/{party_id}")
+def update_party(party_id: int, party_type: PartyType = Form(...), display_name: str = Form(...), inn: str = Form("00"), okpo: str = Form("00"), country_code: str = Form("417"), resident_code: str = Form("1"), orgform_code: str = Form("20"), registration_number: str = Form("00"), registration_authority: str = Form("00"), activity: str = Form("00"), last_name: str = Form("00"), first_name: str = Form("00"), middle_name: str = Form("00"), document_code: str = Form("00"), document_series: str = Form("00"), document_number: str = Form("00"), document_issue_date: str = Form(""), document_issuer: str = Form("00"), birth_date: str = Form(""), birth_place: str = Form("00"), legal_postcode: str = Form("00"), legal_town_code: str = Form("00"), legal_region: str = Form("00"), legal_area: str = Form("00"), legal_town: str = Form("00"), legal_street: str = Form("00"), legal_house: str = Form("00"), legal_room: str = Form("00"), account_number: str = Form("00"), account_bank: str = Form("00"), account_bic: str = Form("00"), account_country_code: str = Form("00"), account_address: str = Form("00"), db: Session = Depends(get_db)):
+    party = db.get(Party, party_id)
+    if not party: raise HTTPException(404, "Контрагент не найден")
+    _apply_party_form(party, **{k:v for k,v in locals().items() if k not in {"party","party_id","db"}})
+    db.commit()
     return RedirectResponse("/parties", 303)
 
 
@@ -441,6 +459,7 @@ def save_trade_reporting(
     trade_id: int, client_party_id: int = Form(...), exchange_party_id: int = Form(...),
     message_number: int = Form(...), message_type: str = Form("1"), operation_date: str = Form(...),
     operation_code: str = Form("8001"), additional_operation_codes: str = Form("00"), currency_codes: str = Form("00"),
+    client_participant_kind: str = Form("05"), exchange_participant_kind: str = Form("04"),
     kgs_equivalent: Decimal = Form(...), reason: str = Form(...), unusual_code: str = Form(...),
     unusual_codes: str = Form("00"), operation_state: str = Form("1"), extra_info: str = Form("00"),
     db: Session = Depends(get_db)
@@ -453,7 +472,8 @@ def save_trade_reporting(
     reporting.client_party_id, reporting.exchange_party_id = client_party_id, exchange_party_id
     reporting.message_number, reporting.message_type, reporting.operation_date = message_number, message_type, parsed_dt
     reporting.operation_code, reporting.additional_operation_codes = operation_code.strip(), additional_operation_codes.strip() or "00"
-    reporting.currency_codes, reporting.kgs_equivalent = currency_codes.strip(), kgs_equivalent
+    reporting.currency_codes, reporting.kgs_equivalent = (currency_codes.strip() or CURRENCY_CODES.get(trade.quote.rfq.quote_asset, "00")), kgs_equivalent
+    reporting.client_participant_kind, reporting.exchange_participant_kind = client_participant_kind.strip(), exchange_participant_kind.strip()
     reporting.reason, reporting.unusual_code, reporting.unusual_codes = reason.strip(), unusual_code.strip(), unusual_codes.strip() or "00"
     reporting.operation_state, reporting.extra_info = operation_state, extra_info.strip() or "00"
     db.add(reporting); db.commit()

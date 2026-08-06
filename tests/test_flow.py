@@ -63,7 +63,10 @@ def test_regulatory_profile_parties_validation_and_xml():
     exchange = client.post('/parties', data={
         'party_type':'LEGAL','display_name':'Корэкс Маркетс','inn':'0150520251068','okpo':'33901014',
         'country_code':'417','resident_code':'1','orgform_code':'20','registration_number':'316103-3301-ООО',
-        'registration_authority':'Управление юстиции','activity':'Управление финансовыми рынками',
+        'registration_authority':'Управление юстиции','activity':'Управление финансовыми рынками','additional_activities':'Виртуальные активы',
+        'authorized_person_name':'Асанбекова Нургуль Акимкадыровна','authorized_document_code':'001',
+        'authorized_document_series':'ID','authorized_document_number':'0004644','authorized_document_issue_date':'2017-05-15',
+        'authorized_document_issuer':'МКК 211011',
         'last_name':'00','first_name':'00','middle_name':'00','document_code':'00','document_series':'00',
         'document_number':'00','birth_place':'00','legal_postcode':'720001','legal_town_code':'41711000000000',
         'legal_region':'БИШКЕК','legal_area':'00','legal_town':'Г. БИШКЕК','legal_street':'Исанова',
@@ -95,6 +98,8 @@ def test_regulatory_profile_parties_validation_and_xml():
     assert xml.status_code == 200
     decoded = xml.content.decode('windows-1251')
     assert '<ROWSET>' in decoded and '<MSGNUM>1</MSGNUM>' in decoded and '<PAGENUM>003Ф</PAGENUM>' in decoded
+    assert '<ADDINFO><ACTIVITY>Управление финансовыми рынками</ACTIVITY><ACTIVITIES>Виртуальные активы</ACTIVITIES></ADDINFO>' in decoded
+    assert '<DISPONENT><NAME>Асанбекова Нургуль Акимкадыровна</NAME><DOC><DOC_CODE>001</DOC_CODE>' in decoded
 
 def test_form1_routes_and_trade_button():
     trade_page = client.get('/trades/1')

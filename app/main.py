@@ -30,7 +30,7 @@ def migrate_sqlite_schema() -> None:
             "network": "VARCHAR(40)", "rejected_at": "DATETIME", "rejected_by": "VARCHAR(120)",
             "rejection_reason": "TEXT",
         },
-        "parties": {"party_type_code": "VARCHAR(3) DEFAULT '002'"},
+        "parties": {"party_type_code": "VARCHAR(3) DEFAULT '002'", "additional_activities": "VARCHAR(254) DEFAULT '00'", "authorized_person_name": "VARCHAR(100) DEFAULT '00'", "authorized_document_code": "VARCHAR(3) DEFAULT '00'", "authorized_document_series": "VARCHAR(10) DEFAULT '00'", "authorized_document_number": "VARCHAR(20) DEFAULT '00'", "authorized_document_issue_date": "DATETIME", "authorized_document_issuer": "VARCHAR(254) DEFAULT '00'"},
         "trade_reporting": {"client_participant_kind": "VARCHAR(2) DEFAULT '05'", "exchange_participant_kind": "VARCHAR(2) DEFAULT '04'"},
         "trades": {
             "bank_fee": "NUMERIC(30, 8) DEFAULT 0", "network_fee": "NUMERIC(30, 8) DEFAULT 0",
@@ -182,7 +182,7 @@ def compliance_dashboard(request: Request, db: Session = Depends(get_db)):
 def create_rfq(client_name: str = Form(...), side: str = Form(...), base_asset: str = Form(...),
                quote_asset: str = Form(...), network: str = Form(""), amount_type: AmountType = Form(...),
                crypto_amount: str = Form(""), fiat_amount: str = Form(""), comment: str = Form(""),
-               return_to: str = Form("/client"), db: Session = Depends(get_db)):
+               db: Session = Depends(get_db)):
     if base_asset not in CRYPTO_ASSETS or quote_asset not in FIAT_ASSETS:
         raise HTTPException(400, "Выберите валюту из перечня")
     try:
@@ -198,8 +198,7 @@ def create_rfq(client_name: str = Form(...), side: str = Form(...), base_asset: 
               network=network or None, amount_type=amount_type, amount=crypto if amount_type == AmountType.CRYPTO else None,
               fiat_amount=fiat if amount_type == AmountType.FIAT else None, comment=comment.strip())
     db.add(rfq); db.flush(); audit(db, "RFQ", rfq.id, "CREATED", client_name, comment); db.commit()
-    redirect_target = "/dealer" if return_to == "/dealer" else "/client"
-    return RedirectResponse(redirect_target, 303)
+    return RedirectResponse("/client", 303)
 
 
 @app.post("/rfqs/{rfq_id}/quote")
@@ -364,7 +363,7 @@ def _parse_optional_date(value: str):
         raise HTTPException(400, "Неверный формат даты") from exc
 
 
-def _apply_party_form(party: Party, *, party_type: PartyType, display_name: str, inn: str, okpo: str, country_code: str, resident_code: str, orgform_code: str, registration_number: str, registration_authority: str, activity: str, last_name: str, first_name: str, middle_name: str, document_code: str, document_series: str, document_number: str, document_issue_date: str, document_issuer: str, birth_date: str, birth_place: str, legal_postcode: str, legal_town_code: str, legal_region: str, legal_area: str, legal_town: str, legal_street: str, legal_house: str, legal_room: str, account_number: str, account_bank: str, account_bic: str, account_country_code: str, account_address: str):
+def _apply_party_form(party: Party, *, party_type: PartyType, display_name: str, inn: str, okpo: str, country_code: str, resident_code: str, orgform_code: str, registration_number: str, registration_authority: str, activity: str, additional_activities: str, authorized_person_name: str, authorized_document_code: str, authorized_document_series: str, authorized_document_number: str, authorized_document_issue_date: str, authorized_document_issuer: str, last_name: str, first_name: str, middle_name: str, document_code: str, document_series: str, document_number: str, document_issue_date: str, document_issuer: str, birth_date: str, birth_place: str, legal_postcode: str, legal_town_code: str, legal_region: str, legal_area: str, legal_town: str, legal_street: str, legal_house: str, legal_room: str, account_number: str, account_bank: str, account_bic: str, account_country_code: str, account_address: str):
     def clean(v): return (v or "").strip() or "00"
     party.party_type = party_type
     party.party_type_code = "002" if party_type == PartyType.LEGAL else "003"
@@ -373,6 +372,13 @@ def _apply_party_form(party: Party, *, party_type: PartyType, display_name: str,
     party.country_code, party.resident_code = clean(country_code), resident_code
     party.orgform_code = clean(orgform_code) if party_type == PartyType.LEGAL else "00"
     party.registration_number, party.registration_authority, party.activity = clean(registration_number), clean(registration_authority), clean(activity)
+    party.additional_activities = clean(additional_activities)
+    party.authorized_person_name = clean(authorized_person_name)
+    party.authorized_document_code = clean(authorized_document_code)
+    party.authorized_document_series = clean(authorized_document_series)
+    party.authorized_document_number = clean(authorized_document_number)
+    party.authorized_document_issue_date = _parse_optional_date(authorized_document_issue_date)
+    party.authorized_document_issuer = clean(authorized_document_issuer)
     party.last_name, party.first_name, party.middle_name = clean(last_name), clean(first_name), clean(middle_name)
     party.document_code, party.document_series, party.document_number = clean(document_code), clean(document_series), clean(document_number)
     party.document_issue_date, party.document_issuer = _parse_optional_date(document_issue_date), clean(document_issuer)
@@ -389,7 +395,7 @@ def _apply_party_form(party: Party, *, party_type: PartyType, display_name: str,
 
 @app.post("/parties")
 def create_party(
-    party_type: PartyType = Form(...), display_name: str = Form(...), inn: str = Form("00"), okpo: str = Form("00"), country_code: str = Form("417"), resident_code: str = Form("1"), orgform_code: str = Form("20"), registration_number: str = Form("00"), registration_authority: str = Form("00"), activity: str = Form("00"), last_name: str = Form("00"), first_name: str = Form("00"), middle_name: str = Form("00"), document_code: str = Form("00"), document_series: str = Form("00"), document_number: str = Form("00"), document_issue_date: str = Form(""), document_issuer: str = Form("00"), birth_date: str = Form(""), birth_place: str = Form("00"), legal_postcode: str = Form("00"), legal_town_code: str = Form("00"), legal_region: str = Form("00"), legal_area: str = Form("00"), legal_town: str = Form("00"), legal_street: str = Form("00"), legal_house: str = Form("00"), legal_room: str = Form("00"), account_number: str = Form("00"), account_bank: str = Form("00"), account_bic: str = Form("00"), account_country_code: str = Form("00"), account_address: str = Form("00"), db: Session = Depends(get_db)
+    party_type: PartyType = Form(...), display_name: str = Form(...), inn: str = Form("00"), okpo: str = Form("00"), country_code: str = Form("417"), resident_code: str = Form("1"), orgform_code: str = Form("20"), registration_number: str = Form("00"), registration_authority: str = Form("00"), activity: str = Form("00"), additional_activities: str = Form("00"), authorized_person_name: str = Form("00"), authorized_document_code: str = Form("00"), authorized_document_series: str = Form("00"), authorized_document_number: str = Form("00"), authorized_document_issue_date: str = Form(""), authorized_document_issuer: str = Form("00"), last_name: str = Form("00"), first_name: str = Form("00"), middle_name: str = Form("00"), document_code: str = Form("00"), document_series: str = Form("00"), document_number: str = Form("00"), document_issue_date: str = Form(""), document_issuer: str = Form("00"), birth_date: str = Form(""), birth_place: str = Form("00"), legal_postcode: str = Form("00"), legal_town_code: str = Form("00"), legal_region: str = Form("00"), legal_area: str = Form("00"), legal_town: str = Form("00"), legal_street: str = Form("00"), legal_house: str = Form("00"), legal_room: str = Form("00"), account_number: str = Form("00"), account_bank: str = Form("00"), account_bic: str = Form("00"), account_country_code: str = Form("00"), account_address: str = Form("00"), db: Session = Depends(get_db)
 ):
     party = Party(party_type=party_type, display_name=display_name.strip())
     _apply_party_form(party, **{k:v for k,v in locals().items() if k not in {"party","db"}})
@@ -398,7 +404,7 @@ def create_party(
 
 
 @app.post("/parties/{party_id}")
-def update_party(party_id: int, party_type: PartyType = Form(...), display_name: str = Form(...), inn: str = Form("00"), okpo: str = Form("00"), country_code: str = Form("417"), resident_code: str = Form("1"), orgform_code: str = Form("20"), registration_number: str = Form("00"), registration_authority: str = Form("00"), activity: str = Form("00"), last_name: str = Form("00"), first_name: str = Form("00"), middle_name: str = Form("00"), document_code: str = Form("00"), document_series: str = Form("00"), document_number: str = Form("00"), document_issue_date: str = Form(""), document_issuer: str = Form("00"), birth_date: str = Form(""), birth_place: str = Form("00"), legal_postcode: str = Form("00"), legal_town_code: str = Form("00"), legal_region: str = Form("00"), legal_area: str = Form("00"), legal_town: str = Form("00"), legal_street: str = Form("00"), legal_house: str = Form("00"), legal_room: str = Form("00"), account_number: str = Form("00"), account_bank: str = Form("00"), account_bic: str = Form("00"), account_country_code: str = Form("00"), account_address: str = Form("00"), db: Session = Depends(get_db)):
+def update_party(party_id: int, party_type: PartyType = Form(...), display_name: str = Form(...), inn: str = Form("00"), okpo: str = Form("00"), country_code: str = Form("417"), resident_code: str = Form("1"), orgform_code: str = Form("20"), registration_number: str = Form("00"), registration_authority: str = Form("00"), activity: str = Form("00"), additional_activities: str = Form("00"), authorized_person_name: str = Form("00"), authorized_document_code: str = Form("00"), authorized_document_series: str = Form("00"), authorized_document_number: str = Form("00"), authorized_document_issue_date: str = Form(""), authorized_document_issuer: str = Form("00"), last_name: str = Form("00"), first_name: str = Form("00"), middle_name: str = Form("00"), document_code: str = Form("00"), document_series: str = Form("00"), document_number: str = Form("00"), document_issue_date: str = Form(""), document_issuer: str = Form("00"), birth_date: str = Form(""), birth_place: str = Form("00"), legal_postcode: str = Form("00"), legal_town_code: str = Form("00"), legal_region: str = Form("00"), legal_area: str = Form("00"), legal_town: str = Form("00"), legal_street: str = Form("00"), legal_house: str = Form("00"), legal_room: str = Form("00"), account_number: str = Form("00"), account_bank: str = Form("00"), account_bic: str = Form("00"), account_country_code: str = Form("00"), account_address: str = Form("00"), db: Session = Depends(get_db)):
     party = db.get(Party, party_id)
     if not party: raise HTTPException(404, "Контрагент не найден")
     _apply_party_form(party, **{k:v for k,v in locals().items() if k not in {"party","party_id","db"}})

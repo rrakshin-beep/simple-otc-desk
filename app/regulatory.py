@@ -51,6 +51,9 @@ def validate_report(profile, reporting, trade) -> list[ValidationIssue]:
             required(f"{role}.PHYSNAME.FIRSTNAME", party.first_name, "Не указано имя")
         else:
             required(f"{role}.JURNAME.ORGNAME", party.display_name, "Не указано наименование юридического лица")
+            required(f"{role}.ADDINFO.ACTIVITY", party.activity, "Не указан основной вид деятельности", zero_missing=False)
+            required(f"{role}.ADDINFO.ACTIVITIES", party.additional_activities, "Не указаны дополнительные виды деятельности (при отсутствии укажите 00)", zero_missing=False)
+            required(f"{role}.DISPONENT.NAME", party.authorized_person_name, "Не указано уполномоченное лицо (при отсутствии укажите 00)", zero_missing=False)
     if reporting.client_participant_kind and not code_exists("participant_kinds", reporting.client_participant_kind):
         issues.append(ValidationIssue("CLIENT.PARTIC_KIND", f"Тип участника {reporting.client_participant_kind} отсутствует в справочнике", 4))
     if reporting.exchange_participant_kind and not code_exists("participant_kinds", reporting.exchange_participant_kind):
@@ -79,6 +82,8 @@ def validate_report(profile, reporting, trade) -> list[ValidationIssue]:
             issues.append(ValidationIssue(f"{role}.JURNAME.ORGFORM_CODE", f"Код ОПФ {party.orgform_code} отсутствует в справочнике", 4))
         if party.party_type.value == "PHYSICAL" and party.document_code != "00" and not code_exists("document_codes", party.document_code):
             issues.append(ValidationIssue(f"{role}.DOC.DOC_CODE", f"Код документа {party.document_code} отсутствует в справочнике", 4))
+        if party.party_type.value == "LEGAL" and party.authorized_document_code != "00" and not code_exists("document_codes", party.authorized_document_code):
+            issues.append(ValidationIssue(f"{role}.DISPONENT.DOC.DOC_CODE", f"Код документа уполномоченного лица {party.authorized_document_code} отсутствует в справочнике", 4))
         if party.country_code != "00" and not code_exists("countries", party.country_code.lstrip("0") or "0") and not code_exists("countries", party.country_code):
             issues.append(ValidationIssue(f"{role}.NATION_CODE", f"Код страны {party.country_code} отсутствует в справочнике", 4))
     return issues
@@ -125,6 +130,18 @@ def add_party(prtlist, num, page, party, participant_kind, account_state):
         add_text(o, "OKPO", party.okpo)
     add_address(participant, "LEGAL_ADDRESS", party, "legal")
     add_address(participant, "NATURAL_ADDRESS", party, "actual")
+    if party.party_type.value == "LEGAL":
+        info = SubElement(participant, "ADDINFO")
+        add_text(info, "ACTIVITY", party.activity)
+        add_text(info, "ACTIVITIES", party.additional_activities)
+        disponent = SubElement(participant, "DISPONENT")
+        add_text(disponent, "NAME", party.authorized_person_name)
+        dd = SubElement(disponent, "DOC")
+        add_text(dd, "DOC_CODE", party.authorized_document_code)
+        add_text(dd, "SERIES", party.authorized_document_series)
+        add_text(dd, "NUM", party.authorized_document_number)
+        add_text(dd, "ISSUEDATE", party.authorized_document_issue_date.strftime("%m/%d/%Y 0:0:0") if party.authorized_document_issue_date else "00")
+        add_text(dd, "ORGAN", party.authorized_document_issuer)
     if party.party_type.value == "PHYSICAL":
         d = SubElement(participant, "DOC")
         add_text(d, "DOC_CODE", party.document_code)
